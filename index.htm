@@ -94,6 +94,29 @@
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
       });
 
+    // Render the server uptime chart
+    const ctx = document.getElementById('uptimeCanvas').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['6am', '9am', '12pm', '3pm', '6pm', '9pm'],
+        datasets: [{
+          label: 'Uptime (%)',
+          data: [100, 100, 95, 98, 100, 100],
+          borderColor: 'lime',
+          backgroundColor: 'rgba(0,255,0,0.1)',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
+      }
+    });
+
     // Parallax effect with smooth transition
     document.addEventListener("mousemove", e => {
       const x = (e.clientX / window.innerWidth - 0.5) * 30;
