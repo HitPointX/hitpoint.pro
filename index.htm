@@ -85,15 +85,16 @@
           ? data.motd.clean.join(" ")
           : data.motd?.clean || "No MOTD";
 
-        statusElem.innerHTML = `
-          🟢 Online<br>
-          👥 Players: ${players}<br>
-          🧭 Version: ${version} (${software})<br>
-          💬 MOTD:
-        <div class="motd-animated">
-          <span id="motd-scroller">${motd}</span>
-        </div>
-        `;
+statusElem.innerHTML = `
+  🟢 Online<br>
+  👥 Players: ${players}<br>
+  🧭 Version: ${version} (${software})<br>
+  💬 MOTD:<br>
+  <div class="motd-animated">
+    <div id="motd-wrapper">
+      <span id="motd-scroller">${motd}</span>
+    </div>
+  </div>`;
       })
       .catch(() => {
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
