@@ -16,14 +16,16 @@
     .then(res => res.json())
     .then(data => {
       if (!data.online) {
-        document.getElementById("status").textContent = "Offline";
+        document.getElementById("status").textContent = "🔴 Offline";
         return;
       }
 
-      const players = `${data.players.online}/${data.players.max}`;
-      const version = data.version;
-      const software = data.software;
-      const motd = data.motd?.raw || "No MOTD";
+      const players = `${data.players?.online ?? "?"}/${data.players?.max ?? "?"}`;
+      const version = data.version?.name_clean || data.version?.name || "Unknown";
+      const software = data.software || "Vanilla";
+      const motd = Array.isArray(data.motd?.clean)
+        ? data.motd.clean.join(" ")
+        : data.motd?.clean || "No MOTD";
 
       document.getElementById("status").innerHTML = `
         🟢 Online<br>
@@ -33,7 +35,7 @@
       `;
     })
     .catch(() => {
-      document.getElementById("status").textContent = "Unable to fetch status.";
+      document.getElementById("status").textContent = "❌ Unable to fetch status.";
     });
 </script>
 
