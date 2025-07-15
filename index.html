@@ -21,7 +21,7 @@
       left: 0;
       width: 110%;
       height: 110%;
-      background-image: url('/hitpoint-bg.png?v=2');
+      background-image: url('/hitpoint-bg.png?v=4');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -29,7 +29,6 @@
       transform: translate(var(--bg-x, 0), var(--bg-y, 0)) scale(1.05);
       transition: transform 0.1s ease-out;
       pointer-events: none;
-      will-change: transform;
     }
 
     .content {
@@ -148,6 +147,7 @@
   </style>
 </head>
 <body>
+  <div id="bg-layer"></div>
   <div class="content">
     <h1>Welcome to HitPoint SMC Server ♡</h1>
 
@@ -198,7 +198,7 @@
       }
     }
 
-    // Live server status
+    // Live status fetch
     fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
       .then(res => res.json())
       .then(data => {
@@ -227,7 +227,6 @@
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
       });
 
-    // Chart
     const ctx = document.getElementById('uptimeCanvas').getContext('2d');
     new Chart(ctx, {
       type: 'line',
@@ -249,7 +248,7 @@
       }
     });
 
-    // Parallax cursor tracking pog
+    // Parallax effect
     document.addEventListener("mousemove", (e) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 10;
       const y = (e.clientY / window.innerHeight - 0.5) * 10;
