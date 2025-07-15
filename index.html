@@ -5,11 +5,36 @@
   <title>HitPoint Minecraft Server</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
       background-color: #000;
-      color: #f0f0f0;
       font-family: Arial, sans-serif;
+      overflow-x: hidden;
+      color: #f0f0f0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 120%;
+      height: 120%;
+      background-image: url('hitpoint-bg.png'); /* or use direct GitHub raw URL */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: scale(1.05);
+      z-index: -2;
+      transition: background-position 0.1s ease-out;
+    }
+
+    .content {
       padding: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     a, button {
@@ -72,13 +97,7 @@
     .motd-animated {
       font-size: 1em;
       color: #eee;
-      background: repeating-linear-gradient(
-        -45deg,
-        #444,
-        #444 10px,
-        #333 10px,
-        #333 20px
-      );
+      background: repeating-linear-gradient(-45deg, #444, #444 10px, #333 10px, #333 20px);
       background-size: 200% 200%;
       animation: fog 5s linear infinite;
       padding: 10px;
@@ -113,42 +132,39 @@
   </style>
 </head>
 <body>
-  <h1>Welcome to HitPoint Minecraft Server!</h1>
+  <div class="content">
+    <h1>Welcome to HitPoint Minecraft Server!</h1>
 
-  <p>
-    <strong>Server Address:</strong> play.hitpoint.pro<br />
-    <button onclick="window.location.href='minecraft://play.hitpoint.pro';" style="font-size: 14px;">
-      🔗 Click to Direct Connect (Java)
-    </button>
-    <br />
-    <small style="color: gray;">If nothing happens, add the server manually using <strong>play.hitpoint.pro</strong></small>
-  </p>
+    <p>
+      <strong>Server Address:</strong> play.hitpoint.pro<br />
+      <button onclick="window.location.href='minecraft://play.hitpoint.pro';" style="font-size: 14px;">
+        🔗 Click to Direct Connect (Java)
+      </button>
+      <br />
+      <small style="color: gray;">If nothing happens, add the server manually using <strong>play.hitpoint.pro</strong></small>
+    </p>
 
-  <p><strong>Version:</strong> Minecraft 1.21.7</p>
-  <p><strong>Status:</strong> <span id="status">Checking...</span></p>
+    <p><strong>Version:</strong> Minecraft 1.21.7</p>
+    <p><strong>Status:</strong> <span id="status">Checking...</span></p>
 
-  <p>
-    <a href="https://mcmap.hitpoint.pro" target="_blank" class="rainbow-button">🌍 View Fullscreen Map</a>
-  </p>
+    <p><a href="https://mcmap.hitpoint.pro" target="_blank" class="rainbow-button">🌍 View Fullscreen Map</a></p>
+    <p><a href="https://stats.hitpoint.pro/server/Server%201/overview" target="_blank" class="rainbow-button">📊 View Full Leaderboard</a></p>
 
-  <p>
-    <a href="https://stats.hitpoint.pro/server/Server%201/overview" target="_blank" class="rainbow-button">📊 View Full Leaderboard</a>
-  </p>
+    <button class="toggle-map-btn" onclick="toggleView('map')">🗺️ Toggle Inline Map</button>
+    <button class="toggle-map-btn" onclick="toggleView('leaderboard')">📋 Toggle Inline Leaderboard</button>
 
-  <button class="toggle-map-btn" onclick="toggleView('map')">🗺️ Toggle Inline Map</button>
-  <button class="toggle-map-btn" onclick="toggleView('leaderboard')">📋 Toggle Inline Leaderboard</button>
+    <div id="map-container">
+      <iframe id="map-frame" src="https://mcmap.hitpoint.pro"></iframe>
+    </div>
 
-  <div id="map-container">
-    <iframe id="map-frame" src="https://mcmap.hitpoint.pro"></iframe>
-  </div>
+    <div id="leaderboard-container">
+      <iframe id="leaderboard-frame" src="https://stats.hitpoint.pro/server/Server%201/overview"></iframe>
+    </div>
 
-  <div id="leaderboard-container">
-    <iframe id="leaderboard-frame" src="https://stats.hitpoint.pro/server/Server%201/overview"></iframe>
-  </div>
-
-  <div id="uptime-chart">
-    <h2>📈 Server Uptime</h2>
-    <canvas id="uptimeCanvas" width="600" height="300"></canvas>
+    <div id="uptime-chart">
+      <h2>📈 Server Uptime</h2>
+      <canvas id="uptimeCanvas" width="600" height="300"></canvas>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -194,7 +210,7 @@
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
       });
 
-    // Uptime Chart (example/mock)
+    // Uptime chart
     const ctx = document.getElementById('uptimeCanvas').getContext('2d');
     new Chart(ctx, {
       type: 'line',
@@ -214,6 +230,15 @@
           y: { beginAtZero: true, max: 100 }
         }
       }
+    });
+
+    // Mouse parallax background effect
+    document.addEventListener('mousemove', e => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 10;
+      const y = (e.clientY / window.innerHeight - 0.5) * 10;
+      document.body.style.setProperty('--parallax-x', `${x}px`);
+      document.body.style.setProperty('--parallax-y', `${y}px`);
+      document.body.querySelector('body::before')?.style?.setProperty('background-position', `${50 + x}% ${50 + y}%`);
     });
   </script>
 
