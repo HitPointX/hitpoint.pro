@@ -15,14 +15,27 @@
   fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
     .then(res => res.json())
     .then(data => {
-      const status = data.online
-        ? `Online with ${data.players.online} player(s)`
-        : "Offline";
-      document.getElementById("status").textContent = status;
+      if (!data.online) {
+        document.getElementById("status").textContent = "Offline";
+        return;
+      }
+
+      const players = `${data.players.online}/${data.players.max}`;
+      const version = data.version;
+      const software = data.software;
+      const motd = data.motd?.raw || "No MOTD";
+
+      document.getElementById("status").innerHTML = `
+        🟢 Online<br>
+        👥 Players: ${players}<br>
+        🧭 Version: ${version} (${software})<br>
+        💬 MOTD: ${motd}
+      `;
     })
     .catch(() => {
       document.getElementById("status").textContent = "Unable to fetch status.";
     });
 </script>
+
 </body>
 </html>
