@@ -11,7 +11,7 @@ html, body {
 
 body {
   background-image: url('https://hitpoint.pro/hitpoint-bg.png?v=9');
-  background-size: cover;
+  background-size: auto 110%; /* Maintain aspect ratio, pad vertically */
   background-repeat: no-repeat;
   background-position: calc(50% + var(--bg-x)) calc(50% + var(--bg-y));
   background-attachment: fixed;
