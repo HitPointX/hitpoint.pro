@@ -11,7 +11,7 @@ html, body {
 
 body {
   background-image: url('https://hitpoint.pro/hitpoint-bg.png?v=9');
-  background-size: auto 110%; /* Maintain aspect ratio, pad vertically */
+  background-size: 110% auto;
   background-repeat: no-repeat;
   background-position: calc(50% + var(--bg-x)) calc(50% + var(--bg-y));
   background-attachment: fixed;
@@ -24,7 +24,7 @@ body {
 .content {
   padding: 20px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 h1 {
@@ -120,24 +120,13 @@ a, button {
 
 #uptime-chart {
   width: 300px;
-  margin-top: 20px;
-  margin-left: 0;
+  margin: 20px 0;
 }
 
 @media (max-width: 600px) {
   #uptime-chart {
     width: 95%;
   }
-}
-
-canvas {
-  background-color: #111;
-  border-radius: 8px;
-  width: 100%;
-  height: 200px !important;
-  max-width: 350px;
-  box-sizing: border-box;
-  display: block;
 }
 
 #js-toast {
@@ -155,23 +144,29 @@ canvas {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
+canvas {
+  background-color: #111;
+  border-radius: 8px;
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Fog + Vignette Overlay */
 #fog-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 200%;
-  height: 200%;
-  background: url('https://i.imgur.com/M2FsG8Y.png') repeat;
-  opacity: 0.06;
-  animation: fogMove 120s linear infinite;
-  z-index: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-}
-
-@keyframes fogMove {
-  0% { transform: translate(0%, 0%); }
-  50% { transform: translate(-25%, -10%); }
-  100% { transform: translate(0%, 0%); }
+  background: repeating-radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.01),
+    rgba(255, 255, 255, 0.015) 2px,
+    transparent 4px
+  );
+  animation: fogDrift 60s linear infinite;
+  z-index: 0;
 }
 
 #vignette {
@@ -181,6 +176,15 @@ canvas {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.5) 100%);
+  z-index: 1;
+}
+
+@keyframes fogDrift {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 100%;
+  }
 }
