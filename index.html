@@ -3,6 +3,48 @@
 <head>
   <title>HitPoint Minecraft Server</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #mapFrame {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      display: none;
+    }
+    #toggleMapBtn {
+      margin-top: 5px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    /* 🌈 Rainbow Hover Animation */
+    .rainbow-hover {
+      display: inline-block;
+      background: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #333;
+      transition: color 0.3s ease;
+    }
+
+    .rainbow-hover:hover {
+      background: linear-gradient(90deg,
+        red, orange, yellow, green, cyan, blue, violet, red);
+      background-size: 400% 100%;
+      animation: rainbowSlide 2s linear infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @keyframes rainbowSlide {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 400% 50%; }
+    }
+  </style>
 </head>
 <body>
   <h1>Welcome to HitPoint Minecraft Server!</h1>
@@ -16,7 +58,13 @@
 
   <p><strong>Version:</strong> Minecraft 1.21.7</p>
   <p><strong>Status:</strong> <span id="status">Checking...</span></p>
-  <p><a href="https://mcmap.hitpoint.pro" target="_blank">🌍 View Live Map</a></p>
+
+  <p>
+    <a href="https://mcmap.hitpoint.pro" target="_blank" class="rainbow-hover">🌍 View Fullscreen Map</a>
+  </p>
+
+  <button id="toggleMapBtn">📍 Show Map</button>
+  <iframe id="mapFrame" src="https://mcmap.hitpoint.pro" title="BlueMap Live World"></iframe>
 
   <script>
     fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
@@ -44,6 +92,19 @@
       .catch(() => {
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
       });
+
+    // Toggle Map Visibility
+    const toggleBtn = document.getElementById("toggleMapBtn");
+    const mapFrame = document.getElementById("mapFrame");
+    toggleBtn.addEventListener("click", () => {
+      if (mapFrame.style.display === "none") {
+        mapFrame.style.display = "block";
+        toggleBtn.textContent = "📍 Hide Map";
+      } else {
+        mapFrame.style.display = "none";
+        toggleBtn.textContent = "📍 Show Map";
+      }
+    });
   </script>
 
 </body>
