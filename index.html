@@ -9,9 +9,10 @@
       margin: 0;
       padding: 0;
       height: 100%;
+      width: 100%;
+      overflow: hidden;
       background-color: #000;
       font-family: Arial, sans-serif;
-      overflow-x: hidden;
       color: #f0f0f0;
     }
 
@@ -19,14 +20,14 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 110%;
-      height: 110%;
-      background-image: url('/hitpoint-bg.png?v=4');
+      width: 100vw;
+      height: 100vh;
+      background-image: url('/hitpoint-bg.png?v=5');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
       z-index: -2;
-      transform: translate(var(--bg-x, 0), var(--bg-y, 0)) scale(1.05);
+      transform: translate(calc(var(--bg-x, 0) * 1px), calc(var(--bg-y, 0) * 1px)) scale(1.05);
       transition: transform 0.1s ease-out;
       pointer-events: none;
     }
@@ -198,7 +199,6 @@
       }
     }
 
-    // Live status fetch
     fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
       .then(res => res.json())
       .then(data => {
@@ -248,12 +248,11 @@
       }
     });
 
-    // Parallax effect
-    document.addEventListener("mousemove", (e) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 10;
-      const y = (e.clientY / window.innerHeight - 0.5) * 10;
-      document.body.style.setProperty("--bg-x", `${x}px`);
-      document.body.style.setProperty("--bg-y", `${y}px`);
+    document.addEventListener("mousemove", e => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 30;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      document.body.style.setProperty("--bg-x", x);
+      document.body.style.setProperty("--bg-y", y);
     });
   </script>
 
