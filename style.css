@@ -112,7 +112,15 @@ a, button {
   margin-top: 10px;
   backdrop-filter: blur(2px);
   overflow: hidden;
+}
+
+#motd-wrapper {
+  width: 100%;
+  max-width: 300px;
+  overflow: hidden;
   white-space: nowrap;
+  position: relative;
+  margin-top: 5px;
 }
 
 #motd-scroller {
