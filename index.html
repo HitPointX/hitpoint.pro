@@ -27,31 +27,16 @@
     }
 
     .rainbow-button:hover {
-      background: linear-gradient(
-        270deg,
-        red,
-        orange,
-        yellow,
-        green,
-        blue,
-        indigo,
-        violet
-      );
+      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
       background-size: 400% 400%;
       animation: rainbowShift 2s ease infinite;
       color: #fff;
     }
 
     @keyframes rainbowShift {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     #map-container {
@@ -92,8 +77,40 @@
       color: #fff;
       cursor: pointer;
     }
+
     .toggle-map-btn:hover {
       background-color: #222;
+    }
+
+    .motd-animated {
+      font-size: 1em;
+      color: #eee;
+      background: repeating-linear-gradient(
+        -45deg,
+        #444,
+        #444 10px,
+        #333 10px,
+        #333 20px
+      );
+      background-size: 200% 200%;
+      animation: fog 5s linear infinite;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    @keyframes fog {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    #leaderboard, #uptime-chart {
+      margin-top: 30px;
+    }
+
+    canvas {
+      background-color: #111;
+      border-radius: 8px;
     }
   </style>
 </head>
@@ -117,11 +134,25 @@
   </p>
 
   <button class="toggle-map-btn" onclick="toggleMap()">🗺️ Toggle Inline Map</button>
-
   <div id="map-container">
     <iframe id="map-frame" src="https://mcmap.hitpoint.pro"></iframe>
   </div>
 
+  <div id="leaderboard">
+    <h2>🏆 Top Players</h2>
+    <ul id="top-players">
+      <li>Steve - 120h</li>
+      <li>Alex - 110h</li>
+      <li>HitPoint - 100h</li>
+    </ul>
+  </div>
+
+  <div id="uptime-chart">
+    <h2>📈 Server Uptime</h2>
+    <canvas id="uptimeCanvas" width="600" height="300"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     function toggleMap() {
       const container = document.getElementById("map-container");
@@ -129,10 +160,12 @@
     }
 
     fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
+        const statusElem = document.getElementById("status");
+
         if (!data.online) {
-          document.getElementById("status").textContent = "🔴 Offline";
+          statusElem.textContent = "🔴 Offline";
           return;
         }
 
@@ -143,16 +176,38 @@
           ? data.motd.clean.join(" ")
           : data.motd?.clean || "No MOTD";
 
-        document.getElementById("status").innerHTML = `
+        statusElem.innerHTML = `
           🟢 Online<br>
           👥 Players: ${players}<br>
           🧭 Version: ${version} (${software})<br>
-          💬 MOTD: ${motd}
+          💬 MOTD: <span class="motd-animated">${motd}</span>
         `;
       })
       .catch(() => {
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
       });
+
+    // Uptime Chart (example/mock)
+    const ctx = document.getElementById('uptimeCanvas').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['6am', '9am', '12pm', '3pm', '6pm', '9pm'],
+        datasets: [{
+          label: 'Uptime (%)',
+          data: [100, 100, 95, 98, 100, 100],
+          borderColor: 'lime',
+          backgroundColor: 'rgba(0,255,0,0.1)',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: false,
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
+      }
+    });
   </script>
 
   <noscript>
