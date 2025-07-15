@@ -101,10 +101,17 @@ a, button {
   border: none;
 }
 
+/* MOTD Styling */
 .motd-animated {
   font-size: 1em;
   color: #eee;
-  background: repeating-linear-gradient(-45deg, rgba(100, 100, 100, 0.3), rgba(100, 100, 100, 0.3) 10px, rgba(60, 60, 60, 0.3) 10px, rgba(60, 60, 60, 0.3) 20px);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(100, 100, 100, 0.3),
+    rgba(100, 100, 100, 0.3) 10px,
+    rgba(60, 60, 60, 0.3) 10px,
+    rgba(60, 60, 60, 0.3) 20px
+  );
   background-size: 200% 200%;
   animation: fog 5s linear infinite;
   padding: 10px;
@@ -112,23 +119,26 @@ a, button {
   margin-top: 10px;
   backdrop-filter: blur(2px);
   overflow: hidden;
+  max-width: 300px;
+  position: relative;
 }
 
 #motd-wrapper {
-  display: inline-block;
-  max-width: 80%;         /* remember, narrow as needed */
-  overflow: hidden;       /* hide overflow */
-  vertical-align: middle; /* align with icon/text */
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  display: block;
 }
 
 #motd-scroller {
   display: inline-block;
   padding-left: 100%;
   animation: scroll-motd 30s linear infinite;
+  white-space: nowrap;
 }
 
 @keyframes scroll-motd {
-  0%   { transform: translateX(0); }
+  0% { transform: translateX(0%); }
   100% { transform: translateX(-100%); }
 }
 
@@ -148,6 +158,10 @@ a, button {
 @media (max-width: 600px) {
   #uptime-chart {
     width: 95%;
+  }
+
+  .motd-animated {
+    max-width: 95%;
   }
 }
 
@@ -206,10 +220,6 @@ canvas {
 }
 
 @keyframes fogDrift {
-  from {
-    background-position: 0% 0%;
-  }
-  to {
-    background-position: 100% 100%;
-  }
+  from { background-position: 0% 0%; }
+  to { background-position: 100% 100%; }
 }
