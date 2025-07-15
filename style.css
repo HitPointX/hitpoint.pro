@@ -119,8 +119,14 @@ a, button {
 }
 
 #uptime-chart {
-  max-width: 350px;
-  margin-top: 20px;
+  width: 300px;
+  margin: 20px auto;
+}
+
+@media (max-width: 600px) {
+  #uptime-chart {
+    width: 95%;
+  }
 }
 
 #js-toast {
@@ -141,6 +147,6 @@ a, button {
 canvas {
   background-color: #111;
   border-radius: 8px;
-  width: 100%;
-  height: auto;
+  width: 100% !important;
+  height: auto !important;
 }
