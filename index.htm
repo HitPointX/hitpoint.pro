@@ -1,59 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>HitPoint SMC Server ♡</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
+  <div id="bg-layer"></div>
+
+  <div class="content">
     <h1>Welcome to HitPoint SMC Server ♡</h1>
-  </header>
 
-  <main>
-    <section>
-      <p><strong>Server Address:</strong> play.hitpoint.pro</p>
-      <p><a href="minecraft://?addExternalServer=HitPointSMC|play.hitpoint.pro">Click to Direct Connect (Java)</a></p>
-      <p><small>If nothing happens, add the server manually using <code>play.hitpoint.pro</code></small></p>
-      <p><strong>Version:</strong> Minecraft 1.21.7</p>
-    </section>
+    <p>
+      <strong>Server Address:</strong> play.hitpoint.pro<br />
+      <button onclick="window.location.href='minecraft://play.hitpoint.pro';" style="font-size: 14px;">
+        🔗 Click to Direct Connect (Java)
+      </button>
+      <br />
+      <small style="color: gray;">If nothing happens, add the server manually using <strong>play.hitpoint.pro</strong></small>
+    </p>
 
-    <section>
-      <p><strong>Status:</strong> 🟢 Online</p>
-      <p><strong>Players:</strong> 1/100</p>
-      <p><strong>Version:</strong> Paper 1.21.7 (Vanilla)</p>
-      <p><strong>MOTD:</strong> HitPoint SMC - Build at your own pace. Time flies, but you can always mine it back. ♥ Whether solo or side by side, there’s room here for family and friends.</p>
-    </section>
+    <p><strong>Version:</strong> Minecraft 1.21.7</p>
+    <p><strong>Status:</strong> <span id="status">Checking...</span></p>
 
-    <section>
-      <button onclick="toggleFullscreenMap()">🗺️ View Fullscreen Map</button>
-      <button onclick="toggleLeaderboard()">🏆 View Full Leaderboard</button>
-      <div>
-        <button onclick="toggleInlineMap()">🧭 Toggle Inline Map</button>
-        <button onclick="toggleInlineLeaderboard()">📊 Toggle Inline Leaderboard</button>
-      </div>
-    </section>
+    <p><a href="https://mcmap.hitpoint.pro" target="_blank" class="rainbow-button">🌍 View Fullscreen Map</a></p>
+    <p><a href="https://stats.hitpoint.pro/server/Server%201/overview" target="_blank" class="rainbow-button">📊 View Full Leaderboard</a></p>
 
-    <section>
+    <button class="toggle-map-btn" onclick="toggleView('map')">🗺️ Toggle Inline Map</button>
+    <button class="toggle-map-btn" onclick="toggleView('leaderboard')">📋 Toggle Inline Leaderboard</button>
+
+    <div id="map-container" style="display:none;">
+      <iframe id="map-frame" src="https://mcmap.hitpoint.pro"></iframe>
+    </div>
+
+    <div id="leaderboard-container" style="display:none;">
+      <iframe id="leaderboard-frame" src="https://stats.hitpoint.pro/server/Server%201/overview"></iframe>
+    </div>
+
+    <div id="uptime-chart">
       <h2>📈 Server Uptime</h2>
-      <iframe src="https://api.mcstatus.io/v2/status/java/play.hitpoint.pro/chart/uptime" width="100%" height="300" frameborder="0"></iframe>
-    </section>
-  </main>
+      <canvas id="uptimeCanvas" width="600" height="300"></canvas>
+    </div>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    function toggleFullscreenMap() {
-      window.open("https://mcmap.hitpoint.pro", "_blank");
+    function toggleView(view) {
+      const mapContainer = document.getElementById("map-container");
+      const leaderboardContainer = document.getElementById("leaderboard-container");
+
+      if (view === "map") {
+        leaderboardContainer.style.display = "none";
+        mapContainer.style.display = mapContainer.style.display === "none" ? "block" : "none";
+      } else if (view === "leaderboard") {
+        mapContainer.style.display = "none";
+        leaderboardContainer.style.display = leaderboardContainer.style.display === "none" ? "block" : "none";
+      }
     }
-    function toggleLeaderboard() {
-      window.open("https://mcmap.hitpoint.pro/leaderboard", "_blank");
-    }
-    function toggleInlineMap() {
-      alert("Inline map coming soon!");
-    }
-    function toggleInlineLeaderboard() {
-      alert("Inline leaderboard coming soon!");
-    }
+
+    fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
+      .then(res => res.json())
+      .then(data => {
+        const statusElem = document.getElementById("status");
+
+        if (!data.online) {
+          statusElem.textContent = "🔴 Offline";
+          return;
+        }
+
+        const players = `${data.players?.online ?? "?"}/${data.players?.max ?? "?"}`;
+        const version = data.version?.name_clean || data.version?.name || "Unknown";
+        const software = data.software || "Vanilla";
+        const motd = Array.isArray(data.motd?.clean)
+          ? data.motd.clean.join(" ")
+          : data.motd?.clean || "No MOTD";
+
+        statusElem.innerHTML = `
+          🟢 Online<br>
+          👥 Players: ${players}<br>
+          🧭 Version: ${version} (${software})<br>
+          💬 MOTD: <span class="motd-animated">${motd}</span>
+        `;
+      })
+      .catch(() => {
+        document.getElementById("status").textContent = "❌ Unable to fetch status.";
+      });
+
+    const ctx = document.getElementById('uptimeCanvas').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['6am', '9am', '12pm', '3pm', '6pm', '9pm'],
+        datasets: [{
+          label: 'Uptime (%)',
+          data: [100, 100, 95, 98, 100, 100],
+          borderColor: 'lime',
+          backgroundColor: 'rgba(0,255,0,0.1)',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: false,
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
+      }
+    });
+
+    // Parallax effect
+    document.addEventListener("mousemove", e => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 30;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      document.body.style.setProperty("--bg-x", `${x}px`);
+      document.body.style.setProperty("--bg-y", `${y}px`);
+    });
   </script>
+
+  <noscript>
+    <div id="js-toast">
+      ⚠️ JavaScript is disabled in your browser.<br /><br />
+      You won’t be able to use live server status or quick-connect buttons.<br /><br />
+      <strong>To join manually:</strong><br />
+      1. Open Minecraft (Java Edition)<br />
+      2. Go to Multiplayer → Add Server<br />
+      3. Use: <strong>play.hitpoint.pro</strong><br />
+      4. Click Done, then Join
+    </div>
+  </noscript>
 </body>
 </html>
