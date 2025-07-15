@@ -154,3 +154,33 @@ canvas {
   max-width: 300px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
+
+#fog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: url('https://i.imgur.com/M2FsG8Y.png') repeat;
+  opacity: 0.06;
+  animation: fogMove 120s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes fogMove {
+  0% { transform: translate(0%, 0%); }
+  50% { transform: translate(-25%, -10%); }
+  100% { transform: translate(0%, 0%); }
+}
+
+#vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%);
+}
