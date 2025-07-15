@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <title>HitPoint SMC Server ♡</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Prevent 1-frame flicker of parallax background -->
+  <style>
+    body {
+      --bg-x: 0px;
+      --bg-y: 0px;
+    }
+  </style>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,8 +24,7 @@
       <strong>Server Address:</strong> play.hitpoint.pro<br />
       <button onclick="window.location.href='minecraft://play.hitpoint.pro';" style="font-size: 14px;">
         🔗 Click to Direct Connect (Java)
-      </button>
-      <br />
+      </button><br />
       <small style="color: gray;">If nothing happens, add the server manually using <strong>play.hitpoint.pro</strong></small>
     </p>
 
@@ -39,7 +47,7 @@
 
     <div id="uptime-chart">
       <h2>📈 Server Uptime</h2>
-      <canvas id="uptimeCanvas" width="600" height="300"></canvas>
+      <canvas id="uptimeCanvas" width="300" height="200"></canvas>
     </div>
   </div>
 
@@ -86,47 +94,13 @@
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
       });
 
-    const ctx = document.getElementById('uptimeCanvas').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['6am', '9am', '12pm', '3pm', '6pm', '9pm'],
-        datasets: [{
-          label: 'Uptime (%)',
-          data: [100, 100, 95, 98, 100, 100],
-          borderColor: 'lime',
-          backgroundColor: 'rgba(0,255,0,0.1)',
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: false,
-        scales: {
-          y: { beginAtZero: true, max: 100 }
-        }
-      }
-    });
-
-    // Smooth Parallax Background Effect
-    let targetX = 0, targetY = 0;
-    let currentX = 0, currentY = 0;
-
+    // Parallax effect with smooth transition
     document.addEventListener("mousemove", e => {
-      targetX = (e.clientX / window.innerWidth - 0.5) * 20;
-      targetY = (e.clientY / window.innerHeight - 0.5) * 12;
+      const x = (e.clientX / window.innerWidth - 0.5) * 30;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      document.body.style.setProperty("--bg-x", `${x}px`);
+      document.body.style.setProperty("--bg-y", `${y}px`);
     });
-
-    function animateParallax() {
-      currentX += (targetX - currentX) * 0.1;
-      currentY += (targetY - currentY) * 0.1;
-
-      document.body.style.setProperty("--bg-x", `${currentX}px`);
-      document.body.style.setProperty("--bg-y", `${currentY}px`);
-
-      requestAnimationFrame(animateParallax);
-    }
-
-    animateParallax();
   </script>
 
   <noscript>
