@@ -89,7 +89,10 @@
           🟢 Online<br>
           👥 Players: ${players}<br>
           🧭 Version: ${version} (${software})<br>
-          💬 MOTD: <span class="motd-animated">${motd}</span>
+          💬 MOTD:
+        <div class="motd-animated">
+          <span id="motd-scroller">${motd}</span>
+        </div>
         `;
       })
       .catch(() => {
