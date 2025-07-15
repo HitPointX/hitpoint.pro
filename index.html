@@ -11,18 +11,18 @@
   <p><strong>Status:</strong> <span id="status">Checking...</span></p>
   <p><a href="https://mcmap.hitpoint.pro" target="_blank">🌍 View Live Map</a></p>
 
-  <script>
-    fetch("https://api.mcstatus.io/v2/status/java/hitpoint.pro")
-      .then(res => res.json())
-      .then(data => {
-        const status = data.online
-          ? `Online with ${data.players.online} player(s)`
-          : "Offline";
-        document.getElementById("status").textContent = status;
-      })
-      .catch(() => {
-        document.getElementById("status").textContent = "Unable to fetch status.";
-      });
-  </script>
+<script>
+  fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
+    .then(res => res.json())
+    .then(data => {
+      const status = data.online
+        ? `Online with ${data.players.online} player(s)`
+        : "Offline";
+      document.getElementById("status").textContent = status;
+    })
+    .catch(() => {
+      document.getElementById("status").textContent = "Unable to fetch status.";
+    });
+</script>
 </body>
 </html>
