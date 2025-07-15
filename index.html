@@ -6,38 +6,45 @@
 </head>
 <body>
   <h1>Welcome to HitPoint Minecraft Server!</h1>
-  <p><strong>Server Address:</strong> play.hitpoint.pro</p>
+
+  <p>
+    <strong>Server Address:</strong> play.hitpoint.pro<br>
+    <a href="minecraft://play.hitpoint.pro" style="font-size: 14px;">
+      🔗 Click to Direct Connect (Java)
+    </a>
+  </p>
+
   <p><strong>Version:</strong> Minecraft 1.21.7</p>
   <p><strong>Status:</strong> <span id="status">Checking...</span></p>
   <p><a href="https://mcmap.hitpoint.pro" target="_blank">🌍 View Live Map</a></p>
 
-<script>
-  fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
-    .then(res => res.json())
-    .then(data => {
-      if (!data.online) {
-        document.getElementById("status").textContent = "🔴 Offline";
-        return;
-      }
+  <script>
+    fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.online) {
+          document.getElementById("status").textContent = "🔴 Offline";
+          return;
+        }
 
-      const players = `${data.players?.online ?? "?"}/${data.players?.max ?? "?"}`;
-      const version = data.version?.name_clean || data.version?.name || "Unknown";
-      const software = data.software || "Vanilla";
-      const motd = Array.isArray(data.motd?.clean)
-        ? data.motd.clean.join(" ")
-        : data.motd?.clean || "No MOTD";
+        const players = `${data.players?.online ?? "?"}/${data.players?.max ?? "?"}`;
+        const version = data.version?.name_clean || data.version?.name || "Unknown";
+        const software = data.software || "Vanilla";
+        const motd = Array.isArray(data.motd?.clean)
+          ? data.motd.clean.join(" ")
+          : data.motd?.clean || "No MOTD";
 
-      document.getElementById("status").innerHTML = `
-        🟢 Online<br>
-        👥 Players: ${players}<br>
-        🧭 Version: ${version} (${software})<br>
-        💬 MOTD: ${motd}
-      `;
-    })
-    .catch(() => {
-      document.getElementById("status").textContent = "❌ Unable to fetch status.";
-    });
-</script>
+        document.getElementById("status").innerHTML = `
+          🟢 Online<br>
+          👥 Players: ${players}<br>
+          🧭 Version: ${version} (${software})<br>
+          💬 MOTD: ${motd}
+        `;
+      })
+      .catch(() => {
+        document.getElementById("status").textContent = "❌ Unable to fetch status.";
+      });
+  </script>
 
 </body>
 </html>
