@@ -18,17 +18,19 @@
     body::before {
       content: "";
       position: fixed;
-      top: -10%;
-      left: -10%;
-      width: 120%;
-      height: 120%;
-      background-image: url('/hitpoint-bg.png');
+      top: 0;
+      left: 0;
+      width: 110%;
+      height: 110%;
+      background-image: url('https://hitpoint.pro/hitpoint-bg.png');
       background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
-      transform: scale(1.05);
+      background-attachment: fixed;
       z-index: -2;
+      transform: translate(var(--bg-x, 0), var(--bg-y, 0)) scale(1.05);
+      transition: transform 0.1s ease-out;
       pointer-events: none;
+      will-change: transform;
     }
 
     .content {
@@ -197,6 +199,7 @@
       }
     }
 
+    // Live server status
     fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
       .then(res => res.json())
       .then(data => {
@@ -225,6 +228,7 @@
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
       });
 
+    // Chart
     const ctx = document.getElementById('uptimeCanvas').getContext('2d');
     new Chart(ctx, {
       type: 'line',
@@ -244,6 +248,14 @@
           y: { beginAtZero: true, max: 100 }
         }
       }
+    });
+
+    // Parallax cursor tracking
+    document.addEventListener("mousemove", (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 10;
+      const y = (e.clientY / window.innerHeight - 0.5) * 10;
+      document.body.style.setProperty("--bg-x", `${x}px`);
+      document.body.style.setProperty("--bg-y", `${y}px`);
     });
   </script>
 
