@@ -18,13 +18,12 @@
 <body>
   <div id="fog-overlay"></div>
   <div id="vignette"></div>
-  <div id="bg-layer"></div>
   <div class="content">
     <h1>Welcome to HitPoint SMC Server ♡</h1>
 
     <p>
       <strong>Server Address:</strong> play.hitpoint.pro<br />
-      <button onclick="window.location.href='minecraft://play.hitpoint.pro';" style="font-size: 14px;">
+      <button onclick="window.location.href='minecraft://play.hitpoint.pro';">
         🔗 Click to Direct Connect (Java)
       </button><br />
       <small style="color: gray;">If nothing happens, add the server manually using <strong>play.hitpoint.pro</strong></small>
@@ -56,16 +55,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     function toggleView(view) {
-      const mapContainer = document.getElementById("map-container");
-      const leaderboardContainer = document.getElementById("leaderboard-container");
-
-      if (view === "map") {
-        leaderboardContainer.style.display = "none";
-        mapContainer.style.display = mapContainer.style.display === "none" ? "block" : "none";
-      } else if (view === "leaderboard") {
-        mapContainer.style.display = "none";
-        leaderboardContainer.style.display = leaderboardContainer.style.display === "none" ? "block" : "none";
-      }
+      const map = document.getElementById("map-container");
+      const leaderboard = document.getElementById("leaderboard-container");
+      map.style.display = view === "map" ? (map.style.display === "none" ? "block" : "none") : "none";
+      leaderboard.style.display = view === "leaderboard" ? (leaderboard.style.display === "none" ? "block" : "none") : "none";
     }
 
     fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
@@ -85,22 +78,22 @@
           ? data.motd.clean.join(" ")
           : data.motd?.clean || "No MOTD";
 
-statusElem.innerHTML = `
-  🟢 Online<br>
-  👥 Players: ${players}<br>
-  🧭 Version: ${version} (${software})<br>
-  💬 MOTD:<br>
-  <div class="motd-animated">
-    <div id="motd-wrapper">
-      <span id="motd-scroller">${motd}</span>
-    </div>
-  </div>`;
+        statusElem.innerHTML = `
+          🟢 Online<br>
+          👥 Players: ${players}<br>
+          🧭 Version: ${version} (${software})<br>
+          💬 MOTD:
+          <div class="motd-animated">
+            <div id="motd-wrapper">
+              <span id="motd-scroller">${motd}</span>
+            </div>
+          </div>
+        `;
       })
       .catch(() => {
         document.getElementById("status").textContent = "❌ Unable to fetch status.";
       });
 
-    // Render the server uptime chart
     const ctx = document.getElementById('uptimeCanvas').getContext('2d');
     new Chart(ctx, {
       type: 'line',
@@ -114,16 +107,15 @@ statusElem.innerHTML = `
           tension: 0.3
         }]
       },
-         options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true, max: 100 }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
       }
-    }
     });
 
-    // Parallax effect with smooth transition
     document.addEventListener("mousemove", e => {
       const x = (e.clientX / window.innerWidth - 0.5) * 30;
       const y = (e.clientY / window.innerHeight - 0.5) * 20;
