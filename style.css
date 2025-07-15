@@ -111,6 +111,26 @@ a, button {
   border-radius: 5px;
   margin-top: 10px;
   backdrop-filter: blur(2px);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#motd-scroller {
+  display: inline-block;
+  white-space: nowrap;
+  animation: scroll-motd 30s linear infinite;
+  color: #fff;
+  font-size: 14px;
+  padding-left: 100%;
+}
+
+@keyframes scroll-motd {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
 }
 
 @keyframes fog {
