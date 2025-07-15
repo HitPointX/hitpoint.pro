@@ -8,7 +8,6 @@
 </head>
 <body>
   <div id="bg-layer"></div>
-
   <div class="content">
     <h1>Welcome to HitPoint SMC Server ♡</h1>
 
@@ -30,11 +29,11 @@
     <button class="toggle-map-btn" onclick="toggleView('map')">🗺️ Toggle Inline Map</button>
     <button class="toggle-map-btn" onclick="toggleView('leaderboard')">📋 Toggle Inline Leaderboard</button>
 
-    <div id="map-container" style="display:none;">
+    <div id="map-container">
       <iframe id="map-frame" src="https://mcmap.hitpoint.pro"></iframe>
     </div>
 
-    <div id="leaderboard-container" style="display:none;">
+    <div id="leaderboard-container">
       <iframe id="leaderboard-frame" src="https://stats.hitpoint.pro/server/Server%201/overview"></iframe>
     </div>
 
@@ -108,13 +107,26 @@
       }
     });
 
-    // Parallax effect
+    // Smooth Parallax Background Effect
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+
     document.addEventListener("mousemove", e => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 30;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      document.body.style.setProperty("--bg-x", `${x}px`);
-      document.body.style.setProperty("--bg-y", `${y}px`);
+      targetX = (e.clientX / window.innerWidth - 0.5) * 20;
+      targetY = (e.clientY / window.innerHeight - 0.5) * 12;
     });
+
+    function animateParallax() {
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+
+      document.body.style.setProperty("--bg-x", `${currentX}px`);
+      document.body.style.setProperty("--bg-y", `${currentY}px`);
+
+      requestAnimationFrame(animateParallax);
+    }
+
+    animateParallax();
   </script>
 
   <noscript>
