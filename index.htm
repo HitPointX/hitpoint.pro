@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HitPoint SMC Server ♡</title>
+  <title>HitPoint 7 Days to Die Server</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Prevent 1-frame flicker of parallax background -->
   <style>
     body {
       --bg-x: 0px;
@@ -19,32 +18,18 @@
   <div id="fog-overlay"></div>
   <div id="vignette"></div>
   <div class="content">
-    <h1>Welcome to HitPoint SMC Server ♡</h1>
+    <h1>Real Post-Apocalyptic RPG</h1>
 
     <p>
       <strong>Server Address:</strong> play.hitpoint.pro<br />
-      <button onclick="window.location.href='minecraft://play.hitpoint.pro';">
-        🔗 Click to Direct Connect (Java)
+      <button onclick="navigator.clipboard.writeText('play.hitpoint.pro'); alert('IP copied to clipboard!');">
+        📋 Copy Server Address
       </button><br />
-      <small style="color: gray;">If nothing happens, add the server manually using <strong>play.hitpoint.pro</strong></small>
+      <small style="color: gray;">Add the server manually in 7 Days to Die using <strong>play.hitpoint.pro</strong></small>
     </p>
 
-    <p><strong>Version:</strong> Minecraft 1.21.7</p>
-    <p><strong>Status:</strong> <span id="status">Checking...</span></p>
-
-    <p><a href="https://mcmap.hitpoint.pro" target="_blank" class="rainbow-button">🌍 View Fullscreen Map</a></p>
-    <p><a href="https://stats.hitpoint.pro/server/Server%201/overview" target="_blank" class="rainbow-button">📊 View Full Leaderboard</a></p>
-
-    <button class="toggle-map-btn" onclick="toggleView('map')">🗺️ Toggle Inline Map</button>
-    <button class="toggle-map-btn" onclick="toggleView('leaderboard')">📋 Toggle Inline Leaderboard</button>
-
-    <div id="map-container">
-      <iframe id="map-frame" src="https://mcmap.hitpoint.pro"></iframe>
-    </div>
-
-    <div id="leaderboard-container">
-      <iframe id="leaderboard-frame" src="https://stats.hitpoint.pro/server/Server%201/overview"></iframe>
-    </div>
+    <p><strong>Game:</strong> 7 Days to Die (Stable Build)</p>
+    <p><strong>Status:</strong> <span id="status">Manual connection required</span></p>
 
     <div id="uptime-chart">
       <h2>📈 Server Uptime</h2>
@@ -54,54 +39,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    function toggleView(view) {
-      const map = document.getElementById("map-container");
-      const leaderboard = document.getElementById("leaderboard-container");
-      map.style.display = view === "map" ? (map.style.display === "none" ? "block" : "none") : "none";
-      leaderboard.style.display = view === "leaderboard" ? (leaderboard.style.display === "none" ? "block" : "none") : "none";
-    }
-
-    fetch("https://api.mcstatus.io/v2/status/java/play.hitpoint.pro")
-      .then(res => res.json())
-      .then(data => {
-        const statusElem = document.getElementById("status");
-
-        if (!data.online) {
-          statusElem.textContent = "🔴 Offline";
-          return;
-        }
-
-        const players = `${data.players?.online ?? "?"}/${data.players?.max ?? "?"}`;
-        const version = data.version?.name_clean || data.version?.name || "Unknown";
-        const software = data.software || "Vanilla";
-        const motd = Array.isArray(data.motd?.clean)
-          ? data.motd.clean.join(" ")
-          : data.motd?.clean || "No MOTD";
-
-        statusElem.innerHTML = `
-          🟢 Online<br>
-          👥 Players: ${players}<br>
-          🧭 Version: ${version} (${software})<br>
-          💬 MOTD:
-          <div class="motd-animated">
-            <div id="motd-wrapper">
-              <span id="motd-scroller">${motd}</span>
-            </div>
-          </div>
-        `;
-      })
-      .catch(() => {
-        document.getElementById("status").textContent = "❌ Unable to fetch status.";
-      });
-
+    // Simulated uptime chart
     const ctx = document.getElementById('uptimeCanvas').getContext('2d');
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['6am', '9am', '12pm', '3pm', '6pm', '9pm'],
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         datasets: [{
           label: 'Uptime (%)',
-          data: [100, 100, 95, 98, 100, 100],
+          data: [100, 100, 100, 100, 100, 100],
           borderColor: 'lime',
           backgroundColor: 'rgba(0,255,0,0.1)',
           tension: 0.3
@@ -127,12 +73,12 @@
   <noscript>
     <div id="js-toast">
       ⚠️ JavaScript is disabled in your browser.<br /><br />
-      You won’t be able to use live server status or quick-connect buttons.<br /><br />
+      You won’t be able to use uptime data or quick-copy buttons.<br /><br />
       <strong>To join manually:</strong><br />
-      1. Open Minecraft (Java Edition)<br />
-      2. Go to Multiplayer → Add Server<br />
+      1. Open 7 Days to Die<br />
+      2. Go to "Join Game" → Add Favorite<br />
       3. Use: <strong>play.hitpoint.pro</strong><br />
-      4. Click Done, then Join
+      4. Click Connect
     </div>
   </noscript>
 </body>
