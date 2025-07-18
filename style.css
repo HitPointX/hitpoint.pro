@@ -10,7 +10,7 @@ html, body {
 }
 
 body {
-  background-image: url('https://hitpoint.pro/hitpoint-bg.png?v=9');
+  background-image: url('https://hitpoint.pro/hitpoint-bg.png?v=7');
   background-size: 110% auto;
   background-repeat: no-repeat;
   background-position: calc(50% + var(--bg-x)) calc(50% + var(--bg-y));
