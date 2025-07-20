@@ -57,6 +57,7 @@
   <canvas id="gameCanvas" width="512" height="512"></canvas>
   <div id="loading">Loading...</div>
   <div id="toastContainer"></div>
+  <audio id="bgm" loop></audio>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -64,7 +65,7 @@
     const TILE_SIZE = 32;
     const GRID_WIDTH = 6;
     const GRID_HEIGHT = 6;
-    const OFFSET_X = 5; // center in 16x16 tilemap
+    const OFFSET_X = 5;
     const OFFSET_Y = 5;
 
     const player = { x: 0, y: 0, hp: 10, level: 1, itemTier: 0 };
@@ -116,8 +117,9 @@
     function checkAllAssetsLoaded() {
       if (spritesLoaded === totalSprites && tilemapsLoaded === tilemapCount) {
         document.getElementById("loading").style.display = "none";
+        setupAudio();
         generateMap();
-        draw(); // first frame
+        draw();
       }
     }
 
@@ -178,6 +180,8 @@
       const startPos = positions.pop();
       player.x = startPos.x;
       player.y = startPos.y;
+
+      draw();
     }
 
     function shuffle(arr) {
@@ -241,6 +245,7 @@
         if (floor > totalFloors) alert("You conquered all 1000 floors!");
         else {
           toast(`Entering floor ${floor}...`);
+          if (floor % 100 === 1) playRandomMusic();
           generateMap();
         }
       }
@@ -269,6 +274,21 @@
         case "ArrowRight": movePlayer(1, 0); break;
       }
     });
+
+    const bgm = document.getElementById("bgm");
+    const musicTracks = [
+      "https://hitpoint.pro/play/assets/renderme.mp3",
+      "https://hitpoint.pro/play/assets/senderbeware.mp3"
+    ];
+    function playRandomMusic() {
+      const pick = musicTracks[Math.floor(Math.random() * musicTracks.length)];
+      bgm.src = pick;
+      bgm.play();
+    }
+
+    function setupAudio() {
+      playRandomMusic();
+    }
   </script>
 </body>
 </html>
