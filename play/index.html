@@ -57,23 +57,31 @@ const totalFloors = 1000;
 let floor = 1;
 let specialRoomEffect = null;
 
-const enemySheetCols = 4;
-const enemySheetRows = 6;
-
 const spritePaths = {
-  player: "https://hitpoint.pro/play/assets/Idle-Sheet.png",
-  enemy: "https://hitpoint.pro/play/assets/enemies_1.png",
-  item: "https://hitpoint.pro/play/assets/pickup_items_animated.png",
+  player: "https://hitpoint.pro/play/assets/playercharacter.png",
+  enemy1: "https://hitpoint.pro/play/assets/knightenemyx.png",
+  enemy2: "https://hitpoint.pro/play/assets/goblinbat.png",
+  item: "https://hitpoint.pro/play/assets/itemchestpickup.png",
 };
+
+const tilemaps = {};
+for (let i = 0; i <= 9; i++) {
+  const start = i * 100 + 1;
+  const end = (i + 1) * 100;
+  tilemaps[i] = new Image();
+  tilemaps[i].src = `https://hitpoint.pro/play/assets/tilemapfloor${start}to${end}.png`;
+}
+
 const sprites = {};
 let loaded = 0;
+const totalSprites = Object.keys(spritePaths).length;
 
 for (const key in spritePaths) {
   const img = new Image();
   img.src = spritePaths[key];
   img.onload = () => {
     loaded++;
-    if (loaded === Object.keys(spritePaths).length) {
+    if (loaded === totalSprites) {
       generateMap();
       draw();
     }
@@ -96,6 +104,11 @@ function drawTile(x, y, sprite, sx = 0, sy = 0, sw = TILE_SIZE, sh = TILE_SIZE) 
   ctx.drawImage(sprite, sx, sy, sw, sh, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 }
 
+function getTilemapForFloor(floor) {
+  const index = Math.floor((floor - 1) / 100);
+  return tilemaps[index];
+}
+
 function generateMap() {
   enemies.length = 0;
   items.length = 0;
@@ -106,8 +119,7 @@ function generateMap() {
       if (Math.random() < 0.05) enemies.push({
         x, y,
         hp: Math.ceil(floor / 10),
-        frameX: Math.floor(Math.random() * enemySheetCols),
-        frameY: Math.floor(Math.random() * enemySheetRows)
+        sprite: Math.random() < 0.5 ? sprites.enemy1 : sprites.enemy2
       });
       if (Math.random() < 0.03) items.push({
         x, y,
@@ -123,19 +135,19 @@ function draw() {
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Optional: Spin room
   if (specialRoomEffect === "spin") {
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.rotate((Date.now() % 10000) / 5000);
     ctx.translate(-canvas.width/2, -canvas.height/2);
   }
 
-  drawTile(player.x, player.y, sprites.player, 0, 0);
+  const bg = getTilemapForFloor(floor);
+  if (bg?.complete) ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+
+  drawTile(player.x, player.y, sprites.player);
 
   enemies.forEach(e => {
-    const sx = e.frameX * TILE_SIZE;
-    const sy = e.frameY * TILE_SIZE;
-    drawTile(e.x, e.y, sprites.enemy, sx, sy);
+    drawTile(e.x, e.y, e.sprite);
   });
 
   items.forEach(i => drawTile(i.x, i.y, sprites.item));
