@@ -16,10 +16,30 @@
       margin: auto;
       background: #222;
     }
+    .toast {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: #333;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      opacity: 0.9;
+      font-size: 14px;
+      margin-bottom: 4px;
+      animation: fadeout 3s forwards;
+    }
+    @keyframes fadeout {
+      0% { opacity: 1; }
+      80% { opacity: 0.9; }
+      100% { opacity: 0; transform: translateX(-20px); }
+    }
   </style>
 </head>
 <body>
 <canvas id="gameCanvas" width="512" height="512"></canvas>
+<div id="toastContainer"></div>
+
 <script>
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
@@ -33,15 +53,17 @@
   const totalFloors = 1000;
   let floor = 1;
 
-  // Load sprites
+  const enemySheetCols = 4;
+  const enemySheetRows = 6;
+
   const spritePaths = {
     player: "https://hitpoint.pro/play/assets/Idle-Sheet.png",
     enemy: "https://hitpoint.pro/play/assets/enemies_1.png",
     item: "https://hitpoint.pro/play/assets/pickup_items_animated.png",
   };
   const sprites = {};
-
   let loaded = 0;
+
   for (const key in spritePaths) {
     const img = new Image();
     img.src = spritePaths[key];
@@ -55,28 +77,49 @@
     sprites[key] = img;
   }
 
+  function toast(msg) {
+    const div = document.createElement("div");
+    div.className = "toast";
+    div.innerText = msg;
+    document.getElementById("toastContainer").appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+  }
+
   function generateMap() {
     enemies.length = 0;
     items.length = 0;
     for (let y = 0; y < MAP_SIZE; y++) {
       for (let x = 0; x < MAP_SIZE; x++) {
-        if (Math.random() < 0.05) enemies.push({ x, y, hp: Math.ceil(floor / 10) });
-        if (Math.random() < 0.03) items.push({ x, y, tier: Math.floor(Math.random() * maxTier) });
+        if (Math.random() < 0.05) enemies.push({
+          x, y,
+          hp: Math.ceil(floor / 10),
+          frameX: Math.floor(Math.random() * enemySheetCols),
+          frameY: Math.floor(Math.random() * enemySheetRows)
+        });
+        if (Math.random() < 0.03) items.push({
+          x, y,
+          tier: Math.floor(Math.random() * maxTier)
+        });
       }
     }
     player.x = 0;
     player.y = 0;
   }
 
-  function drawTile(x, y, sprite, sx = 0, sy = 0) {
-    ctx.drawImage(sprite, sx, sy, TILE_SIZE, TILE_SIZE, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  function drawTile(x, y, sprite, sx = 0, sy = 0, sw = TILE_SIZE, sh = TILE_SIZE) {
+    ctx.drawImage(sprite, sx, sy, sw, sh, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawTile(player.x, player.y, sprites.player);
+    drawTile(player.x, player.y, sprites.player, 0, 0);
 
-    enemies.forEach(e => drawTile(e.x, e.y, sprites.enemy));
+    enemies.forEach(e => {
+      const sx = e.frameX * TILE_SIZE;
+      const sy = e.frameY * TILE_SIZE;
+      drawTile(e.x, e.y, sprites.enemy, sx, sy);
+    });
+
     items.forEach(i => drawTile(i.x, i.y, sprites.item));
 
     ctx.fillStyle = "white";
@@ -93,23 +136,39 @@
 
     const enemy = enemies.find(e => e.x === nx && e.y === ny);
     if (enemy) {
-      if (player.itemTier >= enemy.hp) enemies.splice(enemies.indexOf(enemy), 1);
-      else {
+      if (player.itemTier >= enemy.hp) {
+        enemies.splice(enemies.indexOf(enemy), 1);
+        toast("You defeated an enemy!");
+      } else {
         player.hp--;
-        if (player.hp <= 0) alert("Game Over");
+        toast("You took damage!");
+        if (player.hp <= 0) {
+          toast("You died!");
+          alert("Game Over");
+          location.reload();
+        }
       }
     }
 
     const item = items.find(i => i.x === nx && i.y === ny);
     if (item) {
-      if (item.tier > player.itemTier) player.itemTier = item.tier;
+      if (item.tier > player.itemTier) {
+        player.itemTier = item.tier;
+        toast(`Upgraded to Tier ${item.tier}!`);
+      } else {
+        toast("Found an item, but it's too weak.");
+      }
       items.splice(items.indexOf(item), 1);
     }
 
     if (enemies.length === 0) {
       floor++;
-      if (floor > totalFloors) alert("You conquered all 1000 floors!");
-      else generateMap();
+      if (floor > totalFloors) {
+        alert("You conquered all 1000 floors!");
+      } else {
+        toast(`Entering floor ${floor}...`);
+        generateMap();
+      }
     }
 
     draw();
