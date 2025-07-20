@@ -52,6 +52,7 @@
   const maxTier = 10;
   const totalFloors = 1000;
   let floor = 1;
+  let itemPool = [];
 
   const enemySheetCols = 4;
   const enemySheetRows = 6;
@@ -69,7 +70,7 @@
     img.src = spritePaths[key];
     img.onload = () => {
       loaded++;
-      if (loaded === Object.keys(spritePaths).length) {
+      if (loaded === Object.keys(spritePaths).length && itemPool.length > 0) {
         generateMap();
         draw();
       }
@@ -77,12 +78,27 @@
     sprites[key] = img;
   }
 
+  fetch("https://hitpoint.pro/play/assets/items_500.json")
+    .then(res => res.json())
+    .then(data => {
+      itemPool = data;
+      if (loaded === Object.keys(spritePaths).length) {
+        generateMap();
+        draw();
+      }
+    });
+
   function toast(msg) {
     const div = document.createElement("div");
     div.className = "toast";
     div.innerText = msg;
     document.getElementById("toastContainer").appendChild(div);
     setTimeout(() => div.remove(), 3000);
+  }
+
+  function getRandomItem() {
+    const index = Math.floor(Math.random() * itemPool.length);
+    return { name: itemPool[index], tier: Math.floor(index / 50) + 1 };
   }
 
   function generateMap() {
@@ -96,10 +112,14 @@
           frameX: Math.floor(Math.random() * enemySheetCols),
           frameY: Math.floor(Math.random() * enemySheetRows)
         });
-        if (Math.random() < 0.03) items.push({
-          x, y,
-          tier: Math.floor(Math.random() * maxTier)
-        });
+        if (Math.random() < 0.03) {
+          const item = getRandomItem();
+          items.push({
+            x, y,
+            name: item.name,
+            tier: item.tier
+          });
+        }
       }
     }
     player.x = 0;
@@ -154,9 +174,9 @@
     if (item) {
       if (item.tier > player.itemTier) {
         player.itemTier = item.tier;
-        toast(`Upgraded to Tier ${item.tier}!`);
+        toast(`Equipped ${item.name} (Tier ${item.tier})`);
       } else {
-        toast("Found an item, but it's too weak.");
+        toast(`Found ${item.name}, but it's weaker.`);
       }
       items.splice(items.indexOf(item), 1);
     }
