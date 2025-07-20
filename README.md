@@ -1,2 +1,2 @@
 # hitpoint.pro
-Site for HitPoint Minecraft server
+Site for 7DTD Real Post-Apocalyptic RPG
