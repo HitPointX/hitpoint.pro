@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HitPoint Dungeon</title>
+  <style>
+    html, body {
+      margin: 0;
+      background: #111;
+      color: #eee;
+      font-family: monospace;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: #222;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="512" height="512"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const TILE_SIZE = 32;
+    const MAP_SIZE = 16;
+
+    const player = {
+      x: 0,
+      y: 0,
+      hp: 10,
+      level: 1,
+      itemTier: 0,
+    };
+
+    const enemies = [];
+    const items = [];
+    const maxTier = 10;
+    const totalFloors = 1000;
+    let floor = 1;
+
+    function generateMap() {
+      enemies.length = 0;
+      items.length = 0;
+      for (let y = 0; y < MAP_SIZE; y++) {
+        for (let x = 0; x < MAP_SIZE; x++) {
+          if (Math.random() < 0.05) {
+            enemies.push({ x, y, hp: Math.ceil(floor / 10) });
+          }
+          if (Math.random() < 0.03) {
+            items.push({ x, y, tier: Math.floor(Math.random() * maxTier) });
+          }
+        }
+      }
+      player.x = 0;
+      player.y = 0;
+    }
+
+    function drawTile(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawTile(player.x, player.y, "lime");
+      enemies.forEach(e => drawTile(e.x, e.y, "red"));
+      items.forEach(i => drawTile(i.x, i.y, "gold"));
+      ctx.fillStyle = "white";
+      ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 10);
+    }
+
+    function movePlayer(dx, dy) {
+      const nx = player.x + dx;
+      const ny = player.y + dy;
+      if (nx < 0 || ny < 0 || nx >= MAP_SIZE || ny >= MAP_SIZE) return;
+
+      player.x = nx;
+      player.y = ny;
+
+      // check for enemy
+      const enemy = enemies.find(e => e.x === nx && e.y === ny);
+      if (enemy) {
+        if (player.itemTier >= enemy.hp) {
+          enemies.splice(enemies.indexOf(enemy), 1);
+        } else {
+          player.hp--;
+          if (player.hp <= 0) alert("Game Over");
+        }
+      }
+
+      // check for item
+      const item = items.find(i => i.x === nx && i.y === ny);
+      if (item) {
+        if (item.tier > player.itemTier) player.itemTier = item.tier;
+        items.splice(items.indexOf(item), 1);
+      }
+
+      // go to next floor when enemies are gone
+      if (enemies.length === 0) {
+        floor++;
+        if (floor > totalFloors) alert("You conquered all 1000 floors!");
+        else generateMap();
+      }
+    }
+
+    window.addEventListener("keydown", e => {
+      switch (e.key) {
+        case "ArrowUp": movePlayer(0, -1); break;
+        case "ArrowDown": movePlayer(0, 1); break;
+        case "ArrowLeft": movePlayer(-1, 0); break;
+        case "ArrowRight": movePlayer(1, 0); break;
+      }
+      draw();
+    });
+
+    generateMap();
+    draw();
+  </script>
+</body>
+</html>
