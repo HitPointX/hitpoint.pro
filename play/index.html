@@ -16,7 +16,6 @@
       display: block;
       margin: auto;
       background: #222;
-      transition: transform 0.5s ease;
     }
     .toast {
       position: fixed;
@@ -40,19 +39,18 @@
   </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="192" height="160"></canvas>
+<canvas id="gameCanvas" width="512" height="512"></canvas>
+<div id="loading" style="color:white; text-align:center;">Loading...</div>
 <div id="toastContainer"></div>
+
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
 const TILE_SIZE = 32;
-const COLS = 6;
-const ROWS = 5;
+const MAP_SIZE = 16;
 
-canvas.width = COLS * TILE_SIZE;
-canvas.height = ROWS * TILE_SIZE;
-
-const player = { x: 0, y: 0, drawX: 0, drawY: 0, hp: 10, level: 1, itemTier: 0 };
+const player = { x: 0, y: 0, hp: 10, level: 1, itemTier: 0 };
 const enemies = [];
 const items = [];
 const maxTier = 10;
@@ -63,33 +61,52 @@ let specialRoomEffect = null;
 const spritePaths = {
   player: "https://hitpoint.pro/play/assets/playercharacter.png",
   enemy1: "https://hitpoint.pro/play/assets/knightenemyx.png",
-  enemy2: "https://hitpoint.pro/play/assets/goblinbat.png",
+  enemy2: "https://hitpoint.pro/play/assets/goblintbat.png",
   item: "https://hitpoint.pro/play/assets/itemchestpickup.png",
 };
 
-const tilemaps = {};
-for (let i = 0; i < 10; i++) {
-  const start = i * 100 + 1;
-  const end = (i + 1) * 100;
-  tilemaps[i] = new Image();
-  tilemaps[i].src = `https://hitpoint.pro/play/assets/tilemapfloor${start}to${end}.png`;
-}
-
 const sprites = {};
-let loaded = 0;
+const tilemaps = {};
+const tilemapCount = 10;
+let tilemapsLoaded = 0;
+let spritesLoaded = 0;
 const totalSprites = Object.keys(spritePaths).length;
 
+// Load tilemaps
+for (let i = 0; i < tilemapCount; i++) {
+  const start = i * 100 + 1;
+  const end = (i + 1) * 100;
+  const img = new Image();
+  img.src = `https://hitpoint.pro/play/assets/tilemapfloor${start}to${end}.png`;
+  img.onload = () => {
+    tilemapsLoaded++;
+    console.log(`Loaded tilemap: tilemapfloor${start}to${end}.png`);
+    checkAllAssetsLoaded();
+  };
+  img.onerror = () => {
+    console.error(`Failed to load tilemapfloor${start}to${end}.png`);
+  };
+  tilemaps[i] = img;
+}
+
+// Load sprites
 for (const key in spritePaths) {
   const img = new Image();
   img.src = spritePaths[key];
   img.onload = () => {
-    loaded++;
-    if (loaded === totalSprites) {
-      generateMap();
-      requestAnimationFrame(draw);
-    }
+    spritesLoaded++;
+    console.log(`Loaded sprite: ${key}`);
+    checkAllAssetsLoaded();
   };
   sprites[key] = img;
+}
+
+function checkAllAssetsLoaded() {
+  if (spritesLoaded === totalSprites && tilemapsLoaded === tilemapCount) {
+    document.getElementById("loading").style.display = "none";
+    generateMap();
+    requestAnimationFrame(draw);
+  }
 }
 
 const itemColors = ["gray", "green", "blue", "purple", "orange"];
@@ -103,6 +120,10 @@ function toast(msg, color = "white") {
   setTimeout(() => div.remove(), 3000);
 }
 
+function drawTile(x, y, sprite, sx = 0, sy = 0, sw = TILE_SIZE, sh = TILE_SIZE) {
+  ctx.drawImage(sprite, sx, sy, sw, sh, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+}
+
 function getTilemapForFloor(floor) {
   const index = Math.floor((floor - 1) / 100);
   return tilemaps[index];
@@ -113,44 +134,53 @@ function generateMap() {
   items.length = 0;
   specialRoomEffect = Math.random() < 0.2 ? randomEffect() : null;
 
-  const enemyCount = Math.floor(Math.random() * 3) + 1;
-  const itemCount = Math.floor(Math.random() * 3) + 2;
-  const positions = new Set();
-
-  while (enemies.length < enemyCount) {
-    let x = Math.floor(Math.random() * COLS);
-    let y = Math.floor(Math.random() * ROWS);
-    let key = `${x},${y}`;
-    if (!positions.has(key)) {
-      enemies.push({ x, y, hp: Math.ceil(floor / 10), sprite: Math.random() < 0.5 ? sprites.enemy1 : sprites.enemy2 });
-      positions.add(key);
+  for (let y = 0; y < MAP_SIZE; y++) {
+    for (let x = 0; x < MAP_SIZE; x++) {
+      if (Math.random() < 0.05) enemies.push({
+        x, y,
+        hp: Math.ceil(floor / 10),
+        sprite: Math.random() < 0.5 ? sprites.enemy1 : sprites.enemy2
+      });
+      if (Math.random() < 0.03) items.push({
+        x, y,
+        tier: Math.floor(Math.random() * maxTier)
+      });
     }
   }
-
-  while (items.length < itemCount) {
-    let x = Math.floor(Math.random() * COLS);
-    let y = Math.floor(Math.random() * ROWS);
-    let key = `${x},${y}`;
-    if (!positions.has(key)) {
-      items.push({ x, y, tier: Math.floor(Math.random() * maxTier) });
-      positions.add(key);
-    }
-  }
-
   player.x = 0;
   player.y = 0;
-  player.drawX = 0;
-  player.drawY = 0;
 }
 
-function drawTile(px, py, sprite) {
-  ctx.drawImage(sprite, px, py, TILE_SIZE, TILE_SIZE);
-}
+let animFrame = null;
+let animProgress = 1;
+let animFrom = {x: 0, y: 0};
+let animTo = {x: 0, y: 0};
 
 function draw() {
+  ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (specialRoomEffect === "spin") {
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate((Date.now() % 10000) / 5000);
+    ctx.translate(-canvas.width/2, -canvas.height/2);
+  }
+
   const bg = getTilemapForFloor(floor);
   if (bg?.complete) ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+
+  // Interpolated player position
+  const interpX = animFrom.x + (animTo.x - animFrom.x) * animProgress;
+  const interpY = animFrom.y + (animTo.y - animFrom.y) * animProgress;
+  drawTile(interpX, interpY, sprites.player);
+
+  enemies.forEach(e => {
+    drawTile(e.x, e.y, e.sprite);
+  });
+
+  items.forEach(i => drawTile(i.x, i.y, sprites.item));
+
+  ctx.restore();
 
   if (specialRoomEffect === "fog") {
     ctx.fillStyle = "rgba(255,255,255,0.05)";
@@ -171,24 +201,23 @@ function draw() {
     canvas.style.filter = "";
   }
 
-  enemies.forEach(e => drawTile(e.x * TILE_SIZE, e.y * TILE_SIZE, e.sprite));
-  items.forEach(i => drawTile(i.x * TILE_SIZE, i.y * TILE_SIZE, sprites.item));
-  drawTile(player.drawX, player.drawY, sprites.player);
-
   ctx.fillStyle = "white";
-  ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 5);
+  ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 10);
 
-  player.drawX += (player.x * TILE_SIZE - player.drawX) * 0.3;
-  player.drawY += (player.y * TILE_SIZE - player.drawY) * 0.3;
-
-  requestAnimationFrame(draw);
+  if (animProgress < 1) {
+    animProgress += 0.1;
+    requestAnimationFrame(draw);
+  }
 }
 
 function movePlayer(dx, dy) {
   const nx = player.x + dx;
   const ny = player.y + dy;
-  if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) return;
+  if (nx < 0 || ny < 0 || nx >= MAP_SIZE || ny >= MAP_SIZE) return;
 
+  animFrom = {x: player.x, y: player.y};
+  animTo = {x: nx, y: ny};
+  animProgress = 0;
   player.x = nx;
   player.y = ny;
 
@@ -229,6 +258,8 @@ function movePlayer(dx, dy) {
       generateMap();
     }
   }
+
+  requestAnimationFrame(draw);
 }
 
 function itemTierLabel(tier) {
@@ -245,7 +276,6 @@ function randomEffect() {
 }
 
 window.addEventListener("keydown", e => {
-  if (e.repeat) return;
   switch (e.key) {
     case "ArrowUp": movePlayer(0, -1); break;
     case "ArrowDown": movePlayer(0, 1); break;
