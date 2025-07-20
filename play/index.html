@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,16 +41,20 @@
   </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="512" height="512"></canvas>
+<canvas id="gameCanvas" width="192" height="160"></canvas>
 <div id="toastContainer"></div>
-
 <script>
+// Canvas & game state
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const TILE_SIZE = 32;
-const MAP_SIZE = 16;
+const COLS = 6;
+const ROWS = 5;
 
-const player = { x: 0, y: 0, hp: 10, level: 1, itemTier: 0 };
+canvas.width = COLS * TILE_SIZE;
+canvas.height = ROWS * TILE_SIZE;
+
+const player = { x: 0, y: 0, drawX: 0, drawY: 0, hp: 10, level: 1, itemTier: 0 };
 const enemies = [];
 const items = [];
 const maxTier = 10;
@@ -57,25 +62,33 @@ const totalFloors = 1000;
 let floor = 1;
 let specialRoomEffect = null;
 
-const enemySheetCols = 4;
-const enemySheetRows = 6;
-
 const spritePaths = {
-  player: "https://hitpoint.pro/play/assets/Idle-Sheet.png",
-  enemy: "https://hitpoint.pro/play/assets/enemies_1.png",
-  item: "https://hitpoint.pro/play/assets/pickup_items_animated.png",
+  player: "https://hitpoint.pro/play/assets/playercharacter.png",
+  enemy1: "https://hitpoint.pro/play/assets/knightenemyx.png",
+  enemy2: "https://hitpoint.pro/play/assets/goblinbat.png",
+  item: "https://hitpoint.pro/play/assets/itemchestpickup.png",
 };
+
+const tilemaps = {};
+for (let i = 0; i < 10; i++) {
+  const start = i * 100 + 1;
+  const end = (i + 1) * 100;
+  tilemaps[i] = new Image();
+  tilemaps[i].src = `https://hitpoint.pro/play/assets/tilemapfloor${start}to${end}.png`;
+}
+
 const sprites = {};
 let loaded = 0;
+const totalSprites = Object.keys(spritePaths).length;
 
 for (const key in spritePaths) {
   const img = new Image();
   img.src = spritePaths[key];
   img.onload = () => {
     loaded++;
-    if (loaded === Object.keys(spritePaths).length) {
+    if (loaded === totalSprites) {
       generateMap();
-      draw();
+      requestAnimationFrame(draw);
     }
   };
   sprites[key] = img;
@@ -92,8 +105,9 @@ function toast(msg, color = "white") {
   setTimeout(() => div.remove(), 3000);
 }
 
-function drawTile(x, y, sprite, sx = 0, sy = 0, sw = TILE_SIZE, sh = TILE_SIZE) {
-  ctx.drawImage(sprite, sx, sy, sw, sh, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+function getTilemapForFloor(floor) {
+  const index = Math.floor((floor - 1) / 100);
+  return tilemaps[index];
 }
 
 function generateMap() {
@@ -101,46 +115,45 @@ function generateMap() {
   items.length = 0;
   specialRoomEffect = Math.random() < 0.2 ? randomEffect() : null;
 
-  for (let y = 0; y < MAP_SIZE; y++) {
-    for (let x = 0; x < MAP_SIZE; x++) {
-      if (Math.random() < 0.05) enemies.push({
-        x, y,
-        hp: Math.ceil(floor / 10),
-        frameX: Math.floor(Math.random() * enemySheetCols),
-        frameY: Math.floor(Math.random() * enemySheetRows)
-      });
-      if (Math.random() < 0.03) items.push({
-        x, y,
-        tier: Math.floor(Math.random() * maxTier)
-      });
+  const enemyCount = Math.floor(Math.random() * 3) + 1;
+  const itemCount = Math.floor(Math.random() * 3) + 2;
+
+  const positions = new Set();
+
+  while (enemies.length < enemyCount) {
+    let x = Math.floor(Math.random() * COLS);
+    let y = Math.floor(Math.random() * ROWS);
+    let key = `${x},${y}`;
+    if (!positions.has(key)) {
+      enemies.push({ x, y, hp: Math.ceil(floor / 10), sprite: Math.random() < 0.5 ? sprites.enemy1 : sprites.enemy2 });
+      positions.add(key);
     }
   }
+
+  while (items.length < itemCount) {
+    let x = Math.floor(Math.random() * COLS);
+    let y = Math.floor(Math.random() * ROWS);
+    let key = `${x},${y}`;
+    if (!positions.has(key)) {
+      items.push({ x, y, tier: Math.floor(Math.random() * maxTier) });
+      positions.add(key);
+    }
+  }
+
   player.x = 0;
   player.y = 0;
+  player.drawX = 0;
+  player.drawY = 0;
+}
+
+function drawTile(px, py, sprite) {
+  ctx.drawImage(sprite, px, py, TILE_SIZE, TILE_SIZE);
 }
 
 function draw() {
-  ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Optional: Spin room
-  if (specialRoomEffect === "spin") {
-    ctx.translate(canvas.width/2, canvas.height/2);
-    ctx.rotate((Date.now() % 10000) / 5000);
-    ctx.translate(-canvas.width/2, -canvas.height/2);
-  }
-
-  drawTile(player.x, player.y, sprites.player, 0, 0);
-
-  enemies.forEach(e => {
-    const sx = e.frameX * TILE_SIZE;
-    const sy = e.frameY * TILE_SIZE;
-    drawTile(e.x, e.y, sprites.enemy, sx, sy);
-  });
-
-  items.forEach(i => drawTile(i.x, i.y, sprites.item));
-
-  ctx.restore();
+  const bg = getTilemapForFloor(floor);
+  if (bg?.complete) ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 
   if (specialRoomEffect === "fog") {
     ctx.fillStyle = "rgba(255,255,255,0.05)";
@@ -161,14 +174,24 @@ function draw() {
     canvas.style.filter = "";
   }
 
+  enemies.forEach(e => drawTile(e.x * TILE_SIZE, e.y * TILE_SIZE, e.sprite));
+  items.forEach(i => drawTile(i.x * TILE_SIZE, i.y * TILE_SIZE, sprites.item));
+  drawTile(player.drawX, player.drawY, sprites.player);
+
   ctx.fillStyle = "white";
-  ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 10);
+  ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 5);
+
+  // Smooth movement
+  player.drawX += (player.x * TILE_SIZE - player.drawX) * 0.3;
+  player.drawY += (player.y * TILE_SIZE - player.drawY) * 0.3;
+
+  requestAnimationFrame(draw);
 }
 
 function movePlayer(dx, dy) {
   const nx = player.x + dx;
   const ny = player.y + dy;
-  if (nx < 0 || ny < 0 || nx >= MAP_SIZE || ny >= MAP_SIZE) return;
+  if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) return;
 
   player.x = nx;
   player.y = ny;
@@ -210,8 +233,6 @@ function movePlayer(dx, dy) {
       generateMap();
     }
   }
-
-  draw();
 }
 
 function itemTierLabel(tier) {
@@ -228,6 +249,7 @@ function randomEffect() {
 }
 
 window.addEventListener("keydown", e => {
+  if (e.repeat) return;
   switch (e.key) {
     case "ArrowUp": movePlayer(0, -1); break;
     case "ArrowDown": movePlayer(0, 1); break;
