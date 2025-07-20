@@ -1,0 +1,3502 @@
+[
+  {
+    "id": 1,
+    "name": "Vampiric Ring of the Wolf",
+    "type": "Ring",
+    "tier": "Legendary",
+    "bonus": 23.2
+  },
+  {
+    "id": 2,
+    "name": "Mystic Gem of Speed",
+    "type": "Gem",
+    "tier": "Rare",
+    "bonus": 2.3
+  },
+  {
+    "id": 3,
+    "name": "Gilded Coin of Magic",
+    "type": "Coin",
+    "tier": "Rare",
+    "bonus": 16.3
+  },
+  {
+    "id": 4,
+    "name": "Mystic Charm of Power",
+    "type": "Charm",
+    "tier": "Rare",
+    "bonus": 24.8
+  },
+  {
+    "id": 5,
+    "name": "Titanic Amulet of Light",
+    "type": "Amulet",
+    "tier": "Rare",
+    "bonus": 7.2
+  },
+  {
+    "id": 6,
+    "name": "Frozen Key of Power",
+    "type": "Key",
+    "tier": "Uncommon",
+    "bonus": 12.5
+  },
+  {
+    "id": 7,
+    "name": "Titanic Ring of the Wolf",
+    "type": "Ring",
+    "tier": "Legendary",
+    "bonus": 23.6
+  },
+  {
+    "id": 8,
+    "name": "Vampiric Lantern of Despair",
+    "type": "Lantern",
+    "tier": "Legendary",
+    "bonus": 7.0
+  },
+  {
+    "id": 9,
+    "name": "Blessed Helmet of Insight",
+    "type": "Helmet",
+    "tier": "Uncommon",
+    "bonus": 6.4
+  },
+  {
+    "id": 10,
+    "name": "Thundering Charm of Agility",
+    "type": "Charm",
+    "tier": "Common",
+    "bonus": 9.8
+  },
+  {
+    "id": 11,
+    "name": "Ancient Leggings of Light",
+    "type": "Leggings",
+    "tier": "Common",
+    "bonus": 24.9
+  },
+  {
+    "id": 12,
+    "name": "Glowing Crystal of Despair",
+    "type": "Crystal",
+    "tier": "Legendary",
+    "bonus": 21.8
+  },
+  {
+    "id": 13,
+    "name": "Radiant Trinket of Insight",
+    "type": "Trinket",
+    "tier": "Common",
+    "bonus": 13.8
+  },
+  {
+    "id": 14,
+    "name": "Shadowed Helmet of Insight",
+    "type": "Helmet",
+    "tier": "Legendary",
+    "bonus": 18.0
+  },
+  {
+    "id": 15,
+    "name": "Frozen Charm of the Bear",
+    "type": "Charm",
+    "tier": "Common",
+    "bonus": 16.1
+  },
+  {
+    "id": 16,
+    "name": "Glowing Shield of Rage",
+    "type": "Shield",
+    "tier": "Uncommon",
+    "bonus": 17.5
+  },
+  {
+    "id": 17,
+    "name": "Ancient Chestplate of Speed",
+    "type": "Chestplate",
+    "tier": "Rare",
+    "bonus": 4.8
+  },
+  {
+    "id": 18,
+    "name": "Glowing Mace of Rage",
+    "type": "Mace",
+    "tier": "Legendary",
+    "bonus": 18.6
+  },
+  {
+    "id": 19,
+    "name": "Thundering Relic of Despair",
+    "type": "Relic",
+    "tier": "Uncommon",
+    "bonus": 4.1
+  },
+  {
+    "id": 20,
+    "name": "Infernal Crystal of Magic",
+    "type": "Crystal",
+    "tier": "Common",
+    "bonus": 20.9
+  },
+  {
+    "id": 21,
+    "name": "Venomous Potion of Fortune",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 15.0
+  },
+  {
+    "id": 22,
+    "name": "Ancient Coin of Rage",
+    "type": "Coin",
+    "tier": "Epic",
+    "bonus": 13.6
+  },
+  {
+    "id": 23,
+    "name": "Radiant Coin of the Undead",
+    "type": "Coin",
+    "tier": "Epic",
+    "bonus": 1.8
+  },
+  {
+    "id": 24,
+    "name": "Infernal Elixir of Insight",
+    "type": "Elixir",
+    "tier": "Rare",
+    "bonus": 11.2
+  },
+  {
+    "id": 25,
+    "name": "Mystic Dagger of Power",
+    "type": "Dagger",
+    "tier": "Legendary",
+    "bonus": 20.4
+  },
+  {
+    "id": 26,
+    "name": "Venomous Dagger of the Undead",
+    "type": "Dagger",
+    "tier": "Rare",
+    "bonus": 23.1
+  },
+  {
+    "id": 27,
+    "name": "Blessed Crystal of the Bear",
+    "type": "Crystal",
+    "tier": "Epic",
+    "bonus": 7.9
+  },
+  {
+    "id": 28,
+    "name": "Ethereal Axe of Defense",
+    "type": "Axe",
+    "tier": "Legendary",
+    "bonus": 15.8
+  },
+  {
+    "id": 29,
+    "name": "Radiant Wand of Magic",
+    "type": "Wand",
+    "tier": "Legendary",
+    "bonus": 10.2
+  },
+  {
+    "id": 30,
+    "name": "Venomous Helmet of Insight",
+    "type": "Helmet",
+    "tier": "Common",
+    "bonus": 17.2
+  },
+  {
+    "id": 31,
+    "name": "Glowing Amulet of Despair",
+    "type": "Amulet",
+    "tier": "Legendary",
+    "bonus": 12.9
+  },
+  {
+    "id": 32,
+    "name": "Ethereal Helmet of Agility",
+    "type": "Helmet",
+    "tier": "Epic",
+    "bonus": 6.5
+  },
+  {
+    "id": 33,
+    "name": "Vampiric Key of Light",
+    "type": "Key",
+    "tier": "Uncommon",
+    "bonus": 13.5
+  },
+  {
+    "id": 34,
+    "name": "Titanic Dagger of Light",
+    "type": "Dagger",
+    "tier": "Epic",
+    "bonus": 8.8
+  },
+  {
+    "id": 35,
+    "name": "Shadowed Bow of Magic",
+    "type": "Bow",
+    "tier": "Epic",
+    "bonus": 7.6
+  },
+  {
+    "id": 36,
+    "name": "Titanic Mace of Power",
+    "type": "Mace",
+    "tier": "Legendary",
+    "bonus": 23.6
+  },
+  {
+    "id": 37,
+    "name": "Venomous Trinket of the Undead",
+    "type": "Trinket",
+    "tier": "Legendary",
+    "bonus": 23.5
+  },
+  {
+    "id": 38,
+    "name": "Shadowed Tome of Speed",
+    "type": "Tome",
+    "tier": "Rare",
+    "bonus": 11.2
+  },
+  {
+    "id": 39,
+    "name": "Venomous Potion of Power",
+    "type": "Potion",
+    "tier": "Legendary",
+    "bonus": 11.3
+  },
+  {
+    "id": 40,
+    "name": "Cursed Boots of the Undead",
+    "type": "Boots",
+    "tier": "Rare",
+    "bonus": 17.8
+  },
+  {
+    "id": 41,
+    "name": "Gilded Axe of Agility",
+    "type": "Axe",
+    "tier": "Epic",
+    "bonus": 21.2
+  },
+  {
+    "id": 42,
+    "name": "Blessed Ring of Magic",
+    "type": "Ring",
+    "tier": "Legendary",
+    "bonus": 9.0
+  },
+  {
+    "id": 43,
+    "name": "Radiant Elixir of Light",
+    "type": "Elixir",
+    "tier": "Legendary",
+    "bonus": 6.9
+  },
+  {
+    "id": 44,
+    "name": "Vampiric Staff of the Wolf",
+    "type": "Staff",
+    "tier": "Rare",
+    "bonus": 24.9
+  },
+  {
+    "id": 45,
+    "name": "Gilded Elixir of Magic",
+    "type": "Elixir",
+    "tier": "Rare",
+    "bonus": 16.4
+  },
+  {
+    "id": 46,
+    "name": "Ethereal Trinket of Speed",
+    "type": "Trinket",
+    "tier": "Rare",
+    "bonus": 8.9
+  },
+  {
+    "id": 47,
+    "name": "Infernal Gem of Despair",
+    "type": "Gem",
+    "tier": "Common",
+    "bonus": 14.5
+  },
+  {
+    "id": 48,
+    "name": "Thundering Charm of Fortune",
+    "type": "Charm",
+    "tier": "Common",
+    "bonus": 10.3
+  },
+  {
+    "id": 49,
+    "name": "Thundering Key of Despair",
+    "type": "Key",
+    "tier": "Legendary",
+    "bonus": 15.7
+  },
+  {
+    "id": 50,
+    "name": "Ancient Shield of Speed",
+    "type": "Shield",
+    "tier": "Rare",
+    "bonus": 4.0
+  },
+  {
+    "id": 51,
+    "name": "Vampiric Chestplate of Despair",
+    "type": "Chestplate",
+    "tier": "Epic",
+    "bonus": 4.7
+  },
+  {
+    "id": 52,
+    "name": "Mystic Crossbow of the Phoenix",
+    "type": "Crossbow",
+    "tier": "Epic",
+    "bonus": 11.7
+  },
+  {
+    "id": 53,
+    "name": "Blessed Leggings of Magic",
+    "type": "Leggings",
+    "tier": "Rare",
+    "bonus": 9.9
+  },
+  {
+    "id": 54,
+    "name": "Venomous Cape of the Wolf",
+    "type": "Cape",
+    "tier": "Rare",
+    "bonus": 12.3
+  },
+  {
+    "id": 55,
+    "name": "Glowing Elixir of the Bear",
+    "type": "Elixir",
+    "tier": "Legendary",
+    "bonus": 15.4
+  },
+  {
+    "id": 56,
+    "name": "Vampiric Staff of the Phoenix",
+    "type": "Staff",
+    "tier": "Rare",
+    "bonus": 13.3
+  },
+  {
+    "id": 57,
+    "name": "Titanic Chestplate of the Bear",
+    "type": "Chestplate",
+    "tier": "Rare",
+    "bonus": 8.6
+  },
+  {
+    "id": 58,
+    "name": "Vampiric Tome of Defense",
+    "type": "Tome",
+    "tier": "Rare",
+    "bonus": 14.9
+  },
+  {
+    "id": 59,
+    "name": "Vampiric Coin of Insight",
+    "type": "Coin",
+    "tier": "Common",
+    "bonus": 18.3
+  },
+  {
+    "id": 60,
+    "name": "Vampiric Sword of the Bear",
+    "type": "Sword",
+    "tier": "Rare",
+    "bonus": 10.6
+  },
+  {
+    "id": 61,
+    "name": "Mystic Wand of Defense",
+    "type": "Wand",
+    "tier": "Uncommon",
+    "bonus": 18.8
+  },
+  {
+    "id": 62,
+    "name": "Thundering Wand of Insight",
+    "type": "Wand",
+    "tier": "Common",
+    "bonus": 11.3
+  },
+  {
+    "id": 63,
+    "name": "Vampiric Charm of Fortune",
+    "type": "Charm",
+    "tier": "Legendary",
+    "bonus": 23.9
+  },
+  {
+    "id": 64,
+    "name": "Blessed Crossbow of the Undead",
+    "type": "Crossbow",
+    "tier": "Uncommon",
+    "bonus": 5.2
+  },
+  {
+    "id": 65,
+    "name": "Frozen Amulet of Speed",
+    "type": "Amulet",
+    "tier": "Common",
+    "bonus": 14.3
+  },
+  {
+    "id": 66,
+    "name": "Glowing Lantern of the Bear",
+    "type": "Lantern",
+    "tier": "Rare",
+    "bonus": 23.7
+  },
+  {
+    "id": 67,
+    "name": "Titanic Coin of the Undead",
+    "type": "Coin",
+    "tier": "Uncommon",
+    "bonus": 15.7
+  },
+  {
+    "id": 68,
+    "name": "Gilded Bow of the Undead",
+    "type": "Bow",
+    "tier": "Rare",
+    "bonus": 9.3
+  },
+  {
+    "id": 69,
+    "name": "Blessed Helmet of Speed",
+    "type": "Helmet",
+    "tier": "Uncommon",
+    "bonus": 23.7
+  },
+  {
+    "id": 70,
+    "name": "Glowing Cape of the Phoenix",
+    "type": "Cape",
+    "tier": "Common",
+    "bonus": 11.2
+  },
+  {
+    "id": 71,
+    "name": "Frozen Dagger of Defense",
+    "type": "Dagger",
+    "tier": "Common",
+    "bonus": 20.5
+  },
+  {
+    "id": 72,
+    "name": "Venomous Cape of Doom",
+    "type": "Cape",
+    "tier": "Common",
+    "bonus": 4.4
+  },
+  {
+    "id": 73,
+    "name": "Ancient Coin of Insight",
+    "type": "Coin",
+    "tier": "Rare",
+    "bonus": 23.7
+  },
+  {
+    "id": 74,
+    "name": "Ancient Mace of Magic",
+    "type": "Mace",
+    "tier": "Rare",
+    "bonus": 7.9
+  },
+  {
+    "id": 75,
+    "name": "Cursed Key of the Wolf",
+    "type": "Key",
+    "tier": "Epic",
+    "bonus": 15.0
+  },
+  {
+    "id": 76,
+    "name": "Blessed Bow of Despair",
+    "type": "Bow",
+    "tier": "Common",
+    "bonus": 23.3
+  },
+  {
+    "id": 77,
+    "name": "Ancient Boots of Agility",
+    "type": "Boots",
+    "tier": "Uncommon",
+    "bonus": 15.2
+  },
+  {
+    "id": 78,
+    "name": "Ancient Key of the Undead",
+    "type": "Key",
+    "tier": "Rare",
+    "bonus": 23.2
+  },
+  {
+    "id": 79,
+    "name": "Ethereal Gem of Despair",
+    "type": "Gem",
+    "tier": "Legendary",
+    "bonus": 21.1
+  },
+  {
+    "id": 80,
+    "name": "Radiant Mace of the Phoenix",
+    "type": "Mace",
+    "tier": "Epic",
+    "bonus": 6.2
+  },
+  {
+    "id": 81,
+    "name": "Titanic Cape of Fortune",
+    "type": "Cape",
+    "tier": "Rare",
+    "bonus": 16.3
+  },
+  {
+    "id": 82,
+    "name": "Venomous Coin of Rage",
+    "type": "Coin",
+    "tier": "Uncommon",
+    "bonus": 14.6
+  },
+  {
+    "id": 83,
+    "name": "Venomous Key of Speed",
+    "type": "Key",
+    "tier": "Legendary",
+    "bonus": 19.5
+  },
+  {
+    "id": 84,
+    "name": "Shadowed Wand of Power",
+    "type": "Wand",
+    "tier": "Legendary",
+    "bonus": 23.5
+  },
+  {
+    "id": 85,
+    "name": "Radiant Potion of Speed",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 17.6
+  },
+  {
+    "id": 86,
+    "name": "Venomous Gem of Rage",
+    "type": "Gem",
+    "tier": "Epic",
+    "bonus": 23.4
+  },
+  {
+    "id": 87,
+    "name": "Shadowed Elixir of Power",
+    "type": "Elixir",
+    "tier": "Uncommon",
+    "bonus": 24.1
+  },
+  {
+    "id": 88,
+    "name": "Glowing Potion of Power",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 10.8
+  },
+  {
+    "id": 89,
+    "name": "Cursed Potion of the Wolf",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 9.7
+  },
+  {
+    "id": 90,
+    "name": "Venomous Helmet of Insight",
+    "type": "Helmet",
+    "tier": "Uncommon",
+    "bonus": 15.1
+  },
+  {
+    "id": 91,
+    "name": "Vampiric Crossbow of the Phoenix",
+    "type": "Crossbow",
+    "tier": "Legendary",
+    "bonus": 8.9
+  },
+  {
+    "id": 92,
+    "name": "Ethereal Gloves of Insight",
+    "type": "Gloves",
+    "tier": "Legendary",
+    "bonus": 21.8
+  },
+  {
+    "id": 93,
+    "name": "Shadowed Mace of the Bear",
+    "type": "Mace",
+    "tier": "Epic",
+    "bonus": 16.5
+  },
+  {
+    "id": 94,
+    "name": "Frozen Mace of the Bear",
+    "type": "Mace",
+    "tier": "Common",
+    "bonus": 15.5
+  },
+  {
+    "id": 95,
+    "name": "Venomous Mace of Magic",
+    "type": "Mace",
+    "tier": "Uncommon",
+    "bonus": 18.7
+  },
+  {
+    "id": 96,
+    "name": "Radiant Potion of Agility",
+    "type": "Potion",
+    "tier": "Epic",
+    "bonus": 13.5
+  },
+  {
+    "id": 97,
+    "name": "Titanic Key of Defense",
+    "type": "Key",
+    "tier": "Uncommon",
+    "bonus": 7.9
+  },
+  {
+    "id": 98,
+    "name": "Shadowed Crossbow of the Phoenix",
+    "type": "Crossbow",
+    "tier": "Uncommon",
+    "bonus": 21.1
+  },
+  {
+    "id": 99,
+    "name": "Mystic Scroll of the Undead",
+    "type": "Scroll",
+    "tier": "Epic",
+    "bonus": 11.5
+  },
+  {
+    "id": 100,
+    "name": "Glowing Elixir of the Wolf",
+    "type": "Elixir",
+    "tier": "Uncommon",
+    "bonus": 9.3
+  },
+  {
+    "id": 101,
+    "name": "Cursed Staff of Power",
+    "type": "Staff",
+    "tier": "Epic",
+    "bonus": 17.7
+  },
+  {
+    "id": 102,
+    "name": "Glowing Crystal of Doom",
+    "type": "Crystal",
+    "tier": "Rare",
+    "bonus": 5.0
+  },
+  {
+    "id": 103,
+    "name": "Venomous Cape of Power",
+    "type": "Cape",
+    "tier": "Rare",
+    "bonus": 24.2
+  },
+  {
+    "id": 104,
+    "name": "Blessed Axe of the Phoenix",
+    "type": "Axe",
+    "tier": "Legendary",
+    "bonus": 13.6
+  },
+  {
+    "id": 105,
+    "name": "Ancient Trinket of the Phoenix",
+    "type": "Trinket",
+    "tier": "Rare",
+    "bonus": 4.0
+  },
+  {
+    "id": 106,
+    "name": "Thundering Charm of Doom",
+    "type": "Charm",
+    "tier": "Uncommon",
+    "bonus": 17.5
+  },
+  {
+    "id": 107,
+    "name": "Gilded Leggings of Power",
+    "type": "Leggings",
+    "tier": "Rare",
+    "bonus": 20.8
+  },
+  {
+    "id": 108,
+    "name": "Venomous Axe of the Phoenix",
+    "type": "Axe",
+    "tier": "Epic",
+    "bonus": 10.4
+  },
+  {
+    "id": 109,
+    "name": "Vampiric Axe of the Bear",
+    "type": "Axe",
+    "tier": "Rare",
+    "bonus": 1.0
+  },
+  {
+    "id": 110,
+    "name": "Gilded Wand of the Undead",
+    "type": "Wand",
+    "tier": "Legendary",
+    "bonus": 4.8
+  },
+  {
+    "id": 111,
+    "name": "Ancient Coin of Defense",
+    "type": "Coin",
+    "tier": "Epic",
+    "bonus": 10.6
+  },
+  {
+    "id": 112,
+    "name": "Cursed Elixir of Light",
+    "type": "Elixir",
+    "tier": "Legendary",
+    "bonus": 11.0
+  },
+  {
+    "id": 113,
+    "name": "Gilded Crystal of the Phoenix",
+    "type": "Crystal",
+    "tier": "Rare",
+    "bonus": 19.6
+  },
+  {
+    "id": 114,
+    "name": "Glowing Tome of the Phoenix",
+    "type": "Tome",
+    "tier": "Rare",
+    "bonus": 8.6
+  },
+  {
+    "id": 115,
+    "name": "Shadowed Tome of Magic",
+    "type": "Tome",
+    "tier": "Epic",
+    "bonus": 5.5
+  },
+  {
+    "id": 116,
+    "name": "Blessed Potion of Power",
+    "type": "Potion",
+    "tier": "Common",
+    "bonus": 10.1
+  },
+  {
+    "id": 117,
+    "name": "Titanic Crossbow of Rage",
+    "type": "Crossbow",
+    "tier": "Common",
+    "bonus": 10.8
+  },
+  {
+    "id": 118,
+    "name": "Titanic Tome of Magic",
+    "type": "Tome",
+    "tier": "Legendary",
+    "bonus": 16.8
+  },
+  {
+    "id": 119,
+    "name": "Gilded Mace of the Bear",
+    "type": "Mace",
+    "tier": "Legendary",
+    "bonus": 14.3
+  },
+  {
+    "id": 120,
+    "name": "Cursed Potion of Magic",
+    "type": "Potion",
+    "tier": "Common",
+    "bonus": 6.6
+  },
+  {
+    "id": 121,
+    "name": "Radiant Bow of Light",
+    "type": "Bow",
+    "tier": "Legendary",
+    "bonus": 22.3
+  },
+  {
+    "id": 122,
+    "name": "Radiant Tome of Insight",
+    "type": "Tome",
+    "tier": "Epic",
+    "bonus": 6.8
+  },
+  {
+    "id": 123,
+    "name": "Ethereal Tome of Power",
+    "type": "Tome",
+    "tier": "Epic",
+    "bonus": 15.2
+  },
+  {
+    "id": 124,
+    "name": "Glowing Wand of Insight",
+    "type": "Wand",
+    "tier": "Epic",
+    "bonus": 7.0
+  },
+  {
+    "id": 125,
+    "name": "Vampiric Relic of the Wolf",
+    "type": "Relic",
+    "tier": "Uncommon",
+    "bonus": 14.0
+  },
+  {
+    "id": 126,
+    "name": "Shadowed Cape of the Bear",
+    "type": "Cape",
+    "tier": "Legendary",
+    "bonus": 20.8
+  },
+  {
+    "id": 127,
+    "name": "Ethereal Axe of Doom",
+    "type": "Axe",
+    "tier": "Rare",
+    "bonus": 8.9
+  },
+  {
+    "id": 128,
+    "name": "Frozen Staff of the Undead",
+    "type": "Staff",
+    "tier": "Common",
+    "bonus": 23.3
+  },
+  {
+    "id": 129,
+    "name": "Thundering Coin of Insight",
+    "type": "Coin",
+    "tier": "Legendary",
+    "bonus": 7.6
+  },
+  {
+    "id": 130,
+    "name": "Cursed Tome of Power",
+    "type": "Tome",
+    "tier": "Uncommon",
+    "bonus": 20.3
+  },
+  {
+    "id": 131,
+    "name": "Titanic Leggings of the Phoenix",
+    "type": "Leggings",
+    "tier": "Epic",
+    "bonus": 4.0
+  },
+  {
+    "id": 132,
+    "name": "Vampiric Orb of Rage",
+    "type": "Orb",
+    "tier": "Uncommon",
+    "bonus": 18.3
+  },
+  {
+    "id": 133,
+    "name": "Titanic Coin of Agility",
+    "type": "Coin",
+    "tier": "Legendary",
+    "bonus": 18.9
+  },
+  {
+    "id": 134,
+    "name": "Thundering Gloves of Magic",
+    "type": "Gloves",
+    "tier": "Uncommon",
+    "bonus": 8.4
+  },
+  {
+    "id": 135,
+    "name": "Vampiric Crystal of Fortune",
+    "type": "Crystal",
+    "tier": "Uncommon",
+    "bonus": 21.8
+  },
+  {
+    "id": 136,
+    "name": "Shadowed Elixir of Magic",
+    "type": "Elixir",
+    "tier": "Rare",
+    "bonus": 9.6
+  },
+  {
+    "id": 137,
+    "name": "Ancient Amulet of Doom",
+    "type": "Amulet",
+    "tier": "Common",
+    "bonus": 13.1
+  },
+  {
+    "id": 138,
+    "name": "Ethereal Shield of the Phoenix",
+    "type": "Shield",
+    "tier": "Uncommon",
+    "bonus": 9.6
+  },
+  {
+    "id": 139,
+    "name": "Vampiric Boots of Despair",
+    "type": "Boots",
+    "tier": "Uncommon",
+    "bonus": 7.8
+  },
+  {
+    "id": 140,
+    "name": "Vampiric Orb of Doom",
+    "type": "Orb",
+    "tier": "Rare",
+    "bonus": 16.5
+  },
+  {
+    "id": 141,
+    "name": "Gilded Tome of Rage",
+    "type": "Tome",
+    "tier": "Uncommon",
+    "bonus": 4.9
+  },
+  {
+    "id": 142,
+    "name": "Thundering Cape of Power",
+    "type": "Cape",
+    "tier": "Legendary",
+    "bonus": 16.8
+  },
+  {
+    "id": 143,
+    "name": "Thundering Bow of Light",
+    "type": "Bow",
+    "tier": "Common",
+    "bonus": 6.9
+  },
+  {
+    "id": 144,
+    "name": "Blessed Helmet of the Bear",
+    "type": "Helmet",
+    "tier": "Legendary",
+    "bonus": 4.9
+  },
+  {
+    "id": 145,
+    "name": "Radiant Potion of Fortune",
+    "type": "Potion",
+    "tier": "Common",
+    "bonus": 8.3
+  },
+  {
+    "id": 146,
+    "name": "Glowing Gloves of Insight",
+    "type": "Gloves",
+    "tier": "Uncommon",
+    "bonus": 7.7
+  },
+  {
+    "id": 147,
+    "name": "Gilded Potion of Agility",
+    "type": "Potion",
+    "tier": "Uncommon",
+    "bonus": 1.8
+  },
+  {
+    "id": 148,
+    "name": "Ancient Coin of Fortune",
+    "type": "Coin",
+    "tier": "Rare",
+    "bonus": 12.8
+  },
+  {
+    "id": 149,
+    "name": "Ancient Elixir of Rage",
+    "type": "Elixir",
+    "tier": "Rare",
+    "bonus": 20.8
+  },
+  {
+    "id": 150,
+    "name": "Blessed Key of the Phoenix",
+    "type": "Key",
+    "tier": "Legendary",
+    "bonus": 5.4
+  },
+  {
+    "id": 151,
+    "name": "Shadowed Relic of Agility",
+    "type": "Relic",
+    "tier": "Uncommon",
+    "bonus": 22.8
+  },
+  {
+    "id": 152,
+    "name": "Ethereal Potion of Speed",
+    "type": "Potion",
+    "tier": "Epic",
+    "bonus": 11.2
+  },
+  {
+    "id": 153,
+    "name": "Cursed Boots of the Undead",
+    "type": "Boots",
+    "tier": "Common",
+    "bonus": 11.1
+  },
+  {
+    "id": 154,
+    "name": "Radiant Cape of Fortune",
+    "type": "Cape",
+    "tier": "Legendary",
+    "bonus": 18.1
+  },
+  {
+    "id": 155,
+    "name": "Blessed Axe of Despair",
+    "type": "Axe",
+    "tier": "Uncommon",
+    "bonus": 15.9
+  },
+  {
+    "id": 156,
+    "name": "Radiant Helmet of Speed",
+    "type": "Helmet",
+    "tier": "Legendary",
+    "bonus": 2.1
+  },
+  {
+    "id": 157,
+    "name": "Infernal Staff of Agility",
+    "type": "Staff",
+    "tier": "Epic",
+    "bonus": 5.5
+  },
+  {
+    "id": 158,
+    "name": "Cursed Bow of Rage",
+    "type": "Bow",
+    "tier": "Epic",
+    "bonus": 12.6
+  },
+  {
+    "id": 159,
+    "name": "Ethereal Amulet of Doom",
+    "type": "Amulet",
+    "tier": "Common",
+    "bonus": 1.4
+  },
+  {
+    "id": 160,
+    "name": "Titanic Scroll of Light",
+    "type": "Scroll",
+    "tier": "Rare",
+    "bonus": 10.3
+  },
+  {
+    "id": 161,
+    "name": "Venomous Staff of Defense",
+    "type": "Staff",
+    "tier": "Rare",
+    "bonus": 4.8
+  },
+  {
+    "id": 162,
+    "name": "Gilded Crossbow of the Bear",
+    "type": "Crossbow",
+    "tier": "Rare",
+    "bonus": 19.4
+  },
+  {
+    "id": 163,
+    "name": "Thundering Sword of Insight",
+    "type": "Sword",
+    "tier": "Epic",
+    "bonus": 5.9
+  },
+  {
+    "id": 164,
+    "name": "Shadowed Leggings of the Undead",
+    "type": "Leggings",
+    "tier": "Rare",
+    "bonus": 3.3
+  },
+  {
+    "id": 165,
+    "name": "Shadowed Mace of Insight",
+    "type": "Mace",
+    "tier": "Common",
+    "bonus": 22.5
+  },
+  {
+    "id": 166,
+    "name": "Venomous Leggings of Speed",
+    "type": "Leggings",
+    "tier": "Epic",
+    "bonus": 14.7
+  },
+  {
+    "id": 167,
+    "name": "Blessed Amulet of Power",
+    "type": "Amulet",
+    "tier": "Common",
+    "bonus": 8.3
+  },
+  {
+    "id": 168,
+    "name": "Infernal Boots of Power",
+    "type": "Boots",
+    "tier": "Common",
+    "bonus": 12.7
+  },
+  {
+    "id": 169,
+    "name": "Gilded Crossbow of Defense",
+    "type": "Crossbow",
+    "tier": "Rare",
+    "bonus": 2.0
+  },
+  {
+    "id": 170,
+    "name": "Cursed Wand of Despair",
+    "type": "Wand",
+    "tier": "Rare",
+    "bonus": 7.9
+  },
+  {
+    "id": 171,
+    "name": "Infernal Trinket of the Phoenix",
+    "type": "Trinket",
+    "tier": "Uncommon",
+    "bonus": 18.4
+  },
+  {
+    "id": 172,
+    "name": "Infernal Wand of the Undead",
+    "type": "Wand",
+    "tier": "Legendary",
+    "bonus": 24.5
+  },
+  {
+    "id": 173,
+    "name": "Ethereal Elixir of Agility",
+    "type": "Elixir",
+    "tier": "Rare",
+    "bonus": 10.8
+  },
+  {
+    "id": 174,
+    "name": "Infernal Ring of Despair",
+    "type": "Ring",
+    "tier": "Common",
+    "bonus": 9.1
+  },
+  {
+    "id": 175,
+    "name": "Radiant Cape of Despair",
+    "type": "Cape",
+    "tier": "Common",
+    "bonus": 18.4
+  },
+  {
+    "id": 176,
+    "name": "Gilded Scroll of Agility",
+    "type": "Scroll",
+    "tier": "Legendary",
+    "bonus": 1.4
+  },
+  {
+    "id": 177,
+    "name": "Shadowed Trinket of Insight",
+    "type": "Trinket",
+    "tier": "Uncommon",
+    "bonus": 15.2
+  },
+  {
+    "id": 178,
+    "name": "Infernal Staff of Doom",
+    "type": "Staff",
+    "tier": "Rare",
+    "bonus": 17.3
+  },
+  {
+    "id": 179,
+    "name": "Shadowed Crystal of Doom",
+    "type": "Crystal",
+    "tier": "Rare",
+    "bonus": 18.6
+  },
+  {
+    "id": 180,
+    "name": "Frozen Dagger of Fortune",
+    "type": "Dagger",
+    "tier": "Epic",
+    "bonus": 20.4
+  },
+  {
+    "id": 181,
+    "name": "Blessed Relic of Doom",
+    "type": "Relic",
+    "tier": "Common",
+    "bonus": 22.6
+  },
+  {
+    "id": 182,
+    "name": "Shadowed Bow of Power",
+    "type": "Bow",
+    "tier": "Rare",
+    "bonus": 17.9
+  },
+  {
+    "id": 183,
+    "name": "Ancient Shield of Despair",
+    "type": "Shield",
+    "tier": "Rare",
+    "bonus": 3.2
+  },
+  {
+    "id": 184,
+    "name": "Gilded Boots of Doom",
+    "type": "Boots",
+    "tier": "Rare",
+    "bonus": 16.8
+  },
+  {
+    "id": 185,
+    "name": "Ethereal Wand of Agility",
+    "type": "Wand",
+    "tier": "Epic",
+    "bonus": 11.0
+  },
+  {
+    "id": 186,
+    "name": "Gilded Amulet of the Undead",
+    "type": "Amulet",
+    "tier": "Common",
+    "bonus": 16.8
+  },
+  {
+    "id": 187,
+    "name": "Vampiric Gloves of the Undead",
+    "type": "Gloves",
+    "tier": "Rare",
+    "bonus": 22.4
+  },
+  {
+    "id": 188,
+    "name": "Titanic Leggings of the Wolf",
+    "type": "Leggings",
+    "tier": "Rare",
+    "bonus": 19.6
+  },
+  {
+    "id": 189,
+    "name": "Titanic Crossbow of the Bear",
+    "type": "Crossbow",
+    "tier": "Legendary",
+    "bonus": 10.5
+  },
+  {
+    "id": 190,
+    "name": "Vampiric Bow of Power",
+    "type": "Bow",
+    "tier": "Common",
+    "bonus": 17.0
+  },
+  {
+    "id": 191,
+    "name": "Titanic Orb of the Wolf",
+    "type": "Orb",
+    "tier": "Epic",
+    "bonus": 11.6
+  },
+  {
+    "id": 192,
+    "name": "Ethereal Gloves of Despair",
+    "type": "Gloves",
+    "tier": "Epic",
+    "bonus": 1.7
+  },
+  {
+    "id": 193,
+    "name": "Frozen Elixir of the Undead",
+    "type": "Elixir",
+    "tier": "Epic",
+    "bonus": 23.9
+  },
+  {
+    "id": 194,
+    "name": "Frozen Scroll of Speed",
+    "type": "Scroll",
+    "tier": "Uncommon",
+    "bonus": 24.7
+  },
+  {
+    "id": 195,
+    "name": "Venomous Charm of the Wolf",
+    "type": "Charm",
+    "tier": "Uncommon",
+    "bonus": 22.1
+  },
+  {
+    "id": 196,
+    "name": "Ancient Trinket of Light",
+    "type": "Trinket",
+    "tier": "Uncommon",
+    "bonus": 5.6
+  },
+  {
+    "id": 197,
+    "name": "Radiant Key of Doom",
+    "type": "Key",
+    "tier": "Epic",
+    "bonus": 14.8
+  },
+  {
+    "id": 198,
+    "name": "Mystic Gloves of Magic",
+    "type": "Gloves",
+    "tier": "Rare",
+    "bonus": 4.4
+  },
+  {
+    "id": 199,
+    "name": "Thundering Ring of Doom",
+    "type": "Ring",
+    "tier": "Uncommon",
+    "bonus": 8.0
+  },
+  {
+    "id": 200,
+    "name": "Shadowed Relic of Fortune",
+    "type": "Relic",
+    "tier": "Rare",
+    "bonus": 21.2
+  },
+  {
+    "id": 201,
+    "name": "Radiant Chestplate of Light",
+    "type": "Chestplate",
+    "tier": "Uncommon",
+    "bonus": 17.2
+  },
+  {
+    "id": 202,
+    "name": "Shadowed Crystal of Fortune",
+    "type": "Crystal",
+    "tier": "Common",
+    "bonus": 7.7
+  },
+  {
+    "id": 203,
+    "name": "Glowing Dagger of Speed",
+    "type": "Dagger",
+    "tier": "Rare",
+    "bonus": 24.8
+  },
+  {
+    "id": 204,
+    "name": "Glowing Lantern of the Wolf",
+    "type": "Lantern",
+    "tier": "Uncommon",
+    "bonus": 5.5
+  },
+  {
+    "id": 205,
+    "name": "Radiant Trinket of Speed",
+    "type": "Trinket",
+    "tier": "Common",
+    "bonus": 22.3
+  },
+  {
+    "id": 206,
+    "name": "Vampiric Potion of Insight",
+    "type": "Potion",
+    "tier": "Uncommon",
+    "bonus": 13.0
+  },
+  {
+    "id": 207,
+    "name": "Cursed Tome of Power",
+    "type": "Tome",
+    "tier": "Legendary",
+    "bonus": 17.2
+  },
+  {
+    "id": 208,
+    "name": "Infernal Elixir of Light",
+    "type": "Elixir",
+    "tier": "Uncommon",
+    "bonus": 4.6
+  },
+  {
+    "id": 209,
+    "name": "Radiant Coin of Agility",
+    "type": "Coin",
+    "tier": "Common",
+    "bonus": 11.9
+  },
+  {
+    "id": 210,
+    "name": "Ethereal Shield of the Undead",
+    "type": "Shield",
+    "tier": "Common",
+    "bonus": 2.7
+  },
+  {
+    "id": 211,
+    "name": "Titanic Coin of Light",
+    "type": "Coin",
+    "tier": "Common",
+    "bonus": 17.4
+  },
+  {
+    "id": 212,
+    "name": "Radiant Elixir of Rage",
+    "type": "Elixir",
+    "tier": "Uncommon",
+    "bonus": 8.8
+  },
+  {
+    "id": 213,
+    "name": "Ancient Coin of the Bear",
+    "type": "Coin",
+    "tier": "Epic",
+    "bonus": 22.7
+  },
+  {
+    "id": 214,
+    "name": "Mystic Orb of Speed",
+    "type": "Orb",
+    "tier": "Epic",
+    "bonus": 19.4
+  },
+  {
+    "id": 215,
+    "name": "Venomous Relic of Despair",
+    "type": "Relic",
+    "tier": "Common",
+    "bonus": 11.1
+  },
+  {
+    "id": 216,
+    "name": "Venomous Crystal of Insight",
+    "type": "Crystal",
+    "tier": "Uncommon",
+    "bonus": 4.6
+  },
+  {
+    "id": 217,
+    "name": "Venomous Chestplate of Light",
+    "type": "Chestplate",
+    "tier": "Uncommon",
+    "bonus": 9.0
+  },
+  {
+    "id": 218,
+    "name": "Thundering Trinket of Insight",
+    "type": "Trinket",
+    "tier": "Epic",
+    "bonus": 19.9
+  },
+  {
+    "id": 219,
+    "name": "Ethereal Ring of Light",
+    "type": "Ring",
+    "tier": "Epic",
+    "bonus": 10.6
+  },
+  {
+    "id": 220,
+    "name": "Venomous Potion of the Phoenix",
+    "type": "Potion",
+    "tier": "Legendary",
+    "bonus": 19.9
+  },
+  {
+    "id": 221,
+    "name": "Frozen Tome of Rage",
+    "type": "Tome",
+    "tier": "Epic",
+    "bonus": 14.9
+  },
+  {
+    "id": 222,
+    "name": "Venomous Gloves of Power",
+    "type": "Gloves",
+    "tier": "Epic",
+    "bonus": 7.3
+  },
+  {
+    "id": 223,
+    "name": "Ethereal Wand of Agility",
+    "type": "Wand",
+    "tier": "Common",
+    "bonus": 17.3
+  },
+  {
+    "id": 224,
+    "name": "Ethereal Trinket of Fortune",
+    "type": "Trinket",
+    "tier": "Rare",
+    "bonus": 19.4
+  },
+  {
+    "id": 225,
+    "name": "Venomous Orb of Fortune",
+    "type": "Orb",
+    "tier": "Rare",
+    "bonus": 11.6
+  },
+  {
+    "id": 226,
+    "name": "Venomous Cape of the Wolf",
+    "type": "Cape",
+    "tier": "Rare",
+    "bonus": 21.9
+  },
+  {
+    "id": 227,
+    "name": "Glowing Staff of Agility",
+    "type": "Staff",
+    "tier": "Legendary",
+    "bonus": 3.9
+  },
+  {
+    "id": 228,
+    "name": "Vampiric Elixir of the Wolf",
+    "type": "Elixir",
+    "tier": "Legendary",
+    "bonus": 10.7
+  },
+  {
+    "id": 229,
+    "name": "Vampiric Tome of Defense",
+    "type": "Tome",
+    "tier": "Uncommon",
+    "bonus": 14.3
+  },
+  {
+    "id": 230,
+    "name": "Radiant Crossbow of the Bear",
+    "type": "Crossbow",
+    "tier": "Rare",
+    "bonus": 3.9
+  },
+  {
+    "id": 231,
+    "name": "Titanic Wand of Despair",
+    "type": "Wand",
+    "tier": "Uncommon",
+    "bonus": 22.7
+  },
+  {
+    "id": 232,
+    "name": "Radiant Lantern of the Wolf",
+    "type": "Lantern",
+    "tier": "Uncommon",
+    "bonus": 4.3
+  },
+  {
+    "id": 233,
+    "name": "Shadowed Ring of Rage",
+    "type": "Ring",
+    "tier": "Uncommon",
+    "bonus": 11.5
+  },
+  {
+    "id": 234,
+    "name": "Frozen Gloves of Despair",
+    "type": "Gloves",
+    "tier": "Epic",
+    "bonus": 11.2
+  },
+  {
+    "id": 235,
+    "name": "Frozen Wand of Magic",
+    "type": "Wand",
+    "tier": "Rare",
+    "bonus": 11.5
+  },
+  {
+    "id": 236,
+    "name": "Frozen Gloves of the Bear",
+    "type": "Gloves",
+    "tier": "Common",
+    "bonus": 10.4
+  },
+  {
+    "id": 237,
+    "name": "Glowing Scroll of Light",
+    "type": "Scroll",
+    "tier": "Uncommon",
+    "bonus": 5.9
+  },
+  {
+    "id": 238,
+    "name": "Infernal Boots of the Undead",
+    "type": "Boots",
+    "tier": "Uncommon",
+    "bonus": 22.5
+  },
+  {
+    "id": 239,
+    "name": "Infernal Staff of Agility",
+    "type": "Staff",
+    "tier": "Rare",
+    "bonus": 18.5
+  },
+  {
+    "id": 240,
+    "name": "Titanic Chestplate of the Undead",
+    "type": "Chestplate",
+    "tier": "Uncommon",
+    "bonus": 9.0
+  },
+  {
+    "id": 241,
+    "name": "Radiant Coin of Speed",
+    "type": "Coin",
+    "tier": "Epic",
+    "bonus": 20.9
+  },
+  {
+    "id": 242,
+    "name": "Glowing Cape of Agility",
+    "type": "Cape",
+    "tier": "Uncommon",
+    "bonus": 21.8
+  },
+  {
+    "id": 243,
+    "name": "Glowing Charm of Fortune",
+    "type": "Charm",
+    "tier": "Legendary",
+    "bonus": 7.3
+  },
+  {
+    "id": 244,
+    "name": "Thundering Lantern of Insight",
+    "type": "Lantern",
+    "tier": "Common",
+    "bonus": 8.7
+  },
+  {
+    "id": 245,
+    "name": "Ancient Lantern of Magic",
+    "type": "Lantern",
+    "tier": "Common",
+    "bonus": 1.6
+  },
+  {
+    "id": 246,
+    "name": "Gilded Relic of Despair",
+    "type": "Relic",
+    "tier": "Uncommon",
+    "bonus": 10.4
+  },
+  {
+    "id": 247,
+    "name": "Radiant Boots of Rage",
+    "type": "Boots",
+    "tier": "Uncommon",
+    "bonus": 8.0
+  },
+  {
+    "id": 248,
+    "name": "Cursed Chestplate of the Wolf",
+    "type": "Chestplate",
+    "tier": "Uncommon",
+    "bonus": 13.3
+  },
+  {
+    "id": 249,
+    "name": "Titanic Cape of Despair",
+    "type": "Cape",
+    "tier": "Common",
+    "bonus": 20.3
+  },
+  {
+    "id": 250,
+    "name": "Cursed Tome of Doom",
+    "type": "Tome",
+    "tier": "Uncommon",
+    "bonus": 6.3
+  },
+  {
+    "id": 251,
+    "name": "Vampiric Gem of Despair",
+    "type": "Gem",
+    "tier": "Rare",
+    "bonus": 22.5
+  },
+  {
+    "id": 252,
+    "name": "Gilded Potion of Light",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 21.3
+  },
+  {
+    "id": 253,
+    "name": "Mystic Chestplate of Insight",
+    "type": "Chestplate",
+    "tier": "Uncommon",
+    "bonus": 20.3
+  },
+  {
+    "id": 254,
+    "name": "Shadowed Key of Fortune",
+    "type": "Key",
+    "tier": "Uncommon",
+    "bonus": 22.9
+  },
+  {
+    "id": 255,
+    "name": "Glowing Gem of Magic",
+    "type": "Gem",
+    "tier": "Uncommon",
+    "bonus": 3.5
+  },
+  {
+    "id": 256,
+    "name": "Vampiric Dagger of Speed",
+    "type": "Dagger",
+    "tier": "Epic",
+    "bonus": 15.8
+  },
+  {
+    "id": 257,
+    "name": "Thundering Boots of Despair",
+    "type": "Boots",
+    "tier": "Common",
+    "bonus": 17.5
+  },
+  {
+    "id": 258,
+    "name": "Vampiric Axe of the Phoenix",
+    "type": "Axe",
+    "tier": "Legendary",
+    "bonus": 21.5
+  },
+  {
+    "id": 259,
+    "name": "Ancient Scroll of Speed",
+    "type": "Scroll",
+    "tier": "Rare",
+    "bonus": 3.0
+  },
+  {
+    "id": 260,
+    "name": "Mystic Key of Speed",
+    "type": "Key",
+    "tier": "Uncommon",
+    "bonus": 15.1
+  },
+  {
+    "id": 261,
+    "name": "Frozen Dagger of Insight",
+    "type": "Dagger",
+    "tier": "Uncommon",
+    "bonus": 18.2
+  },
+  {
+    "id": 262,
+    "name": "Blessed Gem of the Wolf",
+    "type": "Gem",
+    "tier": "Rare",
+    "bonus": 3.2
+  },
+  {
+    "id": 263,
+    "name": "Gilded Helmet of the Undead",
+    "type": "Helmet",
+    "tier": "Legendary",
+    "bonus": 13.1
+  },
+  {
+    "id": 264,
+    "name": "Ancient Key of Agility",
+    "type": "Key",
+    "tier": "Uncommon",
+    "bonus": 23.0
+  },
+  {
+    "id": 265,
+    "name": "Blessed Crystal of Insight",
+    "type": "Crystal",
+    "tier": "Common",
+    "bonus": 3.0
+  },
+  {
+    "id": 266,
+    "name": "Shadowed Ring of Power",
+    "type": "Ring",
+    "tier": "Legendary",
+    "bonus": 1.9
+  },
+  {
+    "id": 267,
+    "name": "Infernal Gem of Insight",
+    "type": "Gem",
+    "tier": "Legendary",
+    "bonus": 12.8
+  },
+  {
+    "id": 268,
+    "name": "Cursed Sword of the Bear",
+    "type": "Sword",
+    "tier": "Legendary",
+    "bonus": 20.9
+  },
+  {
+    "id": 269,
+    "name": "Frozen Relic of the Phoenix",
+    "type": "Relic",
+    "tier": "Epic",
+    "bonus": 11.0
+  },
+  {
+    "id": 270,
+    "name": "Mystic Potion of Power",
+    "type": "Potion",
+    "tier": "Epic",
+    "bonus": 15.9
+  },
+  {
+    "id": 271,
+    "name": "Vampiric Axe of the Wolf",
+    "type": "Axe",
+    "tier": "Epic",
+    "bonus": 21.9
+  },
+  {
+    "id": 272,
+    "name": "Radiant Relic of the Undead",
+    "type": "Relic",
+    "tier": "Epic",
+    "bonus": 10.8
+  },
+  {
+    "id": 273,
+    "name": "Venomous Crossbow of Speed",
+    "type": "Crossbow",
+    "tier": "Common",
+    "bonus": 9.9
+  },
+  {
+    "id": 274,
+    "name": "Blessed Leggings of Power",
+    "type": "Leggings",
+    "tier": "Legendary",
+    "bonus": 7.0
+  },
+  {
+    "id": 275,
+    "name": "Infernal Scroll of Magic",
+    "type": "Scroll",
+    "tier": "Common",
+    "bonus": 23.1
+  },
+  {
+    "id": 276,
+    "name": "Frozen Potion of the Wolf",
+    "type": "Potion",
+    "tier": "Uncommon",
+    "bonus": 5.9
+  },
+  {
+    "id": 277,
+    "name": "Ancient Scroll of Agility",
+    "type": "Scroll",
+    "tier": "Legendary",
+    "bonus": 5.1
+  },
+  {
+    "id": 278,
+    "name": "Gilded Chestplate of Magic",
+    "type": "Chestplate",
+    "tier": "Epic",
+    "bonus": 13.9
+  },
+  {
+    "id": 279,
+    "name": "Vampiric Coin of Rage",
+    "type": "Coin",
+    "tier": "Common",
+    "bonus": 9.5
+  },
+  {
+    "id": 280,
+    "name": "Ethereal Lantern of Insight",
+    "type": "Lantern",
+    "tier": "Epic",
+    "bonus": 9.7
+  },
+  {
+    "id": 281,
+    "name": "Thundering Coin of the Wolf",
+    "type": "Coin",
+    "tier": "Legendary",
+    "bonus": 23.9
+  },
+  {
+    "id": 282,
+    "name": "Cursed Wand of Speed",
+    "type": "Wand",
+    "tier": "Common",
+    "bonus": 13.2
+  },
+  {
+    "id": 283,
+    "name": "Venomous Lantern of Speed",
+    "type": "Lantern",
+    "tier": "Rare",
+    "bonus": 21.5
+  },
+  {
+    "id": 284,
+    "name": "Titanic Staff of Agility",
+    "type": "Staff",
+    "tier": "Uncommon",
+    "bonus": 15.9
+  },
+  {
+    "id": 285,
+    "name": "Gilded Trinket of Defense",
+    "type": "Trinket",
+    "tier": "Epic",
+    "bonus": 24.6
+  },
+  {
+    "id": 286,
+    "name": "Venomous Bow of Insight",
+    "type": "Bow",
+    "tier": "Epic",
+    "bonus": 13.6
+  },
+  {
+    "id": 287,
+    "name": "Mystic Shield of Fortune",
+    "type": "Shield",
+    "tier": "Epic",
+    "bonus": 23.3
+  },
+  {
+    "id": 288,
+    "name": "Vampiric Wand of Agility",
+    "type": "Wand",
+    "tier": "Uncommon",
+    "bonus": 17.0
+  },
+  {
+    "id": 289,
+    "name": "Mystic Dagger of the Bear",
+    "type": "Dagger",
+    "tier": "Legendary",
+    "bonus": 24.9
+  },
+  {
+    "id": 290,
+    "name": "Infernal Amulet of Rage",
+    "type": "Amulet",
+    "tier": "Uncommon",
+    "bonus": 5.0
+  },
+  {
+    "id": 291,
+    "name": "Thundering Charm of Doom",
+    "type": "Charm",
+    "tier": "Rare",
+    "bonus": 23.6
+  },
+  {
+    "id": 292,
+    "name": "Radiant Cape of the Wolf",
+    "type": "Cape",
+    "tier": "Epic",
+    "bonus": 9.2
+  },
+  {
+    "id": 293,
+    "name": "Venomous Axe of Power",
+    "type": "Axe",
+    "tier": "Common",
+    "bonus": 8.5
+  },
+  {
+    "id": 294,
+    "name": "Ancient Shield of Light",
+    "type": "Shield",
+    "tier": "Epic",
+    "bonus": 18.3
+  },
+  {
+    "id": 295,
+    "name": "Thundering Potion of Agility",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 9.1
+  },
+  {
+    "id": 296,
+    "name": "Mystic Staff of the Bear",
+    "type": "Staff",
+    "tier": "Legendary",
+    "bonus": 24.1
+  },
+  {
+    "id": 297,
+    "name": "Shadowed Crossbow of Insight",
+    "type": "Crossbow",
+    "tier": "Uncommon",
+    "bonus": 18.1
+  },
+  {
+    "id": 298,
+    "name": "Cursed Sword of Despair",
+    "type": "Sword",
+    "tier": "Common",
+    "bonus": 23.6
+  },
+  {
+    "id": 299,
+    "name": "Frozen Scroll of the Phoenix",
+    "type": "Scroll",
+    "tier": "Rare",
+    "bonus": 4.8
+  },
+  {
+    "id": 300,
+    "name": "Ancient Crystal of Light",
+    "type": "Crystal",
+    "tier": "Uncommon",
+    "bonus": 6.5
+  },
+  {
+    "id": 301,
+    "name": "Titanic Bow of Light",
+    "type": "Bow",
+    "tier": "Rare",
+    "bonus": 12.3
+  },
+  {
+    "id": 302,
+    "name": "Radiant Helmet of Fortune",
+    "type": "Helmet",
+    "tier": "Legendary",
+    "bonus": 6.1
+  },
+  {
+    "id": 303,
+    "name": "Glowing Trinket of Insight",
+    "type": "Trinket",
+    "tier": "Epic",
+    "bonus": 10.0
+  },
+  {
+    "id": 304,
+    "name": "Titanic Gloves of Rage",
+    "type": "Gloves",
+    "tier": "Epic",
+    "bonus": 8.0
+  },
+  {
+    "id": 305,
+    "name": "Ethereal Potion of Agility",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 21.1
+  },
+  {
+    "id": 306,
+    "name": "Ancient Relic of Doom",
+    "type": "Relic",
+    "tier": "Common",
+    "bonus": 20.7
+  },
+  {
+    "id": 307,
+    "name": "Gilded Shield of the Phoenix",
+    "type": "Shield",
+    "tier": "Legendary",
+    "bonus": 18.2
+  },
+  {
+    "id": 308,
+    "name": "Cursed Cape of Insight",
+    "type": "Cape",
+    "tier": "Common",
+    "bonus": 8.3
+  },
+  {
+    "id": 309,
+    "name": "Frozen Leggings of Doom",
+    "type": "Leggings",
+    "tier": "Rare",
+    "bonus": 12.3
+  },
+  {
+    "id": 310,
+    "name": "Cursed Gloves of Magic",
+    "type": "Gloves",
+    "tier": "Uncommon",
+    "bonus": 14.2
+  },
+  {
+    "id": 311,
+    "name": "Frozen Axe of the Bear",
+    "type": "Axe",
+    "tier": "Legendary",
+    "bonus": 13.8
+  },
+  {
+    "id": 312,
+    "name": "Vampiric Tome of Power",
+    "type": "Tome",
+    "tier": "Epic",
+    "bonus": 15.5
+  },
+  {
+    "id": 313,
+    "name": "Venomous Leggings of the Undead",
+    "type": "Leggings",
+    "tier": "Epic",
+    "bonus": 18.2
+  },
+  {
+    "id": 314,
+    "name": "Ethereal Orb of the Wolf",
+    "type": "Orb",
+    "tier": "Epic",
+    "bonus": 11.1
+  },
+  {
+    "id": 315,
+    "name": "Glowing Shield of Speed",
+    "type": "Shield",
+    "tier": "Uncommon",
+    "bonus": 12.9
+  },
+  {
+    "id": 316,
+    "name": "Glowing Tome of Despair",
+    "type": "Tome",
+    "tier": "Epic",
+    "bonus": 11.1
+  },
+  {
+    "id": 317,
+    "name": "Shadowed Amulet of Speed",
+    "type": "Amulet",
+    "tier": "Legendary",
+    "bonus": 12.8
+  },
+  {
+    "id": 318,
+    "name": "Shadowed Helmet of Defense",
+    "type": "Helmet",
+    "tier": "Rare",
+    "bonus": 20.3
+  },
+  {
+    "id": 319,
+    "name": "Thundering Gem of the Bear",
+    "type": "Gem",
+    "tier": "Rare",
+    "bonus": 11.6
+  },
+  {
+    "id": 320,
+    "name": "Venomous Elixir of Doom",
+    "type": "Elixir",
+    "tier": "Epic",
+    "bonus": 11.2
+  },
+  {
+    "id": 321,
+    "name": "Radiant Potion of Insight",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 9.1
+  },
+  {
+    "id": 322,
+    "name": "Frozen Gem of Fortune",
+    "type": "Gem",
+    "tier": "Uncommon",
+    "bonus": 18.6
+  },
+  {
+    "id": 323,
+    "name": "Blessed Amulet of Defense",
+    "type": "Amulet",
+    "tier": "Common",
+    "bonus": 9.9
+  },
+  {
+    "id": 324,
+    "name": "Ancient Bow of Despair",
+    "type": "Bow",
+    "tier": "Rare",
+    "bonus": 6.9
+  },
+  {
+    "id": 325,
+    "name": "Radiant Crossbow of the Bear",
+    "type": "Crossbow",
+    "tier": "Legendary",
+    "bonus": 7.6
+  },
+  {
+    "id": 326,
+    "name": "Vampiric Potion of Magic",
+    "type": "Potion",
+    "tier": "Rare",
+    "bonus": 18.2
+  },
+  {
+    "id": 327,
+    "name": "Ancient Key of the Undead",
+    "type": "Key",
+    "tier": "Common",
+    "bonus": 3.3
+  },
+  {
+    "id": 328,
+    "name": "Shadowed Potion of the Bear",
+    "type": "Potion",
+    "tier": "Uncommon",
+    "bonus": 10.6
+  },
+  {
+    "id": 329,
+    "name": "Shadowed Sword of the Undead",
+    "type": "Sword",
+    "tier": "Common",
+    "bonus": 13.9
+  },
+  {
+    "id": 330,
+    "name": "Radiant Shield of Power",
+    "type": "Shield",
+    "tier": "Legendary",
+    "bonus": 13.2
+  },
+  {
+    "id": 331,
+    "name": "Thundering Coin of Despair",
+    "type": "Coin",
+    "tier": "Legendary",
+    "bonus": 25.0
+  },
+  {
+    "id": 332,
+    "name": "Mystic Scroll of Despair",
+    "type": "Scroll",
+    "tier": "Uncommon",
+    "bonus": 20.6
+  },
+  {
+    "id": 333,
+    "name": "Glowing Dagger of Fortune",
+    "type": "Dagger",
+    "tier": "Epic",
+    "bonus": 12.0
+  },
+  {
+    "id": 334,
+    "name": "Vampiric Ring of the Undead",
+    "type": "Ring",
+    "tier": "Rare",
+    "bonus": 23.4
+  },
+  {
+    "id": 335,
+    "name": "Gilded Cape of Fortune",
+    "type": "Cape",
+    "tier": "Legendary",
+    "bonus": 2.7
+  },
+  {
+    "id": 336,
+    "name": "Ancient Potion of the Undead",
+    "type": "Potion",
+    "tier": "Uncommon",
+    "bonus": 14.6
+  },
+  {
+    "id": 337,
+    "name": "Mystic Cape of Doom",
+    "type": "Cape",
+    "tier": "Uncommon",
+    "bonus": 6.9
+  },
+  {
+    "id": 338,
+    "name": "Frozen Crossbow of the Undead",
+    "type": "Crossbow",
+    "tier": "Uncommon",
+    "bonus": 18.7
+  },
+  {
+    "id": 339,
+    "name": "Mystic Key of Doom",
+    "type": "Key",
+    "tier": "Rare",
+    "bonus": 24.5
+  },
+  {
+    "id": 340,
+    "name": "Thundering Potion of Doom",
+    "type": "Potion",
+    "tier": "Legendary",
+    "bonus": 12.4
+  },
+  {
+    "id": 341,
+    "name": "Vampiric Wand of Magic",
+    "type": "Wand",
+    "tier": "Legendary",
+    "bonus": 11.0
+  },
+  {
+    "id": 342,
+    "name": "Ancient Shield of Magic",
+    "type": "Shield",
+    "tier": "Legendary",
+    "bonus": 15.8
+  },
+  {
+    "id": 343,
+    "name": "Thundering Mace of Rage",
+    "type": "Mace",
+    "tier": "Legendary",
+    "bonus": 15.2
+  },
+  {
+    "id": 344,
+    "name": "Ethereal Key of the Undead",
+    "type": "Key",
+    "tier": "Uncommon",
+    "bonus": 18.3
+  },
+  {
+    "id": 345,
+    "name": "Glowing Bow of the Wolf",
+    "type": "Bow",
+    "tier": "Common",
+    "bonus": 10.4
+  },
+  {
+    "id": 346,
+    "name": "Gilded Mace of Fortune",
+    "type": "Mace",
+    "tier": "Legendary",
+    "bonus": 15.0
+  },
+  {
+    "id": 347,
+    "name": "Cursed Ring of the Undead",
+    "type": "Ring",
+    "tier": "Rare",
+    "bonus": 16.2
+  },
+  {
+    "id": 348,
+    "name": "Titanic Crystal of Doom",
+    "type": "Crystal",
+    "tier": "Epic",
+    "bonus": 9.3
+  },
+  {
+    "id": 349,
+    "name": "Vampiric Gem of Power",
+    "type": "Gem",
+    "tier": "Uncommon",
+    "bonus": 14.1
+  },
+  {
+    "id": 350,
+    "name": "Radiant Amulet of Doom",
+    "type": "Amulet",
+    "tier": "Uncommon",
+    "bonus": 7.9
+  },
+  {
+    "id": 351,
+    "name": "Vampiric Leggings of Despair",
+    "type": "Leggings",
+    "tier": "Common",
+    "bonus": 4.6
+  },
+  {
+    "id": 352,
+    "name": "Thundering Dagger of Defense",
+    "type": "Dagger",
+    "tier": "Epic",
+    "bonus": 6.7
+  },
+  {
+    "id": 353,
+    "name": "Vampiric Trinket of the Wolf",
+    "type": "Trinket",
+    "tier": "Legendary",
+    "bonus": 11.1
+  },
+  {
+    "id": 354,
+    "name": "Radiant Staff of Speed",
+    "type": "Staff",
+    "tier": "Legendary",
+    "bonus": 15.9
+  },
+  {
+    "id": 355,
+    "name": "Glowing Trinket of Magic",
+    "type": "Trinket",
+    "tier": "Epic",
+    "bonus": 5.2
+  },
+  {
+    "id": 356,
+    "name": "Glowing Scroll of Magic",
+    "type": "Scroll",
+    "tier": "Rare",
+    "bonus": 12.1
+  },
+  {
+    "id": 357,
+    "name": "Shadowed Elixir of Light",
+    "type": "Elixir",
+    "tier": "Uncommon",
+    "bonus": 10.5
+  },
+  {
+    "id": 358,
+    "name": "Mystic Leggings of Insight",
+    "type": "Leggings",
+    "tier": "Legendary",
+    "bonus": 24.3
+  },
+  {
+    "id": 359,
+    "name": "Ancient Crossbow of Rage",
+    "type": "Crossbow",
+    "tier": "Uncommon",
+    "bonus": 3.9
+  },
+  {
+    "id": 360,
+    "name": "Glowing Cape of the Phoenix",
+    "type": "Cape",
+    "tier": "Common",
+    "bonus": 13.4
+  },
+  {
+    "id": 361,
+    "name": "Thundering Charm of the Bear",
+    "type": "Charm",
+    "tier": "Common",
+    "bonus": 15.5
+  },
+  {
+    "id": 362,
+    "name": "Radiant Crossbow of Defense",
+    "type": "Crossbow",
+    "tier": "Uncommon",
+    "bonus": 1.6
+  },
+  {
+    "id": 363,
+    "name": "Vampiric Axe of Despair",
+    "type": "Axe",
+    "tier": "Rare",
+    "bonus": 21.3
+  },
+  {
+    "id": 364,
+    "name": "Radiant Shield of Despair",
+    "type": "Shield",
+    "tier": "Uncommon",
+    "bonus": 9.0
+  },
+  {
+    "id": 365,
+    "name": "Venomous Crossbow of Despair",
+    "type": "Crossbow",
+    "tier": "Rare",
+    "bonus": 10.6
+  },
+  {
+    "id": 366,
+    "name": "Titanic Amulet of Agility",
+    "type": "Amulet",
+    "tier": "Rare",
+    "bonus": 2.8
+  },
+  {
+    "id": 367,
+    "name": "Cursed Wand of Power",
+    "type": "Wand",
+    "tier": "Uncommon",
+    "bonus": 4.0
+  },
+  {
+    "id": 368,
+    "name": "Titanic Orb of the Phoenix",
+    "type": "Orb",
+    "tier": "Rare",
+    "bonus": 3.3
+  },
+  {
+    "id": 369,
+    "name": "Thundering Amulet of Power",
+    "type": "Amulet",
+    "tier": "Legendary",
+    "bonus": 19.2
+  },
+  {
+    "id": 370,
+    "name": "Radiant Helmet of the Phoenix",
+    "type": "Helmet",
+    "tier": "Rare",
+    "bonus": 1.8
+  },
+  {
+    "id": 371,
+    "name": "Blessed Key of the Wolf",
+    "type": "Key",
+    "tier": "Legendary",
+    "bonus": 4.9
+  },
+  {
+    "id": 372,
+    "name": "Cursed Gem of Light",
+    "type": "Gem",
+    "tier": "Uncommon",
+    "bonus": 11.0
+  },
+  {
+    "id": 373,
+    "name": "Cursed Trinket of the Phoenix",
+    "type": "Trinket",
+    "tier": "Uncommon",
+    "bonus": 6.2
+  },
+  {
+    "id": 374,
+    "name": "Titanic Gloves of the Bear",
+    "type": "Gloves",
+    "tier": "Uncommon",
+    "bonus": 22.0
+  },
+  {
+    "id": 375,
+    "name": "Cursed Sword of the Phoenix",
+    "type": "Sword",
+    "tier": "Common",
+    "bonus": 13.8
+  },
+  {
+    "id": 376,
+    "name": "Infernal Gloves of Power",
+    "type": "Gloves",
+    "tier": "Common",
+    "bonus": 9.1
+  },
+  {
+    "id": 377,
+    "name": "Ethereal Scroll of Magic",
+    "type": "Scroll",
+    "tier": "Legendary",
+    "bonus": 15.7
+  },
+  {
+    "id": 378,
+    "name": "Gilded Leggings of Light",
+    "type": "Leggings",
+    "tier": "Common",
+    "bonus": 6.5
+  },
+  {
+    "id": 379,
+    "name": "Infernal Shield of the Wolf",
+    "type": "Shield",
+    "tier": "Rare",
+    "bonus": 1.1
+  },
+  {
+    "id": 380,
+    "name": "Cursed Leggings of Insight",
+    "type": "Leggings",
+    "tier": "Uncommon",
+    "bonus": 5.3
+  },
+  {
+    "id": 381,
+    "name": "Infernal Trinket of the Wolf",
+    "type": "Trinket",
+    "tier": "Rare",
+    "bonus": 1.6
+  },
+  {
+    "id": 382,
+    "name": "Thundering Charm of Speed",
+    "type": "Charm",
+    "tier": "Rare",
+    "bonus": 9.3
+  },
+  {
+    "id": 383,
+    "name": "Titanic Gloves of Despair",
+    "type": "Gloves",
+    "tier": "Uncommon",
+    "bonus": 22.4
+  },
+  {
+    "id": 384,
+    "name": "Glowing Elixir of Power",
+    "type": "Elixir",
+    "tier": "Legendary",
+    "bonus": 8.1
+  },
+  {
+    "id": 385,
+    "name": "Radiant Crystal of the Undead",
+    "type": "Crystal",
+    "tier": "Common",
+    "bonus": 15.0
+  },
+  {
+    "id": 386,
+    "name": "Titanic Bow of Light",
+    "type": "Bow",
+    "tier": "Legendary",
+    "bonus": 5.8
+  },
+  {
+    "id": 387,
+    "name": "Infernal Gem of Defense",
+    "type": "Gem",
+    "tier": "Rare",
+    "bonus": 2.0
+  },
+  {
+    "id": 388,
+    "name": "Shadowed Bow of Defense",
+    "type": "Bow",
+    "tier": "Rare",
+    "bonus": 7.0
+  },
+  {
+    "id": 389,
+    "name": "Venomous Key of Speed",
+    "type": "Key",
+    "tier": "Legendary",
+    "bonus": 2.3
+  },
+  {
+    "id": 390,
+    "name": "Vampiric Chestplate of Agility",
+    "type": "Chestplate",
+    "tier": "Uncommon",
+    "bonus": 13.7
+  },
+  {
+    "id": 391,
+    "name": "Blessed Charm of Rage",
+    "type": "Charm",
+    "tier": "Uncommon",
+    "bonus": 1.8
+  },
+  {
+    "id": 392,
+    "name": "Radiant Sword of the Phoenix",
+    "type": "Sword",
+    "tier": "Uncommon",
+    "bonus": 5.9
+  },
+  {
+    "id": 393,
+    "name": "Thundering Orb of Doom",
+    "type": "Orb",
+    "tier": "Rare",
+    "bonus": 11.1
+  },
+  {
+    "id": 394,
+    "name": "Thundering Elixir of Power",
+    "type": "Elixir",
+    "tier": "Rare",
+    "bonus": 12.8
+  },
+  {
+    "id": 395,
+    "name": "Infernal Charm of Insight",
+    "type": "Charm",
+    "tier": "Common",
+    "bonus": 22.7
+  },
+  {
+    "id": 396,
+    "name": "Gilded Coin of Doom",
+    "type": "Coin",
+    "tier": "Common",
+    "bonus": 23.2
+  },
+  {
+    "id": 397,
+    "name": "Shadowed Shield of the Undead",
+    "type": "Shield",
+    "tier": "Legendary",
+    "bonus": 23.0
+  },
+  {
+    "id": 398,
+    "name": "Blessed Leggings of the Wolf",
+    "type": "Leggings",
+    "tier": "Uncommon",
+    "bonus": 22.3
+  },
+  {
+    "id": 399,
+    "name": "Mystic Lantern of the Bear",
+    "type": "Lantern",
+    "tier": "Uncommon",
+    "bonus": 13.2
+  },
+  {
+    "id": 400,
+    "name": "Venomous Ring of Light",
+    "type": "Ring",
+    "tier": "Rare",
+    "bonus": 23.2
+  },
+  {
+    "id": 401,
+    "name": "Venomous Ring of Speed",
+    "type": "Ring",
+    "tier": "Common",
+    "bonus": 9.5
+  },
+  {
+    "id": 402,
+    "name": "Glowing Relic of Magic",
+    "type": "Relic",
+    "tier": "Rare",
+    "bonus": 1.2
+  },
+  {
+    "id": 403,
+    "name": "Cursed Boots of Despair",
+    "type": "Boots",
+    "tier": "Epic",
+    "bonus": 18.4
+  },
+  {
+    "id": 404,
+    "name": "Venomous Sword of Magic",
+    "type": "Sword",
+    "tier": "Epic",
+    "bonus": 24.3
+  },
+  {
+    "id": 405,
+    "name": "Shadowed Leggings of Light",
+    "type": "Leggings",
+    "tier": "Uncommon",
+    "bonus": 10.8
+  },
+  {
+    "id": 406,
+    "name": "Mystic Gem of Speed",
+    "type": "Gem",
+    "tier": "Epic",
+    "bonus": 15.2
+  },
+  {
+    "id": 407,
+    "name": "Ethereal Staff of Power",
+    "type": "Staff",
+    "tier": "Epic",
+    "bonus": 12.0
+  },
+  {
+    "id": 408,
+    "name": "Frozen Trinket of Defense",
+    "type": "Trinket",
+    "tier": "Epic",
+    "bonus": 14.5
+  },
+  {
+    "id": 409,
+    "name": "Glowing Gem of Magic",
+    "type": "Gem",
+    "tier": "Uncommon",
+    "bonus": 18.0
+  },
+  {
+    "id": 410,
+    "name": "Venomous Scroll of Rage",
+    "type": "Scroll",
+    "tier": "Common",
+    "bonus": 16.2
+  },
+  {
+    "id": 411,
+    "name": "Infernal Key of the Wolf",
+    "type": "Key",
+    "tier": "Legendary",
+    "bonus": 6.7
+  },
+  {
+    "id": 412,
+    "name": "Infernal Relic of the Wolf",
+    "type": "Relic",
+    "tier": "Legendary",
+    "bonus": 19.6
+  },
+  {
+    "id": 413,
+    "name": "Vampiric Orb of Magic",
+    "type": "Orb",
+    "tier": "Uncommon",
+    "bonus": 12.3
+  },
+  {
+    "id": 414,
+    "name": "Mystic Tome of Speed",
+    "type": "Tome",
+    "tier": "Legendary",
+    "bonus": 22.9
+  },
+  {
+    "id": 415,
+    "name": "Radiant Shield of Speed",
+    "type": "Shield",
+    "tier": "Rare",
+    "bonus": 7.7
+  },
+  {
+    "id": 416,
+    "name": "Infernal Cape of Light",
+    "type": "Cape",
+    "tier": "Epic",
+    "bonus": 1.4
+  },
+  {
+    "id": 417,
+    "name": "Frozen Staff of Light",
+    "type": "Staff",
+    "tier": "Uncommon",
+    "bonus": 1.4
+  },
+  {
+    "id": 418,
+    "name": "Venomous Helmet of Defense",
+    "type": "Helmet",
+    "tier": "Legendary",
+    "bonus": 24.0
+  },
+  {
+    "id": 419,
+    "name": "Shadowed Wand of the Bear",
+    "type": "Wand",
+    "tier": "Common",
+    "bonus": 6.3
+  },
+  {
+    "id": 420,
+    "name": "Glowing Tome of Power",
+    "type": "Tome",
+    "tier": "Rare",
+    "bonus": 3.8
+  },
+  {
+    "id": 421,
+    "name": "Ancient Relic of Doom",
+    "type": "Relic",
+    "tier": "Common",
+    "bonus": 8.5
+  },
+  {
+    "id": 422,
+    "name": "Blessed Ring of Agility",
+    "type": "Ring",
+    "tier": "Legendary",
+    "bonus": 9.1
+  },
+  {
+    "id": 423,
+    "name": "Venomous Staff of Light",
+    "type": "Staff",
+    "tier": "Uncommon",
+    "bonus": 16.6
+  },
+  {
+    "id": 424,
+    "name": "Thundering Trinket of the Phoenix",
+    "type": "Trinket",
+    "tier": "Legendary",
+    "bonus": 20.1
+  },
+  {
+    "id": 425,
+    "name": "Shadowed Leggings of Magic",
+    "type": "Leggings",
+    "tier": "Legendary",
+    "bonus": 8.2
+  },
+  {
+    "id": 426,
+    "name": "Frozen Leggings of the Undead",
+    "type": "Leggings",
+    "tier": "Epic",
+    "bonus": 22.6
+  },
+  {
+    "id": 427,
+    "name": "Vampiric Crystal of the Undead",
+    "type": "Crystal",
+    "tier": "Legendary",
+    "bonus": 15.8
+  },
+  {
+    "id": 428,
+    "name": "Radiant Lantern of the Phoenix",
+    "type": "Lantern",
+    "tier": "Common",
+    "bonus": 22.5
+  },
+  {
+    "id": 429,
+    "name": "Ethereal Gem of Rage",
+    "type": "Gem",
+    "tier": "Common",
+    "bonus": 9.9
+  },
+  {
+    "id": 430,
+    "name": "Blessed Elixir of Fortune",
+    "type": "Elixir",
+    "tier": "Rare",
+    "bonus": 20.1
+  },
+  {
+    "id": 431,
+    "name": "Ancient Chestplate of the Bear",
+    "type": "Chestplate",
+    "tier": "Rare",
+    "bonus": 10.0
+  },
+  {
+    "id": 432,
+    "name": "Thundering Gem of Magic",
+    "type": "Gem",
+    "tier": "Rare",
+    "bonus": 21.4
+  },
+  {
+    "id": 433,
+    "name": "Cursed Gem of Despair",
+    "type": "Gem",
+    "tier": "Epic",
+    "bonus": 11.7
+  },
+  {
+    "id": 434,
+    "name": "Radiant Coin of Magic",
+    "type": "Coin",
+    "tier": "Common",
+    "bonus": 8.2
+  },
+  {
+    "id": 435,
+    "name": "Blessed Lantern of the Undead",
+    "type": "Lantern",
+    "tier": "Rare",
+    "bonus": 23.6
+  },
+  {
+    "id": 436,
+    "name": "Mystic Gem of the Undead",
+    "type": "Gem",
+    "tier": "Rare",
+    "bonus": 23.6
+  },
+  {
+    "id": 437,
+    "name": "Venomous Chestplate of Speed",
+    "type": "Chestplate",
+    "tier": "Legendary",
+    "bonus": 7.4
+  },
+  {
+    "id": 438,
+    "name": "Gilded Boots of Doom",
+    "type": "Boots",
+    "tier": "Common",
+    "bonus": 24.8
+  },
+  {
+    "id": 439,
+    "name": "Venomous Shield of Despair",
+    "type": "Shield",
+    "tier": "Uncommon",
+    "bonus": 17.6
+  },
+  {
+    "id": 440,
+    "name": "Glowing Crossbow of Light",
+    "type": "Crossbow",
+    "tier": "Common",
+    "bonus": 14.7
+  },
+  {
+    "id": 441,
+    "name": "Blessed Scroll of Defense",
+    "type": "Scroll",
+    "tier": "Rare",
+    "bonus": 6.6
+  },
+  {
+    "id": 442,
+    "name": "Venomous Scroll of Light",
+    "type": "Scroll",
+    "tier": "Uncommon",
+    "bonus": 3.9
+  },
+  {
+    "id": 443,
+    "name": "Mystic Leggings of Rage",
+    "type": "Leggings",
+    "tier": "Epic",
+    "bonus": 2.5
+  },
+  {
+    "id": 444,
+    "name": "Ethereal Mace of Rage",
+    "type": "Mace",
+    "tier": "Common",
+    "bonus": 9.7
+  },
+  {
+    "id": 445,
+    "name": "Venomous Leggings of the Wolf",
+    "type": "Leggings",
+    "tier": "Rare",
+    "bonus": 1.6
+  },
+  {
+    "id": 446,
+    "name": "Venomous Helmet of Magic",
+    "type": "Helmet",
+    "tier": "Common",
+    "bonus": 21.7
+  },
+  {
+    "id": 447,
+    "name": "Shadowed Ring of Magic",
+    "type": "Ring",
+    "tier": "Legendary",
+    "bonus": 5.6
+  },
+  {
+    "id": 448,
+    "name": "Radiant Crystal of Agility",
+    "type": "Crystal",
+    "tier": "Epic",
+    "bonus": 15.3
+  },
+  {
+    "id": 449,
+    "name": "Vampiric Charm of the Undead",
+    "type": "Charm",
+    "tier": "Uncommon",
+    "bonus": 20.8
+  },
+  {
+    "id": 450,
+    "name": "Thundering Mace of Agility",
+    "type": "Mace",
+    "tier": "Epic",
+    "bonus": 5.5
+  },
+  {
+    "id": 451,
+    "name": "Frozen Amulet of Power",
+    "type": "Amulet",
+    "tier": "Uncommon",
+    "bonus": 13.9
+  },
+  {
+    "id": 452,
+    "name": "Infernal Mace of Agility",
+    "type": "Mace",
+    "tier": "Uncommon",
+    "bonus": 7.2
+  },
+  {
+    "id": 453,
+    "name": "Glowing Crossbow of Light",
+    "type": "Crossbow",
+    "tier": "Rare",
+    "bonus": 1.1
+  },
+  {
+    "id": 454,
+    "name": "Cursed Amulet of Defense",
+    "type": "Amulet",
+    "tier": "Uncommon",
+    "bonus": 14.7
+  },
+  {
+    "id": 455,
+    "name": "Ancient Ring of Agility",
+    "type": "Ring",
+    "tier": "Uncommon",
+    "bonus": 18.9
+  },
+  {
+    "id": 456,
+    "name": "Vampiric Bow of Rage",
+    "type": "Bow",
+    "tier": "Uncommon",
+    "bonus": 16.4
+  },
+  {
+    "id": 457,
+    "name": "Mystic Orb of Doom",
+    "type": "Orb",
+    "tier": "Uncommon",
+    "bonus": 22.6
+  },
+  {
+    "id": 458,
+    "name": "Ancient Crossbow of Insight",
+    "type": "Crossbow",
+    "tier": "Uncommon",
+    "bonus": 19.2
+  },
+  {
+    "id": 459,
+    "name": "Vampiric Mace of Insight",
+    "type": "Mace",
+    "tier": "Rare",
+    "bonus": 19.1
+  },
+  {
+    "id": 460,
+    "name": "Gilded Key of the Wolf",
+    "type": "Key",
+    "tier": "Rare",
+    "bonus": 17.0
+  },
+  {
+    "id": 461,
+    "name": "Glowing Relic of Agility",
+    "type": "Relic",
+    "tier": "Uncommon",
+    "bonus": 7.2
+  },
+  {
+    "id": 462,
+    "name": "Ethereal Crossbow of the Bear",
+    "type": "Crossbow",
+    "tier": "Legendary",
+    "bonus": 3.9
+  },
+  {
+    "id": 463,
+    "name": "Thundering Orb of Light",
+    "type": "Orb",
+    "tier": "Rare",
+    "bonus": 10.2
+  },
+  {
+    "id": 464,
+    "name": "Thundering Gem of the Bear",
+    "type": "Gem",
+    "tier": "Epic",
+    "bonus": 25.0
+  },
+  {
+    "id": 465,
+    "name": "Titanic Potion of Defense",
+    "type": "Potion",
+    "tier": "Uncommon",
+    "bonus": 22.5
+  },
+  {
+    "id": 466,
+    "name": "Titanic Wand of Despair",
+    "type": "Wand",
+    "tier": "Uncommon",
+    "bonus": 16.7
+  },
+  {
+    "id": 467,
+    "name": "Glowing Boots of Speed",
+    "type": "Boots",
+    "tier": "Common",
+    "bonus": 10.0
+  },
+  {
+    "id": 468,
+    "name": "Radiant Charm of Doom",
+    "type": "Charm",
+    "tier": "Uncommon",
+    "bonus": 23.0
+  },
+  {
+    "id": 469,
+    "name": "Infernal Chestplate of Fortune",
+    "type": "Chestplate",
+    "tier": "Rare",
+    "bonus": 22.4
+  },
+  {
+    "id": 470,
+    "name": "Gilded Tome of the Bear",
+    "type": "Tome",
+    "tier": "Rare",
+    "bonus": 2.9
+  },
+  {
+    "id": 471,
+    "name": "Infernal Cape of the Wolf",
+    "type": "Cape",
+    "tier": "Epic",
+    "bonus": 4.6
+  },
+  {
+    "id": 472,
+    "name": "Frozen Chestplate of Fortune",
+    "type": "Chestplate",
+    "tier": "Rare",
+    "bonus": 24.3
+  },
+  {
+    "id": 473,
+    "name": "Frozen Dagger of Insight",
+    "type": "Dagger",
+    "tier": "Legendary",
+    "bonus": 23.5
+  },
+  {
+    "id": 474,
+    "name": "Cursed Crossbow of Magic",
+    "type": "Crossbow",
+    "tier": "Rare",
+    "bonus": 3.5
+  },
+  {
+    "id": 475,
+    "name": "Blessed Bow of Fortune",
+    "type": "Bow",
+    "tier": "Common",
+    "bonus": 11.6
+  },
+  {
+    "id": 476,
+    "name": "Infernal Staff of the Phoenix",
+    "type": "Staff",
+    "tier": "Uncommon",
+    "bonus": 10.3
+  },
+  {
+    "id": 477,
+    "name": "Glowing Orb of Light",
+    "type": "Orb",
+    "tier": "Uncommon",
+    "bonus": 20.4
+  },
+  {
+    "id": 478,
+    "name": "Radiant Leggings of the Bear",
+    "type": "Leggings",
+    "tier": "Uncommon",
+    "bonus": 14.7
+  },
+  {
+    "id": 479,
+    "name": "Blessed Relic of the Wolf",
+    "type": "Relic",
+    "tier": "Common",
+    "bonus": 2.1
+  },
+  {
+    "id": 480,
+    "name": "Shadowed Coin of Power",
+    "type": "Coin",
+    "tier": "Rare",
+    "bonus": 8.7
+  },
+  {
+    "id": 481,
+    "name": "Shadowed Charm of Insight",
+    "type": "Charm",
+    "tier": "Common",
+    "bonus": 15.6
+  },
+  {
+    "id": 482,
+    "name": "Infernal Boots of the Undead",
+    "type": "Boots",
+    "tier": "Common",
+    "bonus": 16.1
+  },
+  {
+    "id": 483,
+    "name": "Glowing Trinket of the Bear",
+    "type": "Trinket",
+    "tier": "Epic",
+    "bonus": 1.4
+  },
+  {
+    "id": 484,
+    "name": "Ethereal Trinket of Agility",
+    "type": "Trinket",
+    "tier": "Legendary",
+    "bonus": 24.3
+  },
+  {
+    "id": 485,
+    "name": "Venomous Lantern of Rage",
+    "type": "Lantern",
+    "tier": "Rare",
+    "bonus": 2.4
+  },
+  {
+    "id": 486,
+    "name": "Cursed Potion of Fortune",
+    "type": "Potion",
+    "tier": "Legendary",
+    "bonus": 20.2
+  },
+  {
+    "id": 487,
+    "name": "Blessed Coin of Power",
+    "type": "Coin",
+    "tier": "Common",
+    "bonus": 2.7
+  },
+  {
+    "id": 488,
+    "name": "Cursed Tome of Despair",
+    "type": "Tome",
+    "tier": "Epic",
+    "bonus": 21.2
+  },
+  {
+    "id": 489,
+    "name": "Cursed Axe of the Phoenix",
+    "type": "Axe",
+    "tier": "Epic",
+    "bonus": 5.2
+  },
+  {
+    "id": 490,
+    "name": "Vampiric Scroll of the Wolf",
+    "type": "Scroll",
+    "tier": "Legendary",
+    "bonus": 21.0
+  },
+  {
+    "id": 491,
+    "name": "Ancient Wand of Power",
+    "type": "Wand",
+    "tier": "Uncommon",
+    "bonus": 13.6
+  },
+  {
+    "id": 492,
+    "name": "Frozen Wand of Power",
+    "type": "Wand",
+    "tier": "Uncommon",
+    "bonus": 21.1
+  },
+  {
+    "id": 493,
+    "name": "Radiant Lantern of the Wolf",
+    "type": "Lantern",
+    "tier": "Common",
+    "bonus": 14.2
+  },
+  {
+    "id": 494,
+    "name": "Glowing Gloves of Magic",
+    "type": "Gloves",
+    "tier": "Legendary",
+    "bonus": 12.8
+  },
+  {
+    "id": 495,
+    "name": "Blessed Gem of Agility",
+    "type": "Gem",
+    "tier": "Legendary",
+    "bonus": 13.1
+  },
+  {
+    "id": 496,
+    "name": "Infernal Amulet of Light",
+    "type": "Amulet",
+    "tier": "Legendary",
+    "bonus": 8.5
+  },
+  {
+    "id": 497,
+    "name": "Vampiric Lantern of Fortune",
+    "type": "Lantern",
+    "tier": "Common",
+    "bonus": 10.2
+  },
+  {
+    "id": 498,
+    "name": "Vampiric Wand of Rage",
+    "type": "Wand",
+    "tier": "Legendary",
+    "bonus": 16.1
+  },
+  {
+    "id": 499,
+    "name": "Thundering Relic of Insight",
+    "type": "Relic",
+    "tier": "Common",
+    "bonus": 23.2
+  },
+  {
+    "id": 500,
+    "name": "Ancient Crystal of Defense",
+    "type": "Crystal",
+    "tier": "Legendary",
+    "bonus": 2.1
+  }
+]
