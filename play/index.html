@@ -114,8 +114,8 @@ function toast(msg, color = "white") {
   setTimeout(() => div.remove(), 3000);
 }
 
-function drawTile(x, y, sprite, sx = 0, sy = 0, sw = TILE_SIZE, sh = TILE_SIZE) {
-  ctx.drawImage(sprite, sx, sy, sw, sh, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+function drawTile(x, y, sprite) {
+  ctx.drawImage(sprite, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 }
 
 function getTilemapForFloor(floor) {
@@ -144,28 +144,29 @@ function generateMap() {
 
   player.x = 0;
   player.y = 0;
+  animFrom = { x: 0, y: 0 };
+  animTo = { x: 0, y: 0 };
+  animProgress = 1;
 }
 
-let animFrame = null;
+let animFrom = { x: 0, y: 0 };
+let animTo = { x: 0, y: 0 };
 let animProgress = 1;
-let animFrom = {x: 0, y: 0};
-let animTo = {x: 0, y: 0};
 
 function draw() {
-  ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const bg = getTilemapForFloor(floor);
-  if (bg?.complete) ctx.drawImage(bg, 0, 0, MAP_SIZE * TILE_SIZE, MAP_SIZE * TILE_SIZE, 0, 0, canvas.width, canvas.height);
-
-  const interpX = animFrom.x + (animTo.x - animFrom.x) * animProgress;
-  const interpY = animFrom.y + (animTo.y - animFrom.y) * animProgress;
-  drawTile(interpX, interpY, sprites.player);
+  if (bg?.complete) {
+    ctx.drawImage(bg, 0, 0, MAP_SIZE * TILE_SIZE, MAP_SIZE * TILE_SIZE, 0, 0, canvas.width, canvas.height);
+  }
 
   enemies.forEach(e => drawTile(e.x, e.y, e.sprite));
   items.forEach(i => drawTile(i.x, i.y, sprites.item));
 
-  ctx.restore();
+  const interpX = animFrom.x + (animTo.x - animFrom.x) * ease(animProgress);
+  const interpY = animFrom.y + (animTo.y - animFrom.y) * ease(animProgress);
+  drawTile(interpX, interpY, sprites.player);
 
   if (specialRoomEffect === "fog") {
     ctx.fillStyle = "rgba(255,255,255,0.05)";
@@ -190,9 +191,13 @@ function draw() {
   ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 10);
 
   if (animProgress < 1) {
-    animProgress += 0.1;
+    animProgress += 0.08;
     requestAnimationFrame(draw);
   }
+}
+
+function ease(t) {
+  return t * t * (3 - 2 * t); // smootherstep
 }
 
 function movePlayer(dx, dy) {
@@ -200,9 +205,10 @@ function movePlayer(dx, dy) {
   const ny = player.y + dy;
   if (nx < 0 || ny < 0 || nx >= MAP_SIZE || ny >= MAP_SIZE) return;
 
-  animFrom = {x: player.x, y: player.y};
-  animTo = {x: nx, y: ny};
+  animFrom = { x: player.x, y: player.y };
+  animTo = { x: nx, y: ny };
   animProgress = 0;
+
   player.x = nx;
   player.y = ny;
 
