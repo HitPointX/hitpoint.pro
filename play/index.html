@@ -79,9 +79,14 @@ const totalSprites = Object.keys(spritePaths).length;
 
 function checkAllAssetsLoaded() {
   if (spritesLoaded === totalSprites && tilemapsLoaded === tilemapCount) {
-    generateMap();
-    document.getElementById("loading").style.display = "none";
-    requestAnimationFrame(draw);
+    const interval = setInterval(() => {
+      if (getTilemapForFloor(floor)?.complete && getTilemapForFloor(floor)?.naturalWidth > 0) {
+        clearInterval(interval);
+        document.getElementById("loading").style.display = "none";
+        generateMap();
+        requestAnimationFrame(draw);
+      }
+    }, 100);
   }
 }
 
@@ -94,6 +99,7 @@ for (let i = 0; i < tilemapCount; i++) {
     tilemapsLoaded++;
     checkAllAssetsLoaded();
   };
+  img.onerror = () => console.error(`Failed to load tilemap: ${img.src}`);
   tilemaps[i] = img;
 }
 
@@ -104,6 +110,7 @@ for (const key in spritePaths) {
     spritesLoaded++;
     checkAllAssetsLoaded();
   };
+  img.onerror = () => console.error(`Failed to load sprite: ${img.src}`);
   sprites[key] = img;
 }
 
@@ -152,17 +159,16 @@ function ease(t) {
 }
 
 function drawTile(x, y, sprite) {
-  const scaledTile = TILE_SIZE;
   const drawX = canvas.width / 2 - (MAP_SIZE * TILE_SIZE) / 2 + x * TILE_SIZE;
   const drawY = canvas.height / 2 - (MAP_SIZE * TILE_SIZE) / 2 + y * TILE_SIZE;
-  ctx.drawImage(sprite, drawX, drawY, scaledTile, scaledTile);
+  ctx.drawImage(sprite, drawX, drawY, TILE_SIZE, TILE_SIZE);
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const bg = getTilemapForFloor(floor);
-  if (bg?.complete) {
+  if (bg?.complete && bg?.naturalWidth > 0) {
     const drawX = canvas.width / 2 - (MAP_SIZE * TILE_SIZE) / 2;
     const drawY = canvas.height / 2 - (MAP_SIZE * TILE_SIZE) / 2;
     ctx.drawImage(bg, drawX, drawY, MAP_SIZE * TILE_SIZE, MAP_SIZE * TILE_SIZE);
