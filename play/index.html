@@ -10,11 +10,13 @@
       background: #111;
       color: #eee;
       font-family: monospace;
+      overflow: hidden;
     }
     canvas {
       display: block;
       margin: auto;
       background: #222;
+      transition: transform 0.5s ease;
     }
     .toast {
       position: fixed;
@@ -28,6 +30,7 @@
       font-size: 14px;
       margin-bottom: 4px;
       animation: fadeout 3s forwards;
+      pointer-events: none;
     }
     @keyframes fadeout {
       0% { opacity: 1; }
@@ -41,167 +44,197 @@
 <div id="toastContainer"></div>
 
 <script>
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
-  const TILE_SIZE = 32;
-  const MAP_SIZE = 16;
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const TILE_SIZE = 32;
+const MAP_SIZE = 16;
 
-  const player = { x: 0, y: 0, hp: 10, level: 1, itemTier: 0 };
-  const enemies = [];
-  const items = [];
-  const maxTier = 10;
-  const totalFloors = 1000;
-  let floor = 1;
-  let itemPool = [];
+const player = { x: 0, y: 0, hp: 10, level: 1, itemTier: 0 };
+const enemies = [];
+const items = [];
+const maxTier = 10;
+const totalFloors = 1000;
+let floor = 1;
+let specialRoomEffect = null;
 
-  const enemySheetCols = 4;
-  const enemySheetRows = 6;
+const enemySheetCols = 4;
+const enemySheetRows = 6;
 
-  const spritePaths = {
-    player: "https://hitpoint.pro/play/assets/Idle-Sheet.png",
-    enemy: "https://hitpoint.pro/play/assets/enemies_1.png",
-    item: "https://hitpoint.pro/play/assets/pickup_items_animated.png",
+const spritePaths = {
+  player: "https://hitpoint.pro/play/assets/Idle-Sheet.png",
+  enemy: "https://hitpoint.pro/play/assets/enemies_1.png",
+  item: "https://hitpoint.pro/play/assets/pickup_items_animated.png",
+};
+const sprites = {};
+let loaded = 0;
+
+for (const key in spritePaths) {
+  const img = new Image();
+  img.src = spritePaths[key];
+  img.onload = () => {
+    loaded++;
+    if (loaded === Object.keys(spritePaths).length) {
+      generateMap();
+      draw();
+    }
   };
-  const sprites = {};
-  let loaded = 0;
+  sprites[key] = img;
+}
 
-  for (const key in spritePaths) {
-    const img = new Image();
-    img.src = spritePaths[key];
-    img.onload = () => {
-      loaded++;
-      if (loaded === Object.keys(spritePaths).length && itemPool.length > 0) {
-        generateMap();
-        draw();
-      }
-    };
-    sprites[key] = img;
-  }
+const itemColors = ["gray", "green", "blue", "purple", "orange"];
 
-  fetch("https://hitpoint.pro/play/assets/items_500.json")
-    .then(res => res.json())
-    .then(data => {
-      itemPool = data;
-      if (loaded === Object.keys(spritePaths).length) {
-        generateMap();
-        draw();
-      }
-    });
+function toast(msg, color = "white") {
+  const div = document.createElement("div");
+  div.className = "toast";
+  div.innerText = msg;
+  div.style.borderLeft = `6px solid ${color}`;
+  document.getElementById("toastContainer").appendChild(div);
+  setTimeout(() => div.remove(), 3000);
+}
 
-  function toast(msg) {
-    const div = document.createElement("div");
-    div.className = "toast";
-    div.innerText = msg;
-    document.getElementById("toastContainer").appendChild(div);
-    setTimeout(() => div.remove(), 3000);
-  }
+function drawTile(x, y, sprite, sx = 0, sy = 0, sw = TILE_SIZE, sh = TILE_SIZE) {
+  ctx.drawImage(sprite, sx, sy, sw, sh, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+}
 
-  function getRandomItem() {
-    const index = Math.floor(Math.random() * itemPool.length);
-    return { name: itemPool[index], tier: Math.floor(index / 50) + 1 };
-  }
+function generateMap() {
+  enemies.length = 0;
+  items.length = 0;
+  specialRoomEffect = Math.random() < 0.2 ? randomEffect() : null;
 
-  function generateMap() {
-    enemies.length = 0;
-    items.length = 0;
-    for (let y = 0; y < MAP_SIZE; y++) {
-      for (let x = 0; x < MAP_SIZE; x++) {
-        if (Math.random() < 0.05) enemies.push({
-          x, y,
-          hp: Math.ceil(floor / 10),
-          frameX: Math.floor(Math.random() * enemySheetCols),
-          frameY: Math.floor(Math.random() * enemySheetRows)
-        });
-        if (Math.random() < 0.03) {
-          const item = getRandomItem();
-          items.push({
-            x, y,
-            name: item.name,
-            tier: item.tier
-          });
-        }
-      }
+  for (let y = 0; y < MAP_SIZE; y++) {
+    for (let x = 0; x < MAP_SIZE; x++) {
+      if (Math.random() < 0.05) enemies.push({
+        x, y,
+        hp: Math.ceil(floor / 10),
+        frameX: Math.floor(Math.random() * enemySheetCols),
+        frameY: Math.floor(Math.random() * enemySheetRows)
+      });
+      if (Math.random() < 0.03) items.push({
+        x, y,
+        tier: Math.floor(Math.random() * maxTier)
+      });
     }
-    player.x = 0;
-    player.y = 0;
+  }
+  player.x = 0;
+  player.y = 0;
+}
+
+function draw() {
+  ctx.save();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Optional: Spin room
+  if (specialRoomEffect === "spin") {
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate((Date.now() % 10000) / 5000);
+    ctx.translate(-canvas.width/2, -canvas.height/2);
   }
 
-  function drawTile(x, y, sprite, sx = 0, sy = 0, sw = TILE_SIZE, sh = TILE_SIZE) {
-    ctx.drawImage(sprite, sx, sy, sw, sh, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-  }
+  drawTile(player.x, player.y, sprites.player, 0, 0);
 
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawTile(player.x, player.y, sprites.player, 0, 0);
-
-    enemies.forEach(e => {
-      const sx = e.frameX * TILE_SIZE;
-      const sy = e.frameY * TILE_SIZE;
-      drawTile(e.x, e.y, sprites.enemy, sx, sy);
-    });
-
-    items.forEach(i => drawTile(i.x, i.y, sprites.item));
-
-    ctx.fillStyle = "white";
-    ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 10);
-  }
-
-  function movePlayer(dx, dy) {
-    const nx = player.x + dx;
-    const ny = player.y + dy;
-    if (nx < 0 || ny < 0 || nx >= MAP_SIZE || ny >= MAP_SIZE) return;
-
-    player.x = nx;
-    player.y = ny;
-
-    const enemy = enemies.find(e => e.x === nx && e.y === ny);
-    if (enemy) {
-      if (player.itemTier >= enemy.hp) {
-        enemies.splice(enemies.indexOf(enemy), 1);
-        toast("You defeated an enemy!");
-      } else {
-        player.hp--;
-        toast("You took damage!");
-        if (player.hp <= 0) {
-          toast("You died!");
-          alert("Game Over");
-          location.reload();
-        }
-      }
-    }
-
-    const item = items.find(i => i.x === nx && i.y === ny);
-    if (item) {
-      if (item.tier > player.itemTier) {
-        player.itemTier = item.tier;
-        toast(`Equipped ${item.name} (Tier ${item.tier})`);
-      } else {
-        toast(`Found ${item.name}, but it's weaker.`);
-      }
-      items.splice(items.indexOf(item), 1);
-    }
-
-    if (enemies.length === 0) {
-      floor++;
-      if (floor > totalFloors) {
-        alert("You conquered all 1000 floors!");
-      } else {
-        toast(`Entering floor ${floor}...`);
-        generateMap();
-      }
-    }
-
-    draw();
-  }
-
-  window.addEventListener("keydown", e => {
-    switch (e.key) {
-      case "ArrowUp": movePlayer(0, -1); break;
-      case "ArrowDown": movePlayer(0, 1); break;
-      case "ArrowLeft": movePlayer(-1, 0); break;
-      case "ArrowRight": movePlayer(1, 0); break;
-    }
+  enemies.forEach(e => {
+    const sx = e.frameX * TILE_SIZE;
+    const sy = e.frameY * TILE_SIZE;
+    drawTile(e.x, e.y, sprites.enemy, sx, sy);
   });
+
+  items.forEach(i => drawTile(i.x, i.y, sprites.item));
+
+  ctx.restore();
+
+  if (specialRoomEffect === "fog") {
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (specialRoomEffect === "dark") {
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (specialRoomEffect === "strobe" && Math.random() < 0.1) {
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (specialRoomEffect === "lightning" && Math.random() < 0.03) {
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+  } else if (specialRoomEffect === "rainbow") {
+    canvas.style.filter = `hue-rotate(${Date.now() % 360}deg)`;
+  } else {
+    canvas.style.filter = "";
+  }
+
+  ctx.fillStyle = "white";
+  ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 10);
+}
+
+function movePlayer(dx, dy) {
+  const nx = player.x + dx;
+  const ny = player.y + dy;
+  if (nx < 0 || ny < 0 || nx >= MAP_SIZE || ny >= MAP_SIZE) return;
+
+  player.x = nx;
+  player.y = ny;
+
+  const enemy = enemies.find(e => e.x === nx && e.y === ny);
+  if (enemy) {
+    if (player.itemTier >= enemy.hp) {
+      enemies.splice(enemies.indexOf(enemy), 1);
+      toast("You defeated an enemy!", "lime");
+    } else {
+      player.hp--;
+      toast("You took damage!", "red");
+      if (player.hp <= 0) {
+        toast("You died!", "red");
+        alert("Game Over");
+        location.reload();
+      }
+    }
+  }
+
+  const item = items.find(i => i.x === nx && i.y === ny);
+  if (item) {
+    const color = itemColors[item.tier % itemColors.length];
+    if (item.tier > player.itemTier) {
+      player.itemTier = item.tier;
+      toast(`+ ${itemTierLabel(item.tier)} Item!`, color);
+    } else {
+      toast(`Found weaker ${itemTierLabel(item.tier)}`, color);
+    }
+    items.splice(items.indexOf(item), 1);
+  }
+
+  if (enemies.length === 0) {
+    floor++;
+    if (floor > totalFloors) {
+      alert("You conquered all 1000 floors!");
+    } else {
+      toast(`Entering floor ${floor}...`);
+      generateMap();
+    }
+  }
+
+  draw();
+}
+
+function itemTierLabel(tier) {
+  if (tier >= 9) return "Legendary";
+  if (tier >= 7) return "Epic";
+  if (tier >= 5) return "Rare";
+  if (tier >= 3) return "Uncommon";
+  return "Common";
+}
+
+function randomEffect() {
+  const effects = ["fog", "strobe", "lightning", "dark", "scroll", "spin", "rainbow"];
+  return effects[Math.floor(Math.random() * effects.length)];
+}
+
+window.addEventListener("keydown", e => {
+  switch (e.key) {
+    case "ArrowUp": movePlayer(0, -1); break;
+    case "ArrowDown": movePlayer(0, 1); break;
+    case "ArrowLeft": movePlayer(-1, 0); break;
+    case "ArrowRight": movePlayer(1, 0); break;
+  }
+});
 </script>
 </body>
 </html>
