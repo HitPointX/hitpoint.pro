@@ -39,7 +39,7 @@
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
-<div id="loading" style="color:white; text-align:center;">Loading...</div>
+<div id="loading" style="color:white; text-align:center; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);">Loading...</div>
 <div id="toastContainer"></div>
 
 <script>
@@ -55,7 +55,7 @@ window.addEventListener("resize", resizeCanvas);
 
 const TILE_SIZE = 32;
 const MAP_SIZE = 16;
-const player = { x: 0, y: 0, hp: 10, level: 1, itemTier: 0 };
+const player = { x: 8, y: 8, hp: 10, level: 1, itemTier: 0 };
 const enemies = [];
 const items = [];
 const maxTier = 10;
@@ -138,8 +138,6 @@ function generateMap() {
     }
   }
 
-  player.x = 8;
-  player.y = 8;
   animFrom = {x: player.x, y: player.y};
   animTo = {x: player.x, y: player.y};
   animProgress = 1;
@@ -155,8 +153,8 @@ function ease(t) {
 
 function drawTile(x, y, sprite) {
   const scaledTile = TILE_SIZE;
-  const drawX = canvas.width/2 - (MAP_SIZE/2 - x) * scaledTile;
-  const drawY = canvas.height/2 - (MAP_SIZE/2 - y) * scaledTile;
+  const drawX = canvas.width / 2 - (MAP_SIZE * TILE_SIZE) / 2 + x * TILE_SIZE;
+  const drawY = canvas.height / 2 - (MAP_SIZE * TILE_SIZE) / 2 + y * TILE_SIZE;
   ctx.drawImage(sprite, drawX, drawY, scaledTile, scaledTile);
 }
 
@@ -165,19 +163,19 @@ function draw() {
 
   const bg = getTilemapForFloor(floor);
   if (bg?.complete) {
-    const scale = TILE_SIZE;
-    const drawX = canvas.width / 2 - (MAP_SIZE * scale) / 2;
-    const drawY = canvas.height / 2 - (MAP_SIZE * scale) / 2;
-    ctx.drawImage(bg, drawX, drawY, MAP_SIZE * scale, MAP_SIZE * scale);
+    const drawX = canvas.width / 2 - (MAP_SIZE * TILE_SIZE) / 2;
+    const drawY = canvas.height / 2 - (MAP_SIZE * TILE_SIZE) / 2;
+    ctx.drawImage(bg, drawX, drawY, MAP_SIZE * TILE_SIZE, MAP_SIZE * TILE_SIZE);
   }
 
-  enemies.forEach(e => drawTile(e.x, e.y, e.sprite));
   items.forEach(i => drawTile(i.x, i.y, sprites.item));
+  enemies.forEach(e => drawTile(e.x, e.y, e.sprite));
 
   const interpX = animFrom.x + (animTo.x - animFrom.x) * ease(animProgress);
   const interpY = animFrom.y + (animTo.y - animFrom.y) * ease(animProgress);
   drawTile(interpX, interpY, sprites.player);
 
+  // Room effects
   if (specialRoomEffect === "fog") {
     ctx.fillStyle = "rgba(255,255,255,0.05)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
