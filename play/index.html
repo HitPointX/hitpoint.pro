@@ -77,6 +77,14 @@ let spritesLoaded = 0;
 const tilemapCount = 10;
 const totalSprites = Object.keys(spritePaths).length;
 
+function checkAllAssetsLoaded() {
+  if (spritesLoaded === totalSprites && tilemapsLoaded === tilemapCount) {
+    generateMap();
+    document.getElementById("loading").style.display = "none";
+    requestAnimationFrame(draw);
+  }
+}
+
 for (let i = 0; i < tilemapCount; i++) {
   const start = i * 100 + 1;
   const end = (i + 1) * 100;
@@ -97,14 +105,6 @@ for (const key in spritePaths) {
     checkAllAssetsLoaded();
   };
   sprites[key] = img;
-}
-
-function checkAllAssetsLoaded() {
-  if (spritesLoaded === totalSprites && tilemapsLoaded === tilemapCount) {
-    generateMap();
-    document.getElementById("loading").style.display = "none";
-    requestAnimationFrame(draw);
-  }
 }
 
 const itemColors = ["gray", "green", "blue", "purple", "orange"];
@@ -175,7 +175,6 @@ function draw() {
   const interpY = animFrom.y + (animTo.y - animFrom.y) * ease(animProgress);
   drawTile(interpX, interpY, sprites.player);
 
-  // Room effects
   if (specialRoomEffect === "fog") {
     ctx.fillStyle = "rgba(255,255,255,0.05)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -200,6 +199,8 @@ function draw() {
 
   if (animProgress < 1) {
     animProgress += 0.1;
+    requestAnimationFrame(draw);
+  } else {
     requestAnimationFrame(draw);
   }
 }
@@ -252,8 +253,6 @@ function movePlayer(dx, dy) {
       generateMap();
     }
   }
-
-  requestAnimationFrame(draw);
 }
 
 function itemTierLabel(tier) {
