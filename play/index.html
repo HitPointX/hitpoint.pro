@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,7 +43,6 @@
 <canvas id="gameCanvas" width="192" height="160"></canvas>
 <div id="toastContainer"></div>
 <script>
-// Canvas & game state
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const TILE_SIZE = 32;
@@ -117,7 +115,6 @@ function generateMap() {
 
   const enemyCount = Math.floor(Math.random() * 3) + 1;
   const itemCount = Math.floor(Math.random() * 3) + 2;
-
   const positions = new Set();
 
   while (enemies.length < enemyCount) {
@@ -181,7 +178,6 @@ function draw() {
   ctx.fillStyle = "white";
   ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 5);
 
-  // Smooth movement
   player.drawX += (player.x * TILE_SIZE - player.drawX) * 0.3;
   player.drawY += (player.y * TILE_SIZE - player.drawY) * 0.3;
 
