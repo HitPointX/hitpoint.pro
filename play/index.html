@@ -35,11 +35,18 @@
       80% { opacity: 0.9; }
       100% { opacity: 0; transform: translateX(-20px); }
     }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+    }
   </style>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
-<div id="loading" style="color:white; text-align:center; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);">Loading...</div>
+<div id="loading">Loading...</div>
 <div id="toastContainer"></div>
 
 <script>
@@ -55,7 +62,7 @@ window.addEventListener("resize", resizeCanvas);
 
 const TILE_SIZE = 32;
 const MAP_SIZE = 16;
-const player = { x: 8, y: 8, hp: 10, level: 1, itemTier: 0 };
+const player = { x: 0, y: 0, hp: 10, level: 1, itemTier: 0 };
 const enemies = [];
 const items = [];
 const maxTier = 10;
@@ -77,19 +84,6 @@ let spritesLoaded = 0;
 const tilemapCount = 10;
 const totalSprites = Object.keys(spritePaths).length;
 
-function checkAllAssetsLoaded() {
-  if (spritesLoaded === totalSprites && tilemapsLoaded === tilemapCount) {
-    const interval = setInterval(() => {
-      if (getTilemapForFloor(floor)?.complete && getTilemapForFloor(floor)?.naturalWidth > 0) {
-        clearInterval(interval);
-        document.getElementById("loading").style.display = "none";
-        generateMap();
-        requestAnimationFrame(draw);
-      }
-    }, 100);
-  }
-}
-
 for (let i = 0; i < tilemapCount; i++) {
   const start = i * 100 + 1;
   const end = (i + 1) * 100;
@@ -99,7 +93,6 @@ for (let i = 0; i < tilemapCount; i++) {
     tilemapsLoaded++;
     checkAllAssetsLoaded();
   };
-  img.onerror = () => console.error(`Failed to load tilemap: ${img.src}`);
   tilemaps[i] = img;
 }
 
@@ -110,18 +103,15 @@ for (const key in spritePaths) {
     spritesLoaded++;
     checkAllAssetsLoaded();
   };
-  img.onerror = () => console.error(`Failed to load sprite: ${img.src}`);
   sprites[key] = img;
 }
 
-const itemColors = ["gray", "green", "blue", "purple", "orange"];
-function toast(msg, color = "white") {
-  const div = document.createElement("div");
-  div.className = "toast";
-  div.innerText = msg;
-  div.style.borderLeft = `6px solid ${color}`;
-  document.getElementById("toastContainer").appendChild(div);
-  setTimeout(() => div.remove(), 3000);
+function checkAllAssetsLoaded() {
+  if (spritesLoaded === totalSprites && tilemapsLoaded === tilemapCount) {
+    generateMap();
+    document.getElementById("loading").style.display = "none";
+    requestAnimationFrame(draw);
+  }
 }
 
 function getTilemapForFloor(floor) {
@@ -145,6 +135,8 @@ function generateMap() {
     }
   }
 
+  player.x = 8;
+  player.y = 8;
   animFrom = {x: player.x, y: player.y};
   animTo = {x: player.x, y: player.y};
   animProgress = 1;
@@ -159,23 +151,25 @@ function ease(t) {
 }
 
 function drawTile(x, y, sprite) {
-  const drawX = canvas.width / 2 - (MAP_SIZE * TILE_SIZE) / 2 + x * TILE_SIZE;
-  const drawY = canvas.height / 2 - (MAP_SIZE * TILE_SIZE) / 2 + y * TILE_SIZE;
-  ctx.drawImage(sprite, drawX, drawY, TILE_SIZE, TILE_SIZE);
+  const scaledTile = TILE_SIZE;
+  const drawX = canvas.width/2 - (MAP_SIZE/2 - x) * scaledTile;
+  const drawY = canvas.height/2 - (MAP_SIZE/2 - y) * scaledTile;
+  ctx.drawImage(sprite, drawX, drawY, scaledTile, scaledTile);
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const bg = getTilemapForFloor(floor);
-  if (bg?.complete && bg?.naturalWidth > 0) {
-    const drawX = canvas.width / 2 - (MAP_SIZE * TILE_SIZE) / 2;
-    const drawY = canvas.height / 2 - (MAP_SIZE * TILE_SIZE) / 2;
-    ctx.drawImage(bg, drawX, drawY, MAP_SIZE * TILE_SIZE, MAP_SIZE * TILE_SIZE);
+  if (bg?.complete) {
+    const scale = TILE_SIZE;
+    const drawX = canvas.width / 2 - (MAP_SIZE * scale) / 2;
+    const drawY = canvas.height / 2 - (MAP_SIZE * scale) / 2;
+    ctx.drawImage(bg, drawX, drawY, MAP_SIZE * scale, MAP_SIZE * scale);
   }
 
-  items.forEach(i => drawTile(i.x, i.y, sprites.item));
   enemies.forEach(e => drawTile(e.x, e.y, e.sprite));
+  items.forEach(i => drawTile(i.x, i.y, sprites.item));
 
   const interpX = animFrom.x + (animTo.x - animFrom.x) * ease(animProgress);
   const interpY = animFrom.y + (animTo.y - animFrom.y) * ease(animProgress);
@@ -211,6 +205,15 @@ function draw() {
   }
 }
 
+function toast(msg, color = "white") {
+  const div = document.createElement("div");
+  div.className = "toast";
+  div.innerText = msg;
+  div.style.borderLeft = `6px solid ${color}`;
+  document.getElementById("toastContainer").appendChild(div);
+  setTimeout(() => div.remove(), 3000);
+}
+
 function movePlayer(dx, dy) {
   const nx = player.x + dx;
   const ny = player.y + dy;
@@ -240,7 +243,7 @@ function movePlayer(dx, dy) {
 
   const item = items.find(i => i.x === nx && i.y === ny);
   if (item) {
-    const color = itemColors[item.tier % itemColors.length];
+    const color = ["gray", "green", "blue", "purple", "orange"][item.tier % 5];
     if (item.tier > player.itemTier) {
       player.itemTier = item.tier;
       toast(`+ ${itemTierLabel(item.tier)} Item!`, color);
