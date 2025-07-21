@@ -205,8 +205,9 @@
       player.y = newY;
 
       if (potion && potion.x === newX && potion.y === newY) {
-        player.hp += 4;
-        toast("Healing Potion [+4 HP]", "cyan");
+        const healAmount = Math.floor(Math.random() * 7) + 6;
+        player.hp += healAmount;
+        toast(`Healing Potion [+${healAmount} HP]`, "cyan");
         potion = null;
       }
 
@@ -218,10 +219,17 @@
 
       let enemyIndex = enemies.findIndex(e => e.x === newX && e.y === newY);
       if (enemyIndex !== -1) {
-        toast("You fight the enemy!", "red");
-        player.hp -= 3;
+        let dodgeChance = Math.min(100, 1 + tier);
+        let dodged = Math.random() * 100 < dodgeChance;
+        if (dodged) {
+          toast(`Dodged the attack! [${dodgeChance.toFixed(1)}%]`, "yellow");
+        } else {
+          toast("You fight the enemy!", "red");
+          player.hp -= 3;
+        }
+
         player.flash = 5;
-        player.color = "red";
+        player.color = dodged ? "yellow" : "red";
         enemies[enemyIndex].flash = 5;
 
         if (player.hp <= 0) {
@@ -231,6 +239,7 @@
           setTimeout(() => location.reload(), 2000);
           return;
         }
+
         if (enemies[enemyIndex].carrying) {
           chests.push({ x: newX, y: newY });
         }
