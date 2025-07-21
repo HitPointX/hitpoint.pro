@@ -134,15 +134,18 @@
       if (!items.length) return;
 
       const item = items[Math.floor(Math.random() * items.length)];
+      const color = getRarityColor(item.rarity);
       if (item.effect === "tier") {
         tier += item.value;
-        toast(`${item.name} [+${item.value} Tier]`, getRarityColor(item.rarity));
+        toast(`${item.name} [+${item.value} Tier]`, color);
       } else if (item.effect === "heal") {
         player.hp += item.value;
-        toast(`${item.name} [+${item.value} HP]`, getRarityColor(item.rarity));
+        toast(`${item.name} [+${item.value} HP]`, color);
       } else {
-        toast(item.name, getRarityColor(item.rarity));
+        toast(item.name, color);
       }
+
+      draw(); // update tier in footer
     }
 
     function getRarityColor(rarity) {
