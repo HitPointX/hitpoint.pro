@@ -65,13 +65,15 @@
     let enemies = [];
     let chests = [];
     let items = [];
+    let potion = null;
 
     const sprites = {
       tilemap: new Image(),
       player: new Image(),
       bat: new Image(),
       knight: new Image(),
-      chest: new Image()
+      chest: new Image(),
+      potion: new Image()
     };
 
     sprites.tilemap.src = "assets/tilemapfloor1to100.png";
@@ -79,6 +81,7 @@
     sprites.bat.src = "assets/goblintbat.png";
     sprites.knight.src = "assets/knightenemy1.png";
     sprites.chest.src = "assets/itemchestpickup.png";
+    sprites.potion.src = "assets/Potion1.png";
 
     function toast(msg, color = "#ccc") {
       toastDiv.innerText = msg;
@@ -94,12 +97,24 @@
     function spawnStuff() {
       enemies = [];
       chests = [];
+      potion = null;
+
       for (let i = 0; i < 3; i++) {
         const type = Math.random() < 0.5 ? "bat" : "knight";
         enemies.push({ x: randPos(), y: randPos(), carrying: null, type, flash: 0 });
       }
+
       for (let i = 0; i < 2; i++) {
         chests.push({ x: randPos(), y: randPos() });
+      }
+
+      if (Math.random() > 0.015) {
+        let dx = Math.random() < 0.5 ? -1 : 1;
+        let dy = Math.random() < 0.5 ? -1 : 1;
+        potion = {
+          x: Math.max(0, Math.min(GRID_WIDTH - 1, player.x + dx)),
+          y: Math.max(0, Math.min(GRID_HEIGHT - 1, player.y + dy))
+        };
       }
     }
 
@@ -115,6 +130,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(sprites.tilemap, offsetX, offsetY, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
 
+      if (potion) drawTile(potion.x, potion.y, sprites.potion);
       for (let chest of chests) drawTile(chest.x, chest.y, sprites.chest);
       for (let enemy of enemies) {
         const sprite = enemy.type === "bat" ? sprites.bat : sprites.knight;
@@ -164,6 +180,7 @@
       } else {
         toast(item.name, color);
       }
+      tierBar.innerText = `Tier: ${tier}`;
       draw();
     }
 
@@ -187,6 +204,12 @@
       player.x = newX;
       player.y = newY;
 
+      if (potion && potion.x === newX && potion.y === newY) {
+        player.hp += 4;
+        toast("Healing Potion [+4 HP]", "cyan");
+        potion = null;
+      }
+
       let chestIndex = chests.findIndex(c => c.x === newX && c.y === newY);
       if (chestIndex !== -1) {
         chests.splice(chestIndex, 1);
@@ -199,7 +222,6 @@
         player.hp -= 3;
         player.flash = 5;
         player.color = "red";
-
         enemies[enemyIndex].flash = 5;
 
         if (player.hp <= 0) {
