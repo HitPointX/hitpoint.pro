@@ -43,7 +43,7 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const TILE_SIZE = 64;
+    const TILE_SIZE = 59; // scaled down from 64
     const GRID_WIDTH = 6;
     const GRID_HEIGHT = 6;
     const offsetX = (canvas.width - GRID_WIDTH * TILE_SIZE) / 2;
@@ -85,6 +85,10 @@
       toastDiv.style.color = color;
       toastDiv.style.opacity = 1;
       setTimeout(() => (toastDiv.style.opacity = 0), 1500);
+    }
+
+    function updateTierDisplay() {
+      tierBar.innerText = `Tier: ${tier} | Dodge: ${Math.min(100, 1 + tier)}%`;
     }
 
     function randPos() {
@@ -140,7 +144,7 @@
       ctx.font = "14px monospace";
       ctx.fillStyle = "white";
       ctx.fillText(`Floor ${floor} | HP: ${player.hp}`, offsetX, offsetY + GRID_HEIGHT * TILE_SIZE + 16);
-      tierBar.innerText = `Tier: ${tier} | Dodge: ${Math.min(100, 1 + tier)}%`;
+      updateTierDisplay();
     }
 
     function moveEnemies() {
@@ -173,13 +177,13 @@
         toast(`${item.name} [+${item.value} Tier]`, color);
         player.flash = 5;
         player.color = "gold";
+        updateTierDisplay();
       } else if (item.effect === "heal") {
         player.hp = Math.min(50, player.hp + item.value);
         toast(`${item.name} [+${item.value} HP]`, color);
       } else {
         toast(item.name, color);
       }
-      draw();
     }
 
     function getRarityColor(rarity) {
