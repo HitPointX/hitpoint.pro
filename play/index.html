@@ -37,7 +37,7 @@
   <canvas id="gameCanvas" width="1024" height="768"></canvas>
   <div id="toast"></div>
   <div id="speaker" title="Toggle Music">🔊</div>
-  <div id="tierBar">Tier: 0</div>
+  <div id="tierBar">Tier: 0 | Dodge: 1%</div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -61,11 +61,8 @@
     let currentTrackIndex = 0;
     const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
 
-    let player = { x: 3, y: 3, hp: 10, flash: 0, color: "normal" };
-    let enemies = [];
-    let chests = [];
-    let items = [];
-    let potion = null;
+    let player = { x: 3, y: 3, hp: 10, flash: 0, color: "normal", jitter: 0 };
+    let enemies = [], chests = [], items = [], potion = null;
 
     const sprites = {
       tilemap: new Image(),
@@ -118,12 +115,14 @@
       }
     }
 
-    function drawTile(x, y, sprite, tint) {
+    function drawTile(x, y, sprite, tint, jitter = false) {
+      let jx = jitter ? (Math.random() * 4 - 2) : 0;
+      let jy = jitter ? (Math.random() * 4 - 2) : 0;
       if (tint) {
         ctx.fillStyle = tint;
         ctx.fillRect(offsetX + x * TILE_SIZE, offsetY + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
       }
-      ctx.drawImage(sprite, offsetX + x * TILE_SIZE, offsetY + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      ctx.drawImage(sprite, offsetX + x * TILE_SIZE + jx, offsetY + y * TILE_SIZE + jy, TILE_SIZE, TILE_SIZE);
     }
 
     function draw() {
@@ -136,12 +135,12 @@
         const sprite = enemy.type === "bat" ? sprites.bat : sprites.knight;
         drawTile(enemy.x, enemy.y, sprite, enemy.flash > 0 ? "rgba(255,0,0,0.5)" : null);
       }
-      drawTile(player.x, player.y, sprites.player, player.flash > 0 ? (player.color === "gold" ? "rgba(255,215,0,0.5)" : "rgba(255,0,0,0.5)") : null);
+      drawTile(player.x, player.y, sprites.player, player.flash > 0 ? (player.color === "gold" ? "rgba(255,215,0,0.5)" : "rgba(255,0,0,0.5)") : null, player.jitter > 0);
 
       ctx.font = "14px monospace";
       ctx.fillStyle = "white";
       ctx.fillText(`Floor ${floor} | HP: ${player.hp}`, offsetX, offsetY + GRID_HEIGHT * TILE_SIZE + 16);
-      tierBar.innerText = `Tier: ${tier}`;
+      tierBar.innerText = `Tier: ${tier} | Dodge: ${Math.min(100, 1 + tier)}%`;
     }
 
     function moveEnemies() {
@@ -175,12 +174,11 @@
         player.flash = 5;
         player.color = "gold";
       } else if (item.effect === "heal") {
-        player.hp += item.value;
+        player.hp = Math.min(50, player.hp + item.value);
         toast(`${item.name} [+${item.value} HP]`, color);
       } else {
         toast(item.name, color);
       }
-      tierBar.innerText = `Tier: ${tier}`;
       draw();
     }
 
@@ -197,6 +195,7 @@
     function movePlayer(dx, dy) {
       if (isGameOver) return;
 
+      player.jitter = 0;
       let newX = player.x + dx;
       let newY = player.y + dy;
       if (newX < 0 || newY < 0 || newX >= GRID_WIDTH || newY >= GRID_HEIGHT) return;
@@ -206,7 +205,7 @@
 
       if (potion && potion.x === newX && potion.y === newY) {
         const healAmount = Math.floor(Math.random() * 7) + 6;
-        player.hp += healAmount;
+        player.hp = Math.min(50, player.hp + healAmount);
         toast(`Healing Potion [+${healAmount} HP]`, "cyan");
         potion = null;
       }
@@ -223,9 +222,10 @@
         let dodged = Math.random() * 100 < dodgeChance;
         if (dodged) {
           toast(`Dodged the attack! [${dodgeChance.toFixed(1)}%]`, "yellow");
+          player.jitter = 6;
         } else {
           toast("You fight the enemy!", "red");
-          player.hp -= 3;
+          player.hp = Math.max(0, player.hp - 3);
         }
 
         player.flash = 5;
@@ -233,7 +233,6 @@
         enemies[enemyIndex].flash = 5;
 
         if (player.hp <= 0) {
-          player.hp = 0;
           toast("You died!", "red");
           isGameOver = true;
           setTimeout(() => location.reload(), 2000);
@@ -303,6 +302,7 @@
 
     function tick() {
       if (player.flash > 0) player.flash--;
+      if (player.jitter > 0) player.jitter--;
       enemies.forEach(e => { if (e.flash > 0) e.flash--; });
       draw();
       requestAnimationFrame(tick);
