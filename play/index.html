@@ -50,6 +50,19 @@
       font-size: 16px;
       pointer-events: none;
       z-index: 999;
+      display: none;
+    }
+    #musicToggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1000;
+      color: #ccc;
+    }
+    #musicToggle.off {
+      color: red;
     }
   </style>
 </head>
@@ -57,6 +70,7 @@
   <canvas id="gameCanvas" width="512" height="512"></canvas>
   <div id="loading">Loading...</div>
   <div id="toastContainer"></div>
+  <div id="musicToggle" title="Toggle Music">🔊</div>
   <audio id="bgm" loop></audio>
 
   <script>
@@ -266,6 +280,32 @@
       return effects[Math.floor(Math.random() * effects.length)];
     }
 
+    const bgm = document.getElementById("bgm");
+    const musicToggle = document.getElementById("musicToggle");
+    let isMuted = false;
+    const musicTracks = [
+      "https://hitpoint.pro/play/assets/renderme.mp3",
+      "https://hitpoint.pro/play/assets/senderbeware.mp3"
+    ];
+
+    function playRandomMusic() {
+      if (!isMuted) {
+        const pick = musicTracks[Math.floor(Math.random() * musicTracks.length)];
+        bgm.src = pick;
+        bgm.play().catch(() => {});
+      }
+    }
+
+    function setupAudio() {
+      playRandomMusic();
+    }
+
+    musicToggle.addEventListener("click", () => {
+      isMuted = !isMuted;
+      bgm.muted = isMuted;
+      musicToggle.classList.toggle("off", isMuted);
+    });
+
     window.addEventListener("keydown", e => {
       switch (e.key) {
         case "ArrowUp": movePlayer(0, -1); break;
@@ -275,20 +315,9 @@
       }
     });
 
-    const bgm = document.getElementById("bgm");
-    const musicTracks = [
-      "https://hitpoint.pro/play/assets/renderme.mp3",
-      "https://hitpoint.pro/play/assets/senderbeware.mp3"
-    ];
-    function playRandomMusic() {
-      const pick = musicTracks[Math.floor(Math.random() * musicTracks.length)];
-      bgm.src = pick;
-      bgm.play();
-    }
-
-    function setupAudio() {
-      playRandomMusic();
-    }
+    window.addEventListener("click", () => {
+      if (bgm.paused && !isMuted) bgm.play().catch(() => {});
+    });
   </script>
 </body>
 </html>
