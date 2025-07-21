@@ -2,241 +2,235 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HitPoint Dungeon</title>
   <style>
-    html, body {
+    body {
       margin: 0;
-      background: #111;
+      background-color: #111;
       overflow: hidden;
     }
-    canvas {
+    #gameCanvas {
       display: block;
-      margin: 0 auto;
-      background: #111;
+      margin: auto;
+      background-color: #111;
     }
-    #musicToggle {
+    #toast {
       position: absolute;
       top: 10px;
-      right: 10px;
-      font-size: 24px;
+      left: 10px;
+      padding: 6px 12px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
       color: white;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    #speaker {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 24px;
       cursor: pointer;
-      z-index: 1000;
+      filter: drop-shadow(0 0 2px #000);
+      user-select: none;
     }
   </style>
 </head>
 <body>
-  <div id="musicToggle">🔊</div>
-  <canvas id="gameCanvas" width="512" height="512"></canvas>
-
+  <canvas id="gameCanvas" width="1024" height="768"></canvas>
+  <div id="toast"></div>
+  <div id="speaker">🔊</div>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    let gridSize = 6;
-    let tileSize = 64;
-    let player = { x: 2, y: 2 };
-    let enemies = [];
-    let chests = [];
+    const TILE_SIZE = 64;
+    const GRID_WIDTH = 6;
+    const GRID_HEIGHT = 6;
 
-    const tilemap = new Image();
-    const playerImg = new Image();
-    const batImg = new Image();
-    const chestImg = new Image();
+    const offsetX = (canvas.width - GRID_WIDTH * TILE_SIZE) / 2;
+    const offsetY = (canvas.height - GRID_HEIGHT * TILE_SIZE) / 2;
 
-    tilemap.src = "assets/tilemapfloor1to100.png";
-    playerImg.src = "assets/playercharacter.png";
-    batImg.src = "assets/goblintbat.png";
-    chestImg.src = "assets/itemchestpickup.png";
-
-    let tilemapOffsetX = 0;
-    let tilemapOffsetY = 0;
-
-    let currentFloor = 1;
-    let hp = 10;
+    let player = { x: 3, y: 3, hp: 10 };
+    let floor = 1;
     let tier = 0;
+    let isGameOver = false;
+    let musicMuted = false;
+    let currentMusic = null;
+    let stolenChests = [];
 
     const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
     let currentTrackIndex = 0;
-    let musicEnabled = true;
-    let currentMusic = null;
 
-    const musicToggle = document.getElementById("musicToggle");
-    musicToggle.addEventListener("click", () => {
-      musicEnabled = !musicEnabled;
-      musicToggle.style.color = musicEnabled ? "#eee" : "red";
-      if (musicEnabled) {
-        playMusic();
-      } else if (currentMusic) {
-        currentMusic.pause();
-      }
+    const speaker = document.getElementById("speaker");
+    speaker.addEventListener("click", () => {
+      musicMuted = !musicMuted;
+      speaker.style.color = musicMuted ? "red" : "#ccc";
+      if (currentMusic) currentMusic.volume = musicMuted ? 0 : 1;
     });
 
     function playMusic() {
-      if (currentMusic) currentMusic.pause();
-      const track = musicTracks[Math.floor((currentFloor - 1) / 100) % musicTracks.length];
+      const track = musicTracks[currentTrackIndex];
       currentMusic = new Audio(`assets/${track}`);
       currentMusic.loop = true;
-      if (musicEnabled) currentMusic.play();
+      currentMusic.volume = musicMuted ? 0 : 1;
+      currentMusic.play();
     }
 
-    function centerOffsets() {
-      tilemapOffsetX = (canvas.width - gridSize * tileSize) / 2;
-      tilemapOffsetY = (canvas.height - gridSize * tileSize) / 2;
+    function nextTrack() {
+      currentTrackIndex = (currentTrackIndex + 1) % musicTracks.length;
+      if (currentMusic) currentMusic.pause();
+      playMusic();
     }
 
-    function drawTilemap() {
-      ctx.drawImage(tilemap, tilemapOffsetX - tileSize, tilemapOffsetY - tileSize);
+    function toast(msg, color = "#ccc") {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.style.color = color;
+      t.style.opacity = 1;
+      setTimeout(() => (t.style.opacity = 0), 1500);
     }
 
-    function drawGrid() {
-      for (let y = 0; y < gridSize; y++) {
-        for (let x = 0; x < gridSize; x++) {
-          ctx.strokeStyle = "rgba(255,255,255,0.1)";
-          ctx.strokeRect(
-            tilemapOffsetX + x * tileSize,
-            tilemapOffsetY + y * tileSize,
-            tileSize,
-            tileSize
-          );
-        }
+    const tileSprite = new Image();
+    tileSprite.src = "assets/tilemapfloor1to100.png";
+
+    const sprites = {
+      player: new Image(),
+      enemy: new Image(),
+      bat: new Image(),
+      chest: new Image()
+    };
+    sprites.player.src = "assets/playercharacter.png";
+    sprites.enemy.src = "assets/knightenemy1.png";
+    sprites.bat.src = "assets/goblintbat.png";
+    sprites.chest.src = "assets/itemchestpickup.png";
+
+    let enemies = [];
+    let chests = [];
+
+    function drawTile(x, y, sprite) {
+      ctx.drawImage(sprite, offsetX + x * TILE_SIZE, offsetY + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(tileSprite, offsetX, offsetY, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+
+      chests.forEach(c => drawTile(c.x, c.y, sprites.chest));
+      enemies.forEach(e => drawTile(e.x, e.y, sprites.bat));
+      drawTile(player.x, player.y, sprites.player);
+
+      ctx.font = "14px monospace";
+      ctx.fillStyle = "white";
+      ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${tier}`, offsetX, offsetY + GRID_HEIGHT * TILE_SIZE + 16);
+    }
+
+    function spawnStuff() {
+      enemies = [];
+      chests = [];
+      for (let i = 0; i < Math.random() * 3 + 1; i++) {
+        enemies.push({ x: randPos(), y: randPos(), carrying: null });
+      }
+      for (let i = 0; i < Math.random() * 3 + 1; i++) {
+        chests.push({ x: randPos(), y: randPos() });
       }
     }
 
-    function drawSprites() {
-      ctx.drawImage(
-        playerImg,
-        tilemapOffsetX + player.x * tileSize,
-        tilemapOffsetY + player.y * tileSize,
-        tileSize,
-        tileSize
-      );
-      enemies.forEach((e) => {
-        ctx.drawImage(
-          batImg,
-          tilemapOffsetX + e.x * tileSize,
-          tilemapOffsetY + e.y * tileSize,
-          tileSize,
-          tileSize
-        );
-      });
-      chests.forEach((c) => {
-        ctx.drawImage(
-          chestImg,
-          tilemapOffsetX + c.x * tileSize,
-          tilemapOffsetY + c.y * tileSize,
-          tileSize,
-          tileSize
-        );
-      });
+    function randPos() {
+      return Math.floor(Math.random() * GRID_WIDTH);
     }
 
-    function drawHUD() {
-      ctx.fillStyle = "white";
-      ctx.font = "14px monospace";
-      ctx.fillText(`Floor ${currentFloor} | HP: ${hp} | Tier: ${tier}`, 10, canvas.height - 10);
-    }
-
-    function drawGame() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawTilemap();
-      drawGrid();
-      drawSprites();
-      drawHUD();
+    function nextFloor() {
+      floor++;
+      if (floor % 100 === 1) {
+        nextTrack();
+      }
+      toast(`Entering floor ${floor}...`, "#ccc");
+      spawnStuff();
     }
 
     function movePlayer(dx, dy) {
+      if (isGameOver) return;
       const newX = player.x + dx;
       const newY = player.y + dy;
-      if (newX >= 0 && newX < gridSize && newY >= 0 && newY < gridSize) {
-        player.x = newX;
-        player.y = newY;
-        handleEnemyTurn();
-        drawGame();
+      if (newX < 0 || newY < 0 || newX >= GRID_WIDTH || newY >= GRID_HEIGHT) return;
+
+      player.x = newX;
+      player.y = newY;
+
+      let chestIndex = chests.findIndex(c => c.x === newX && c.y === newY);
+      if (chestIndex !== -1) {
+        toast("Found chest!", "yellow");
+        chests.splice(chestIndex, 1);
       }
+
+      let enemyIndex = enemies.findIndex(e => e.x === newX && e.y === newY);
+      if (enemyIndex !== -1) {
+        toast("You fight!", "red");
+        player.hp -= 3;
+        if (player.hp <= 0) {
+          toast("You died!", "red");
+          isGameOver = true;
+          setTimeout(() => location.reload(), 2000);
+          return;
+        }
+        if (enemies[enemyIndex].carrying) {
+          chests.push({ x: newX, y: newY });
+        }
+        enemies.splice(enemyIndex, 1);
+      }
+
+      moveEnemies();
+      draw();
     }
 
-    function handleEnemyTurn() {
-      enemies.forEach((e) => {
-        if (Math.random() < 0.5) {
-          const dx = player.x > e.x ? 1 : player.x < e.x ? -1 : 0;
-          const dy = player.y > e.y ? 1 : player.y < e.y ? -1 : 0;
-          const targetX = e.x + dx;
-          const targetY = e.y + dy;
+    function moveEnemies() {
+      enemies.forEach(e => {
+        if (Math.random() < 0.5) return;
+        let dx = player.x > e.x ? 1 : player.x < e.x ? -1 : 0;
+        let dy = player.y > e.y ? 1 : player.y < e.y ? -1 : 0;
 
-          if (targetX === player.x && targetY === player.y) {
-            hp--;
-          } else if (
-            !enemies.some((other) => other !== e && other.x === targetX && other.y === targetY)
-          ) {
-            e.x = targetX;
-            e.y = targetY;
+        let nx = e.x + dx;
+        let ny = e.y + dy;
 
-            // Chest steal
-            const chestIndex = chests.findIndex((c) => c.x === e.x && c.y === e.y);
-            if (chestIndex !== -1) {
-              e.hasChest = true;
-              chests.splice(chestIndex, 1);
-            }
-          }
+        if (nx === player.x && ny === player.y) return;
+
+        const overlappingChestIndex = chests.findIndex(c => c.x === nx && c.y === ny);
+        if (overlappingChestIndex !== -1 && !e.carrying) {
+          e.carrying = chests[overlappingChestIndex];
+          chests.splice(overlappingChestIndex, 1);
         }
+
+        e.x = Math.max(0, Math.min(GRID_WIDTH - 1, nx));
+        e.y = Math.max(0, Math.min(GRID_HEIGHT - 1, ny));
       });
     }
 
-    function spawnFloor() {
-      currentFloor++;
-      player = { x: 2, y: 2 };
-      enemies = [];
-      chests = [];
-
-      const enemyCount = 1 + Math.floor(Math.random() * 3);
-      for (let i = 0; i < enemyCount; i++) {
-        enemies.push({ x: rand(), y: rand(), hasChest: false });
-      }
-
-      const chestCount = 2 + Math.floor(Math.random() * 3);
-      for (let i = 0; i < chestCount; i++) {
-        chests.push({ x: rand(), y: rand() });
-      }
-
-      if ((currentFloor - 1) % 100 === 0) playMusic();
-
-      drawGame();
-    }
-
-    function rand() {
-      return Math.floor(Math.random() * gridSize);
-    }
-
-    document.addEventListener("keydown", (e) => {
+    window.addEventListener("keydown", e => {
       switch (e.key) {
         case "ArrowUp":
-        case "w":
-          movePlayer(0, -1);
-          break;
+        case "w": movePlayer(0, -1); break;
         case "ArrowDown":
-        case "s":
-          movePlayer(0, 1);
-          break;
+        case "s": movePlayer(0, 1); break;
         case "ArrowLeft":
-        case "a":
-          movePlayer(-1, 0);
-          break;
+        case "a": movePlayer(-1, 0); break;
         case "ArrowRight":
-        case "d":
-          movePlayer(1, 0);
-          break;
-        case " ":
-          spawnFloor();
-          break;
+        case "d": movePlayer(1, 0); break;
+        case " ": nextFloor(); break;
       }
     });
 
     window.onload = () => {
-      centerOffsets();
-      spawnFloor();
-      playMusic();
+      toast("Loading...", "#aaa");
+      tileSprite.onload = () => {
+        spawnStuff();
+        draw();
+        playMusic();
+        toast("Welcome to HitPoint Dungeon!");
+      };
     };
   </script>
 </body>
