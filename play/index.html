@@ -25,10 +25,20 @@
       font-size: 14px; color: white; opacity: 0;
       transition: opacity 0.4s;
     }
-    #speaker {
-      position: absolute; top: 8px; right: 8px;
+    #speaker, #autoplayBtn {
+      position: absolute; top: 8px;
       font-size: 24px; cursor: pointer; user-select: none;
       color: #ccc; z-index: 999;
+    }
+    #speaker { right: 8px; }
+    #autoplayBtn {
+      right: 48px;
+      font-size: 14px;
+      padding: 4px 8px;
+      background: #222;
+      border: 1px solid #555;
+      border-radius: 4px;
+      font-family: monospace;
     }
     #speaker.muted { color: red; }
     #tierBar {
@@ -49,19 +59,21 @@
   <canvas id="gameCanvas" width="1024" height="768"></canvas>
   <div id="toast"></div>
   <div id="speaker" title="Toggle Music">🔊</div>
+  <div id="autoplayBtn">Auto-Play</div>
   <div id="tierBar">Tier: 0 | Dodge: 1%</div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const TILE_SIZE = 48; // final scale fix
+    const TILE_SIZE = 48;
     const GRID_WIDTH = 6;
     const GRID_HEIGHT = 6;
     const offsetX = (canvas.width - GRID_WIDTH * TILE_SIZE) / 2;
     const offsetY = (canvas.height - GRID_HEIGHT * TILE_SIZE) / 2;
 
     const speaker = document.getElementById("speaker");
+    const autoplayBtn = document.getElementById("autoplayBtn");
     const toastDiv = document.getElementById("toast");
     const tierBar = document.getElementById("tierBar");
 
@@ -69,6 +81,7 @@
     let tier = 0;
     let isGameOver = false;
     let musicMuted = false;
+    let autoPlayEnabled = false;
     let currentMusic = null;
     let currentTrackIndex = 0;
     const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
@@ -185,13 +198,11 @@
       const color = getRarityColor(item.rarity);
 
       if (item.effect === "tier") {
-        const oldTier = tier;
         tier += item.value;
         toast(`${item.name} [+${item.value} Tier]`, color);
         player.flash = 5;
         player.color = "gold";
         updateTierDisplay();
-        console.log(`Tier increased from ${oldTier} → ${tier}`);
       } else if (item.effect === "heal") {
         player.hp = Math.min(50, player.hp + item.value);
         toast(`${item.name} [+${item.value} HP]`, color);
@@ -274,6 +285,22 @@
       draw();
     }
 
+    function moveToward(tx, ty) {
+      const dx = tx > player.x ? 1 : tx < player.x ? -1 : 0;
+      const dy = ty > player.y ? 1 : ty < player.y ? -1 : 0;
+      if (dx !== 0) movePlayer(dx, 0);
+      else if (dy !== 0) movePlayer(0, dy);
+    }
+
+    function autoPlayMove() {
+      if (!autoPlayEnabled || isGameOver) return;
+      if (potion) { moveToward(potion.x, potion.y); return; }
+      if (chests.length > 0) { moveToward(chests[0].x, chests[0].y); return; }
+      if (enemies.length > 0) { moveToward(enemies[0].x, enemies[0].y); return; }
+    }
+
+    setInterval(autoPlayMove, 300);
+
     function nextFloor() {
       floor++;
       if ((floor - 1) % 100 === 0 && floor !== 1) nextTrack();
@@ -305,6 +332,11 @@
       musicMuted = !musicMuted;
       speaker.classList.toggle("muted", musicMuted);
       if (currentMusic) currentMusic.volume = musicMuted ? 0 : 1;
+    };
+
+    autoplayBtn.onclick = () => {
+      autoPlayEnabled = !autoPlayEnabled;
+      autoplayBtn.textContent = autoPlayEnabled ? "Stop Auto-Play" : "Auto-Play";
     };
 
     window.addEventListener("keydown", e => {
