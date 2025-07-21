@@ -7,7 +7,7 @@
   <style>
     body {
       margin: 0;
-      background-color: #111;
+      background: #111;
       overflow: hidden;
     }
     canvas {
@@ -36,6 +36,7 @@
       cursor: pointer;
       user-select: none;
       color: #ccc;
+      z-index: 999;
     }
     #speaker.muted {
       color: red;
@@ -54,68 +55,42 @@
     const TILE_SIZE = 64;
     const GRID_WIDTH = 6;
     const GRID_HEIGHT = 6;
-
     const offsetX = (canvas.width - GRID_WIDTH * TILE_SIZE) / 2;
     const offsetY = (canvas.height - GRID_HEIGHT * TILE_SIZE) / 2;
 
-    let player = { x: 3, y: 3, hp: 10 };
+    const speaker = document.getElementById("speaker");
+    const toastDiv = document.getElementById("toast");
+
     let floor = 1;
     let tier = 0;
     let isGameOver = false;
+    let musicMuted = false;
+    let currentMusic = null;
+    let currentTrackIndex = 0;
+    const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
 
-    const toastDiv = document.getElementById("toast");
+    let player = { x: 3, y: 3, hp: 10 };
+    let enemies = [];
+    let chests = [];
+
+    const sprites = {
+      tilemap: new Image(),
+      player: new Image(),
+      bat: new Image(),
+      chest: new Image()
+    };
+
+    sprites.tilemap.src = "assets/tilemapfloor1to100.png";
+    sprites.player.src = "assets/playercharacter.png";
+    sprites.bat.src = "assets/goblintbat.png";
+    sprites.chest.src = "assets/itemchestpickup.png";
+
     function toast(msg, color = "#ccc") {
       toastDiv.innerText = msg;
       toastDiv.style.color = color;
       toastDiv.style.opacity = 1;
       setTimeout(() => (toastDiv.style.opacity = 0), 1500);
     }
-
-    const speaker = document.getElementById("speaker");
-    let musicMuted = false;
-    let currentMusic = null;
-    let currentTrackIndex = 0;
-    const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
-
-    speaker.onclick = () => {
-      musicMuted = !musicMuted;
-      speaker.classList.toggle("muted", musicMuted);
-      if (currentMusic) currentMusic.volume = musicMuted ? 0 : 1;
-    };
-
-    function playMusic() {
-      const track = musicTracks[currentTrackIndex];
-      currentMusic = new Audio(`assets/${track}`);
-      currentMusic.loop = true;
-      currentMusic.volume = musicMuted ? 0 : 1;
-
-      // Attempt to autoplay — modern browsers block autoplay until interaction
-      currentMusic.play().catch(err => {
-        console.warn("Autoplay blocked, waiting for user interaction...");
-        document.addEventListener("keydown", () => currentMusic.play(), { once: true });
-      });
-    }
-
-    function nextTrack() {
-      currentTrackIndex = (currentTrackIndex + 1) % musicTracks.length;
-      if (currentMusic) currentMusic.pause();
-      playMusic();
-    }
-
-    const tileSprite = new Image();
-    tileSprite.src = "assets/tilemapfloor1to100.png";
-
-    const sprites = {
-      player: new Image(),
-      bat: new Image(),
-      chest: new Image()
-    };
-    sprites.player.src = "assets/playercharacter.png";
-    sprites.bat.src = "assets/goblintbat.png";
-    sprites.chest.src = "assets/itemchestpickup.png";
-
-    let enemies = [];
-    let chests = [];
 
     function randPos() {
       return Math.floor(Math.random() * GRID_WIDTH);
@@ -124,7 +99,7 @@
     function spawnStuff() {
       enemies = [];
       chests = [];
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 3; i++) {
         enemies.push({ x: randPos(), y: randPos(), carrying: null });
       }
       for (let i = 0; i < 2; i++) {
@@ -138,10 +113,10 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(tileSprite, offsetX, offsetY, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+      ctx.drawImage(sprites.tilemap, offsetX, offsetY, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
 
-      chests.forEach(c => drawTile(c.x, c.y, sprites.chest));
-      enemies.forEach(e => drawTile(e.x, e.y, sprites.bat));
+      for (let chest of chests) drawTile(chest.x, chest.y, sprites.chest);
+      for (let enemy of enemies) drawTile(enemy.x, enemy.y, sprites.bat);
       drawTile(player.x, player.y, sprites.player);
 
       ctx.font = "14px monospace";
@@ -149,19 +124,34 @@
       ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${tier}`, offsetX, offsetY + GRID_HEIGHT * TILE_SIZE + 16);
     }
 
-    function nextFloor() {
-      floor++;
-      if ((floor - 1) % 100 === 0 && floor !== 1) {
-        nextTrack();
-      }
-      toast(`Floor ${floor} begins`, "#ccc");
-      spawnStuff();
+    function moveEnemies() {
+      enemies.forEach(e => {
+        if (Math.random() < 0.5) return;
+        let dx = player.x > e.x ? 1 : player.x < e.x ? -1 : 0;
+        let dy = player.y > e.y ? 1 : player.y < e.y ? -1 : 0;
+
+        let nx = e.x + dx;
+        let ny = e.y + dy;
+
+        if (nx === player.x && ny === player.y) return;
+
+        const chestIndex = chests.findIndex(c => c.x === nx && c.y === ny);
+        if (chestIndex !== -1 && !e.carrying) {
+          e.carrying = chests[chestIndex];
+          chests.splice(chestIndex, 1);
+        }
+
+        e.x = Math.max(0, Math.min(GRID_WIDTH - 1, nx));
+        e.y = Math.max(0, Math.min(GRID_HEIGHT - 1, ny));
+      });
     }
 
     function movePlayer(dx, dy) {
       if (isGameOver) return;
-      const newX = player.x + dx;
-      const newY = player.y + dy;
+
+      let newX = player.x + dx;
+      let newY = player.y + dy;
+
       if (newX < 0 || newY < 0 || newX >= GRID_WIDTH || newY >= GRID_HEIGHT) return;
 
       player.x = newX;
@@ -194,27 +184,42 @@
       draw();
     }
 
-    function moveEnemies() {
-      enemies.forEach(e => {
-        if (Math.random() < 0.5) return;
-        let dx = player.x > e.x ? 1 : player.x < e.x ? -1 : 0;
-        let dy = player.y > e.y ? 1 : player.y < e.y ? -1 : 0;
+    function nextFloor() {
+      floor++;
+      if ((floor - 1) % 100 === 0 && floor !== 1) {
+        nextTrack();
+      }
+      toast(`Floor ${floor} begins`, "#ccc");
+      spawnStuff();
+      draw();
+    }
 
-        let nx = e.x + dx;
-        let ny = e.y + dy;
+    function nextTrack() {
+      currentTrackIndex = (currentTrackIndex + 1) % musicTracks.length;
+      if (currentMusic) currentMusic.pause();
+      playMusic();
+    }
 
-        if (nx === player.x && ny === player.y) return;
-
-        const chestIndex = chests.findIndex(c => c.x === nx && c.y === ny);
-        if (chestIndex !== -1 && !e.carrying) {
-          e.carrying = chests[chestIndex];
-          chests.splice(chestIndex, 1);
-        }
-
-        e.x = Math.max(0, Math.min(GRID_WIDTH - 1, nx));
-        e.y = Math.max(0, Math.min(GRID_HEIGHT - 1, ny));
+    function playMusic() {
+      const track = musicTracks[currentTrackIndex];
+      currentMusic = new Audio(`assets/${track}`);
+      currentMusic.loop = true;
+      currentMusic.volume = musicMuted ? 0 : 1;
+      currentMusic.play().catch(() => {
+        // Retry on user interaction
+        const handler = () => {
+          currentMusic.play();
+          document.removeEventListener("keydown", handler);
+        };
+        document.addEventListener("keydown", handler);
       });
     }
+
+    speaker.onclick = () => {
+      musicMuted = !musicMuted;
+      speaker.classList.toggle("muted", musicMuted);
+      if (currentMusic) currentMusic.volume = musicMuted ? 0 : 1;
+    };
 
     window.addEventListener("keydown", e => {
       switch (e.key.toLowerCase()) {
@@ -226,14 +231,21 @@
       }
     });
 
-    window.onload = () => {
-      tileSprite.onload = () => {
-        spawnStuff();
-        draw();
-        playMusic();
-        toast("Welcome to HitPoint Dungeon!");
+    // Wait for all assets to load before starting
+    let loadedImages = 0;
+    const totalImages = Object.keys(sprites).length;
+
+    Object.values(sprites).forEach(img => {
+      img.onload = () => {
+        loadedImages++;
+        if (loadedImages === totalImages) {
+          spawnStuff();
+          draw();
+          playMusic();
+          toast("Welcome to HitPoint Dungeon!");
+        }
       };
-    };
+    });
   </script>
 </body>
 </html>
