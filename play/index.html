@@ -11,35 +11,45 @@
       color: #eee;
       font-family: monospace;
       overflow: hidden;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     canvas {
       display: block;
-      margin: auto;
       background: #111;
     }
-    .toast {
-      position: fixed;
+    #loading {
+      position: absolute;
+      color: white;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+      z-index: 5;
+    }
+    #toastContainer {
+      position: absolute;
       top: 10px;
       left: 10px;
+      pointer-events: none;
+    }
+    .toast {
       background: #333;
       color: white;
       padding: 8px 12px;
       border-radius: 6px;
-      opacity: 0.9;
       font-size: 14px;
       margin-bottom: 4px;
+      opacity: 0.9;
+      border-left: 6px solid white;
       animation: fadeout 3s forwards;
-      pointer-events: none;
     }
-    #toastContainer { pointer-events: none; }
-    #loading {
-      color: white;
-      text-align: center;
-      position: absolute;
-      width: 100%;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 20px;
+    @keyframes fadeout {
+      0% { opacity: 1; }
+      80% { opacity: 0.9; }
+      100% { opacity: 0; transform: translateX(-20px); }
     }
     #musicToggle {
       position: absolute;
@@ -47,19 +57,13 @@
       right: 10px;
       font-size: 24px;
       cursor: pointer;
-      color: white;
       z-index: 10;
-    }
-    @keyframes fadeout {
-      0% { opacity: 1; }
-      80% { opacity: 0.9; }
-      100% { opacity: 0; transform: translateX(-20px); }
     }
   </style>
 </head>
 <body>
 <canvas id="gameCanvas" width="512" height="512"></canvas>
-<div id="musicToggle">🔊</div>
+<div id="musicToggle" style="color: #ccc;">🔊</div>
 <div id="loading">Loading...</div>
 <div id="toastContainer"></div>
 
@@ -69,38 +73,64 @@ const ctx = canvas.getContext("2d");
 const TILE_SIZE = 32;
 const GRID_WIDTH = 6;
 const GRID_HEIGHT = 6;
-
-const player = { x: 0, y: 0, hp: 10, level: 1, itemTier: 0 };
-const enemies = [];
-const items = [];
-const maxTier = 10;
-const totalFloors = 1000;
-let floor = 1;
-let specialRoomEffect = null;
-
-let currentMusic = null;
 const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
+
+let floor = 1;
+let player = { x: 0, y: 0, hp: 10, itemTier: 0 };
+let enemies = [];
+let items = [];
+let specialRoomEffect = null;
+let currentMusic = null;
 let musicEnabled = true;
 
-const spritePaths = {
-  player: "https://hitpoint.pro/play/assets/playercharacter.png",
-  enemy1: "https://hitpoint.pro/play/assets/knightenemyx.png",
-  enemy2: "https://hitpoint.pro/play/assets/goblintbat.png",
-  item: "https://hitpoint.pro/play/assets/itemchestpickup.png",
+const sprites = {
+  player: new Image(),
+  enemy1: new Image(),
+  enemy2: new Image(),
+  item: new Image()
 };
+sprites.player.src = "https://hitpoint.pro/play/assets/playercharacter.png";
+sprites.enemy1.src = "https://hitpoint.pro/play/assets/knightenemyx.png";
+sprites.enemy2.src = "https://hitpoint.pro/play/assets/goblintbat.png";
+sprites.item.src = "https://hitpoint.pro/play/assets/itemchestpickup.png";
 
-const sprites = {};
-const tilemaps = {};
+const tilemaps = [];
 let tilemapsLoaded = 0;
-let spritesLoaded = 0;
 const tilemapCount = 10;
-const totalSprites = Object.keys(spritePaths).length;
+for (let i = 0; i < tilemapCount; i++) {
+  const img = new Image();
+  const start = i * 100 + 1;
+  const end = (i + 1) * 100;
+  img.src = `https://hitpoint.pro/play/assets/tilemapfloor${start}to${end}.png`;
+  img.onload = () => {
+    tilemapsLoaded++;
+    if (tilemapsLoaded === tilemapCount) startGame();
+  };
+  tilemaps.push(img);
+}
+
+let spritesLoaded = 0;
+for (let key in sprites) {
+  sprites[key].onload = () => {
+    spritesLoaded++;
+    if (spritesLoaded === Object.keys(sprites).length && tilemapsLoaded === tilemapCount) {
+      startGame();
+    }
+  };
+}
+
+function startGame() {
+  document.getElementById("loading").style.display = "none";
+  generateMap();
+  draw();
+}
+
+function getTilemapForFloor(floor) {
+  return tilemaps[Math.floor((floor - 1) / 100)];
+}
 
 function loadAudioTrack(track) {
-  if (currentMusic) {
-    currentMusic.pause();
-    currentMusic = null;
-  }
+  if (currentMusic) currentMusic.pause();
   currentMusic = new Audio(`https://hitpoint.pro/play/assets/${track}`);
   currentMusic.loop = true;
   if (musicEnabled) currentMusic.play();
@@ -110,36 +140,9 @@ document.getElementById("musicToggle").addEventListener("click", () => {
   musicEnabled = !musicEnabled;
   document.getElementById("musicToggle").style.color = musicEnabled ? "#ccc" : "red";
   if (currentMusic) {
-    if (musicEnabled) currentMusic.play();
-    else currentMusic.pause();
+    musicEnabled ? currentMusic.play() : currentMusic.pause();
   }
 });
-
-for (let i = 0; i < tilemapCount; i++) {
-  const start = i * 100 + 1;
-  const end = (i + 1) * 100;
-  const img = new Image();
-  img.src = `https://hitpoint.pro/play/assets/tilemapfloor${start}to${end}.png`;
-  img.onload = () => { tilemapsLoaded++; checkAllAssetsLoaded(); };
-  tilemaps[i] = img;
-}
-
-for (const key in spritePaths) {
-  const img = new Image();
-  img.src = spritePaths[key];
-  img.onload = () => { spritesLoaded++; checkAllAssetsLoaded(); };
-  sprites[key] = img;
-}
-
-function checkAllAssetsLoaded() {
-  if (spritesLoaded === totalSprites && tilemapsLoaded === tilemapCount) {
-    document.getElementById("loading").style.display = "none";
-    generateMap();
-    draw();
-  }
-}
-
-const itemColors = ["gray", "green", "blue", "purple", "orange"];
 
 function toast(msg, color = "white") {
   const div = document.createElement("div");
@@ -150,71 +153,59 @@ function toast(msg, color = "white") {
   setTimeout(() => div.remove(), 3000);
 }
 
-function drawTile(x, y, sprite) {
-  ctx.drawImage(sprite, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+function itemTierLabel(tier) {
+  return ["Common", "Uncommon", "Rare", "Epic", "Legendary"][Math.min(4, Math.floor(tier / 2))];
 }
 
-function getTilemapForFloor(floor) {
-  const index = Math.floor((floor - 1) / 100);
-  return tilemaps[index];
+function drawTile(x, y, img) {
+  ctx.drawImage(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 }
 
 function generateMap() {
-  enemies.length = 0;
-  items.length = 0;
-  specialRoomEffect = Math.random() < 0.2 ? randomEffect() : null;
+  enemies = [];
+  items = [];
+  specialRoomEffect = Math.random() < 0.2 ? "fog" : null;
 
   const enemyCount = Math.floor(Math.random() * 3) + 1;
   const itemCount = Math.floor(Math.random() * 3) + 2;
 
   const taken = new Set();
   while (enemies.length < enemyCount) {
-    const x = Math.floor(Math.random() * GRID_WIDTH);
-    const y = Math.floor(Math.random() * GRID_HEIGHT);
-    const key = x + "," + y;
-    if (!taken.has(key)) {
-      taken.add(key);
+    let x = Math.floor(Math.random() * GRID_WIDTH);
+    let y = Math.floor(Math.random() * GRID_HEIGHT);
+    if (!taken.has(`${x},${y}`)) {
+      taken.add(`${x},${y}`);
       enemies.push({
-        x, y,
-        hp: Math.ceil(floor / 10),
-        hasStolenItem: false,
+        x, y, hp: Math.ceil(floor / 10), hasStolenItem: false,
         sprite: Math.random() < 0.5 ? sprites.enemy1 : sprites.enemy2
       });
     }
   }
 
   while (items.length < itemCount) {
-    const x = Math.floor(Math.random() * GRID_WIDTH);
-    const y = Math.floor(Math.random() * GRID_HEIGHT);
-    const key = x + "," + y;
-    if (!taken.has(key)) {
-      taken.add(key);
-      items.push({ x, y, tier: Math.floor(Math.random() * maxTier) });
+    let x = Math.floor(Math.random() * GRID_WIDTH);
+    let y = Math.floor(Math.random() * GRID_HEIGHT);
+    if (!taken.has(`${x},${y}`)) {
+      taken.add(`${x},${y}`);
+      items.push({ x, y, tier: Math.floor(Math.random() * 10) });
     }
   }
 
   player.x = 0;
   player.y = 0;
-  loadAudioTrack(musicTracks[Math.floor(floor / 100) % musicTracks.length]);
+  const musicIndex = Math.floor((floor - 1) / 100) % musicTracks.length;
+  loadAudioTrack(musicTracks[musicIndex]);
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const bg = getTilemapForFloor(floor);
-  if (bg?.complete) ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
-
+  const tilemap = getTilemapForFloor(floor);
+  if (tilemap.complete) ctx.drawImage(tilemap, 0, 0, canvas.width, canvas.height);
   items.forEach(i => drawTile(i.x, i.y, sprites.item));
   enemies.forEach(e => drawTile(e.x, e.y, e.sprite));
   drawTile(player.x, player.y, sprites.player);
-
-  if (specialRoomEffect === "fog") {
-    ctx.fillStyle = "rgba(255,255,255,0.05)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
   ctx.fillStyle = "white";
-  ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, canvas.height - 10);
+  ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, 500);
 }
 
 function movePlayer(dx, dy) {
@@ -225,43 +216,40 @@ function movePlayer(dx, dy) {
   player.x = nx;
   player.y = ny;
 
-  const enemy = enemies.find(e => e.x === nx && e.y === ny);
+  let enemy = enemies.find(e => e.x === nx && e.y === ny);
   if (enemy) {
     if (player.itemTier >= enemy.hp) {
-      enemies.splice(enemies.indexOf(enemy), 1);
+      enemies = enemies.filter(e => e !== enemy);
       toast("Enemy defeated!", "lime");
       if (enemy.hasStolenItem) {
         toast("Recovered stolen chest!", "orange");
-        items.push({ x: nx, y: ny, tier: Math.floor(Math.random() * maxTier) });
+        items.push({ x: nx, y: ny, tier: Math.floor(Math.random() * 10) });
       }
     } else {
       player.hp--;
       toast("You took damage!", "red");
       if (player.hp <= 0) {
-        toast("You died!", "red");
         alert("Game Over");
         location.reload();
       }
     }
   }
 
-  const item = items.find(i => i.x === nx && i.y === ny);
+  let item = items.find(i => i.x === nx && i.y === ny);
   if (item) {
-    const color = itemColors[item.tier % itemColors.length];
-    if (item.tier > player.itemTier) {
-      player.itemTier = item.tier;
-      toast(`+ ${itemTierLabel(item.tier)} Item!`, color);
-    } else {
-      toast(`Weaker ${itemTierLabel(item.tier)} found`, color);
-    }
-    items.splice(items.indexOf(item), 1);
+    const color = ["gray", "green", "blue", "purple", "orange"][item.tier % 5];
+    toast(`+ ${itemTierLabel(item.tier)} Item!`, color);
+    player.itemTier = Math.max(player.itemTier, item.tier);
+    items = items.filter(i => i !== item);
   }
 
   moveEnemiesTowardPlayer();
+
   if (enemies.length === 0) {
     floor++;
-    if (floor > totalFloors) alert("You conquered all 1000 floors!");
-    else {
+    if (floor > 1000) {
+      alert("You conquered all 1000 floors!");
+    } else {
       toast(`Entering floor ${floor}...`);
       generateMap();
     }
@@ -275,40 +263,24 @@ function moveEnemiesTowardPlayer() {
     if (Math.random() < 0.5) {
       let dx = player.x - e.x;
       let dy = player.y - e.y;
-      if (Math.abs(dx) > Math.abs(dy)) dx = Math.sign(dx), dy = 0;
-      else dy = Math.sign(dy), dx = 0;
-
-      const tx = e.x + dx;
-      const ty = e.y + dy;
-
+      if (Math.abs(dx) > Math.abs(dy)) { dx = Math.sign(dx); dy = 0; }
+      else { dy = Math.sign(dy); dx = 0; }
+      let tx = e.x + dx, ty = e.y + dy;
       if (tx >= 0 && ty >= 0 && tx < GRID_WIDTH && ty < GRID_HEIGHT) {
-        const chestAtTarget = items.find(i => i.x === tx && i.y === ty);
-        if (chestAtTarget) {
-          items.splice(items.indexOf(chestAtTarget), 1);
+        const chest = items.find(i => i.x === tx && i.y === ty);
+        if (chest) {
           e.hasStolenItem = true;
+          items = items.filter(i => i !== chest);
           toast("Enemy stole a chest!", "orange");
         }
-        const occupied = enemies.some(en => en.x === tx && en.y === ty);
-        if (!occupied && !(player.x === tx && player.y === ty)) {
+        if (!enemies.some(en => en !== e && en.x === tx && en.y === ty) &&
+            !(player.x === tx && player.y === ty)) {
           e.x = tx;
           e.y = ty;
         }
       }
     }
   });
-}
-
-function itemTierLabel(tier) {
-  if (tier >= 9) return "Legendary";
-  if (tier >= 7) return "Epic";
-  if (tier >= 5) return "Rare";
-  if (tier >= 3) return "Uncommon";
-  return "Common";
-}
-
-function randomEffect() {
-  const effects = ["fog", "dark", "strobe", "lightning", "rainbow"];
-  return effects[Math.floor(Math.random() * effects.length)];
 }
 
 window.addEventListener("keydown", e => {
