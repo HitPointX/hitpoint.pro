@@ -116,7 +116,6 @@
       const dodgeChance = Math.min(100, 1 + tier);
       tierBar.innerText = `Tier: ${tier} | Dodge: ${dodgeChance}%`;
     }
-
     function randPos() {
       return Math.floor(Math.random() * GRID_WIDTH);
     }
@@ -166,10 +165,6 @@
       }
 
       drawTile(player.x, player.y, sprites.player, player.flash > 0 ? (player.color === "gold" ? "rgba(255,215,0,0.5)" : "rgba(255,0,0,0.5)") : null, player.jitter > 0);
-
-      ctx.font = "14px monospace";
-      ctx.fillStyle = "white";
-      ctx.fillText(`Floor ${floor} | HP: ${player.hp}`, offsetX, offsetY + GRID_HEIGHT * TILE_SIZE + 16);
     }
 
     function moveEnemies() {
@@ -276,7 +271,9 @@
         enemies.splice(enemyIndex, 1);
         if (enemies.length === 0) {
           toast("Floor cleared!", "lime");
-          setTimeout(nextFloor, 1200);
+          setTimeout(() => {
+            nextFloor();
+          }, 1000); // autoplay will continue automatically
           return;
         }
       }
@@ -287,7 +284,7 @@
 
     function moveToward(tx, ty) {
       const dx = tx > player.x ? 1 : tx < player.x ? -1 : 0;
-      const dy = ty > player.y ? 1 : ty < player.y ? -1 : 0;
+      const dy = ty > player.y ? 1 : player.y < player.y ? -1 : 0;
       if (dx !== 0) movePlayer(dx, 0);
       else if (dy !== 0) movePlayer(0, dy);
     }
