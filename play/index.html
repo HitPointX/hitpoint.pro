@@ -55,9 +55,9 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const TILE_SIZE = 48;
-    const GRID_WIDTH = 5;
-    const GRID_HEIGHT = 5;
+    const TILE_SIZE = 48; // final scale fix
+    const GRID_WIDTH = 6;
+    const GRID_HEIGHT = 6;
     const offsetX = (canvas.width - GRID_WIDTH * TILE_SIZE) / 2;
     const offsetY = (canvas.height - GRID_HEIGHT * TILE_SIZE) / 2;
 
@@ -73,7 +73,7 @@
     let currentTrackIndex = 0;
     const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
 
-    let player = { x: 2, y: 2, hp: 10, flash: 0, color: "normal", jitter: 0 };
+    let player = { x: 3, y: 3, hp: 10, flash: 0, color: "normal", jitter: 0 };
     let enemies = [], chests = [], items = [], potion = null;
 
     const sprites = {
@@ -185,11 +185,13 @@
       const color = getRarityColor(item.rarity);
 
       if (item.effect === "tier") {
+        const oldTier = tier;
         tier += item.value;
         toast(`${item.name} [+${item.value} Tier]`, color);
         player.flash = 5;
         player.color = "gold";
         updateTierDisplay();
+        console.log(`Tier increased from ${oldTier} → ${tier}`);
       } else if (item.effect === "heal") {
         player.hp = Math.min(50, player.hp + item.value);
         toast(`${item.name} [+${item.value} HP]`, color);
