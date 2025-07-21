@@ -2,295 +2,242 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HitPoint Dungeon</title>
   <style>
     html, body {
       margin: 0;
       background: #111;
-      color: #eee;
-      font-family: monospace;
       overflow: hidden;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     canvas {
       display: block;
+      margin: 0 auto;
       background: #111;
-    }
-    #loading {
-      position: absolute;
-      color: white;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 20px;
-      z-index: 5;
-    }
-    #toastContainer {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      pointer-events: none;
-    }
-    .toast {
-      background: #333;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      margin-bottom: 4px;
-      opacity: 0.9;
-      border-left: 6px solid white;
-      animation: fadeout 3s forwards;
-    }
-    @keyframes fadeout {
-      0% { opacity: 1; }
-      80% { opacity: 0.9; }
-      100% { opacity: 0; transform: translateX(-20px); }
     }
     #musicToggle {
       position: absolute;
       top: 10px;
       right: 10px;
       font-size: 24px;
+      color: white;
       cursor: pointer;
-      z-index: 10;
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="512" height="512"></canvas>
-<div id="musicToggle" style="color: #ccc;">🔊</div>
-<div id="loading">Loading...</div>
-<div id="toastContainer"></div>
+  <div id="musicToggle">🔊</div>
+  <canvas id="gameCanvas" width="512" height="512"></canvas>
 
-<script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const TILE_SIZE = 32;
-const GRID_WIDTH = 6;
-const GRID_HEIGHT = 6;
-const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-let floor = 1;
-let player = { x: 0, y: 0, hp: 10, itemTier: 0 };
-let enemies = [];
-let items = [];
-let specialRoomEffect = null;
-let currentMusic = null;
-let musicEnabled = true;
+    let gridSize = 6;
+    let tileSize = 64;
+    let player = { x: 2, y: 2 };
+    let enemies = [];
+    let chests = [];
 
-const sprites = {
-  player: new Image(),
-  enemy1: new Image(),
-  enemy2: new Image(),
-  item: new Image()
-};
-sprites.player.src = "https://hitpoint.pro/play/assets/playercharacter.png";
-sprites.enemy1.src = "https://hitpoint.pro/play/assets/knightenemyx.png";
-sprites.enemy2.src = "https://hitpoint.pro/play/assets/goblintbat.png";
-sprites.item.src = "https://hitpoint.pro/play/assets/itemchestpickup.png";
+    const tilemap = new Image();
+    const playerImg = new Image();
+    const batImg = new Image();
+    const chestImg = new Image();
 
-const tilemaps = [];
-let tilemapsLoaded = 0;
-const tilemapCount = 10;
-for (let i = 0; i < tilemapCount; i++) {
-  const img = new Image();
-  const start = i * 100 + 1;
-  const end = (i + 1) * 100;
-  img.src = `https://hitpoint.pro/play/assets/tilemapfloor${start}to${end}.png`;
-  img.onload = () => {
-    tilemapsLoaded++;
-    if (tilemapsLoaded === tilemapCount) startGame();
-  };
-  tilemaps.push(img);
-}
+    tilemap.src = "assets/tilemapfloor1to100.png";
+    playerImg.src = "assets/playercharacter.png";
+    batImg.src = "assets/goblintbat.png";
+    chestImg.src = "assets/itemchestpickup.png";
 
-let spritesLoaded = 0;
-for (let key in sprites) {
-  sprites[key].onload = () => {
-    spritesLoaded++;
-    if (spritesLoaded === Object.keys(sprites).length && tilemapsLoaded === tilemapCount) {
-      startGame();
+    let tilemapOffsetX = 0;
+    let tilemapOffsetY = 0;
+
+    let currentFloor = 1;
+    let hp = 10;
+    let tier = 0;
+
+    const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
+    let currentTrackIndex = 0;
+    let musicEnabled = true;
+    let currentMusic = null;
+
+    const musicToggle = document.getElementById("musicToggle");
+    musicToggle.addEventListener("click", () => {
+      musicEnabled = !musicEnabled;
+      musicToggle.style.color = musicEnabled ? "#eee" : "red";
+      if (musicEnabled) {
+        playMusic();
+      } else if (currentMusic) {
+        currentMusic.pause();
+      }
+    });
+
+    function playMusic() {
+      if (currentMusic) currentMusic.pause();
+      const track = musicTracks[Math.floor((currentFloor - 1) / 100) % musicTracks.length];
+      currentMusic = new Audio(`assets/${track}`);
+      currentMusic.loop = true;
+      if (musicEnabled) currentMusic.play();
     }
-  };
-}
 
-function startGame() {
-  document.getElementById("loading").style.display = "none";
-  generateMap();
-  draw();
-}
+    function centerOffsets() {
+      tilemapOffsetX = (canvas.width - gridSize * tileSize) / 2;
+      tilemapOffsetY = (canvas.height - gridSize * tileSize) / 2;
+    }
 
-function getTilemapForFloor(floor) {
-  return tilemaps[Math.floor((floor - 1) / 100)];
-}
+    function drawTilemap() {
+      ctx.drawImage(tilemap, tilemapOffsetX - tileSize, tilemapOffsetY - tileSize);
+    }
 
-function loadAudioTrack(track) {
-  if (currentMusic) currentMusic.pause();
-  currentMusic = new Audio(`https://hitpoint.pro/play/assets/${track}`);
-  currentMusic.loop = true;
-  if (musicEnabled) currentMusic.play();
-}
+    function drawGrid() {
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          ctx.strokeStyle = "rgba(255,255,255,0.1)";
+          ctx.strokeRect(
+            tilemapOffsetX + x * tileSize,
+            tilemapOffsetY + y * tileSize,
+            tileSize,
+            tileSize
+          );
+        }
+      }
+    }
 
-document.getElementById("musicToggle").addEventListener("click", () => {
-  musicEnabled = !musicEnabled;
-  document.getElementById("musicToggle").style.color = musicEnabled ? "#ccc" : "red";
-  if (currentMusic) {
-    musicEnabled ? currentMusic.play() : currentMusic.pause();
-  }
-});
-
-function toast(msg, color = "white") {
-  const div = document.createElement("div");
-  div.className = "toast";
-  div.innerText = msg;
-  div.style.borderLeft = `6px solid ${color}`;
-  document.getElementById("toastContainer").appendChild(div);
-  setTimeout(() => div.remove(), 3000);
-}
-
-function itemTierLabel(tier) {
-  return ["Common", "Uncommon", "Rare", "Epic", "Legendary"][Math.min(4, Math.floor(tier / 2))];
-}
-
-function drawTile(x, y, img) {
-  ctx.drawImage(img, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-}
-
-function generateMap() {
-  enemies = [];
-  items = [];
-  specialRoomEffect = Math.random() < 0.2 ? "fog" : null;
-
-  const enemyCount = Math.floor(Math.random() * 3) + 1;
-  const itemCount = Math.floor(Math.random() * 3) + 2;
-
-  const taken = new Set();
-  while (enemies.length < enemyCount) {
-    let x = Math.floor(Math.random() * GRID_WIDTH);
-    let y = Math.floor(Math.random() * GRID_HEIGHT);
-    if (!taken.has(`${x},${y}`)) {
-      taken.add(`${x},${y}`);
-      enemies.push({
-        x, y, hp: Math.ceil(floor / 10), hasStolenItem: false,
-        sprite: Math.random() < 0.5 ? sprites.enemy1 : sprites.enemy2
+    function drawSprites() {
+      ctx.drawImage(
+        playerImg,
+        tilemapOffsetX + player.x * tileSize,
+        tilemapOffsetY + player.y * tileSize,
+        tileSize,
+        tileSize
+      );
+      enemies.forEach((e) => {
+        ctx.drawImage(
+          batImg,
+          tilemapOffsetX + e.x * tileSize,
+          tilemapOffsetY + e.y * tileSize,
+          tileSize,
+          tileSize
+        );
+      });
+      chests.forEach((c) => {
+        ctx.drawImage(
+          chestImg,
+          tilemapOffsetX + c.x * tileSize,
+          tilemapOffsetY + c.y * tileSize,
+          tileSize,
+          tileSize
+        );
       });
     }
-  }
 
-  while (items.length < itemCount) {
-    let x = Math.floor(Math.random() * GRID_WIDTH);
-    let y = Math.floor(Math.random() * GRID_HEIGHT);
-    if (!taken.has(`${x},${y}`)) {
-      taken.add(`${x},${y}`);
-      items.push({ x, y, tier: Math.floor(Math.random() * 10) });
+    function drawHUD() {
+      ctx.fillStyle = "white";
+      ctx.font = "14px monospace";
+      ctx.fillText(`Floor ${currentFloor} | HP: ${hp} | Tier: ${tier}`, 10, canvas.height - 10);
     }
-  }
 
-  player.x = 0;
-  player.y = 0;
-  const musicIndex = Math.floor((floor - 1) / 100) % musicTracks.length;
-  loadAudioTrack(musicTracks[musicIndex]);
-}
+    function drawGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawTilemap();
+      drawGrid();
+      drawSprites();
+      drawHUD();
+    }
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const tilemap = getTilemapForFloor(floor);
-  if (tilemap.complete) ctx.drawImage(tilemap, 0, 0, canvas.width, canvas.height);
-  items.forEach(i => drawTile(i.x, i.y, sprites.item));
-  enemies.forEach(e => drawTile(e.x, e.y, e.sprite));
-  drawTile(player.x, player.y, sprites.player);
-  ctx.fillStyle = "white";
-  ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${player.itemTier}`, 10, 500);
-}
-
-function movePlayer(dx, dy) {
-  const nx = player.x + dx;
-  const ny = player.y + dy;
-  if (nx < 0 || ny < 0 || nx >= GRID_WIDTH || ny >= GRID_HEIGHT) return;
-
-  player.x = nx;
-  player.y = ny;
-
-  let enemy = enemies.find(e => e.x === nx && e.y === ny);
-  if (enemy) {
-    if (player.itemTier >= enemy.hp) {
-      enemies = enemies.filter(e => e !== enemy);
-      toast("Enemy defeated!", "lime");
-      if (enemy.hasStolenItem) {
-        toast("Recovered stolen chest!", "orange");
-        items.push({ x: nx, y: ny, tier: Math.floor(Math.random() * 10) });
-      }
-    } else {
-      player.hp--;
-      toast("You took damage!", "red");
-      if (player.hp <= 0) {
-        alert("Game Over");
-        location.reload();
+    function movePlayer(dx, dy) {
+      const newX = player.x + dx;
+      const newY = player.y + dy;
+      if (newX >= 0 && newX < gridSize && newY >= 0 && newY < gridSize) {
+        player.x = newX;
+        player.y = newY;
+        handleEnemyTurn();
+        drawGame();
       }
     }
-  }
 
-  let item = items.find(i => i.x === nx && i.y === ny);
-  if (item) {
-    const color = ["gray", "green", "blue", "purple", "orange"][item.tier % 5];
-    toast(`+ ${itemTierLabel(item.tier)} Item!`, color);
-    player.itemTier = Math.max(player.itemTier, item.tier);
-    items = items.filter(i => i !== item);
-  }
+    function handleEnemyTurn() {
+      enemies.forEach((e) => {
+        if (Math.random() < 0.5) {
+          const dx = player.x > e.x ? 1 : player.x < e.x ? -1 : 0;
+          const dy = player.y > e.y ? 1 : player.y < e.y ? -1 : 0;
+          const targetX = e.x + dx;
+          const targetY = e.y + dy;
 
-  moveEnemiesTowardPlayer();
+          if (targetX === player.x && targetY === player.y) {
+            hp--;
+          } else if (
+            !enemies.some((other) => other !== e && other.x === targetX && other.y === targetY)
+          ) {
+            e.x = targetX;
+            e.y = targetY;
 
-  if (enemies.length === 0) {
-    floor++;
-    if (floor > 1000) {
-      alert("You conquered all 1000 floors!");
-    } else {
-      toast(`Entering floor ${floor}...`);
-      generateMap();
-    }
-  }
-
-  draw();
-}
-
-function moveEnemiesTowardPlayer() {
-  enemies.forEach(e => {
-    if (Math.random() < 0.5) {
-      let dx = player.x - e.x;
-      let dy = player.y - e.y;
-      if (Math.abs(dx) > Math.abs(dy)) { dx = Math.sign(dx); dy = 0; }
-      else { dy = Math.sign(dy); dx = 0; }
-      let tx = e.x + dx, ty = e.y + dy;
-      if (tx >= 0 && ty >= 0 && tx < GRID_WIDTH && ty < GRID_HEIGHT) {
-        const chest = items.find(i => i.x === tx && i.y === ty);
-        if (chest) {
-          e.hasStolenItem = true;
-          items = items.filter(i => i !== chest);
-          toast("Enemy stole a chest!", "orange");
+            // Chest steal
+            const chestIndex = chests.findIndex((c) => c.x === e.x && c.y === e.y);
+            if (chestIndex !== -1) {
+              e.hasChest = true;
+              chests.splice(chestIndex, 1);
+            }
+          }
         }
-        if (!enemies.some(en => en !== e && en.x === tx && en.y === ty) &&
-            !(player.x === tx && player.y === ty)) {
-          e.x = tx;
-          e.y = ty;
-        }
-      }
+      });
     }
-  });
-}
 
-window.addEventListener("keydown", e => {
-  switch (e.key) {
-    case "ArrowUp": movePlayer(0, -1); break;
-    case "ArrowDown": movePlayer(0, 1); break;
-    case "ArrowLeft": movePlayer(-1, 0); break;
-    case "ArrowRight": movePlayer(1, 0); break;
-  }
-});
-</script>
+    function spawnFloor() {
+      currentFloor++;
+      player = { x: 2, y: 2 };
+      enemies = [];
+      chests = [];
+
+      const enemyCount = 1 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < enemyCount; i++) {
+        enemies.push({ x: rand(), y: rand(), hasChest: false });
+      }
+
+      const chestCount = 2 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < chestCount; i++) {
+        chests.push({ x: rand(), y: rand() });
+      }
+
+      if ((currentFloor - 1) % 100 === 0) playMusic();
+
+      drawGame();
+    }
+
+    function rand() {
+      return Math.floor(Math.random() * gridSize);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      switch (e.key) {
+        case "ArrowUp":
+        case "w":
+          movePlayer(0, -1);
+          break;
+        case "ArrowDown":
+        case "s":
+          movePlayer(0, 1);
+          break;
+        case "ArrowLeft":
+        case "a":
+          movePlayer(-1, 0);
+          break;
+        case "ArrowRight":
+        case "d":
+          movePlayer(1, 0);
+          break;
+        case " ":
+          spawnFloor();
+          break;
+      }
+    });
+
+    window.onload = () => {
+      centerOffsets();
+      spawnFloor();
+      playMusic();
+    };
+  </script>
 </body>
 </html>
