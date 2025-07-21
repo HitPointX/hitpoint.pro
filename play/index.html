@@ -5,42 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HitPoint Dungeon</title>
   <style>
-    body {
-      margin: 0;
-      background: #111;
-      overflow: hidden;
-    }
-    canvas {
-      display: block;
-      margin: auto;
-      background-color: #111;
-    }
+    body { margin: 0; background: #111; overflow: hidden; }
+    canvas { display: block; margin: auto; background-color: #111; }
     #toast {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 6px 12px;
-      background: rgba(0,0,0,0.7);
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 14px;
-      color: white;
-      opacity: 0;
+      position: absolute; top: 10px; left: 10px;
+      padding: 6px 12px; background: rgba(0,0,0,0.7);
+      border-radius: 4px; font-family: monospace;
+      font-size: 14px; color: white; opacity: 0;
       transition: opacity 0.4s;
     }
     #speaker {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-size: 24px;
-      cursor: pointer;
-      user-select: none;
-      color: #ccc;
-      z-index: 999;
+      position: absolute; top: 8px; right: 8px;
+      font-size: 24px; cursor: pointer; user-select: none;
+      color: #ccc; z-index: 999;
     }
-    #speaker.muted {
-      color: red;
-    }
+    #speaker.muted { color: red; }
   </style>
 </head>
 <body>
@@ -72,6 +51,7 @@
     let player = { x: 3, y: 3, hp: 10 };
     let enemies = [];
     let chests = [];
+    let items = [];
 
     const sprites = {
       tilemap: new Image(),
@@ -135,9 +115,7 @@
         if (Math.random() < 0.5) return;
         let dx = player.x > e.x ? 1 : player.x < e.x ? -1 : 0;
         let dy = player.y > e.y ? 1 : player.y < e.y ? -1 : 0;
-
-        let nx = e.x + dx;
-        let ny = e.y + dy;
+        let nx = e.x + dx, ny = e.y + dy;
 
         if (nx === player.x && ny === player.y) return;
 
@@ -152,12 +130,36 @@
       });
     }
 
+    function applyItem() {
+      if (!items.length) return;
+
+      const item = items[Math.floor(Math.random() * items.length)];
+      if (item.effect === "tier") {
+        tier += item.value;
+        toast(`${item.name} [+${item.value} Tier]`, getRarityColor(item.rarity));
+      } else if (item.effect === "heal") {
+        player.hp += item.value;
+        toast(`${item.name} [+${item.value} HP]`, getRarityColor(item.rarity));
+      } else {
+        toast(item.name, getRarityColor(item.rarity));
+      }
+    }
+
+    function getRarityColor(rarity) {
+      return {
+        common: "white",
+        uncommon: "lime",
+        rare: "blue",
+        epic: "magenta",
+        legendary: "orange"
+      }[rarity] || "#ccc";
+    }
+
     function movePlayer(dx, dy) {
       if (isGameOver) return;
 
       let newX = player.x + dx;
       let newY = player.y + dy;
-
       if (newX < 0 || newY < 0 || newX >= GRID_WIDTH || newY >= GRID_HEIGHT) return;
 
       player.x = newX;
@@ -165,8 +167,8 @@
 
       let chestIndex = chests.findIndex(c => c.x === newX && c.y === newY);
       if (chestIndex !== -1) {
-        toast("You opened a chest!", "yellow");
         chests.splice(chestIndex, 1);
+        applyItem();
       }
 
       let enemyIndex = enemies.findIndex(e => e.x === newX && e.y === newY);
@@ -184,8 +186,6 @@
           chests.push({ x: newX, y: newY });
         }
         enemies.splice(enemyIndex, 1);
-
-        // Check for floor clear
         if (enemies.length === 0) {
           toast("Floor cleared!", "lime");
           setTimeout(nextFloor, 1200);
@@ -199,9 +199,7 @@
 
     function nextFloor() {
       floor++;
-      if ((floor - 1) % 100 === 0 && floor !== 1) {
-        nextTrack();
-      }
+      if ((floor - 1) % 100 === 0 && floor !== 1) nextTrack();
       toast(`Floor ${floor} begins`, "#ccc");
       spawnStuff();
       draw();
@@ -219,11 +217,10 @@
       currentMusic.loop = true;
       currentMusic.volume = musicMuted ? 0 : 1;
       currentMusic.play().catch(() => {
-        const handler = () => {
+        document.addEventListener("keydown", function retryPlay() {
           currentMusic.play();
-          document.removeEventListener("keydown", handler);
-        };
-        document.addEventListener("keydown", handler);
+          document.removeEventListener("keydown", retryPlay);
+        });
       });
     }
 
@@ -246,15 +243,22 @@
     let loadedImages = 0;
     const totalImages = Object.keys(sprites).length;
 
-    Object.values(sprites).forEach(img => {
-      img.onload = () => {
-        loadedImages++;
-        if (loadedImages === totalImages) {
+    function init() {
+      fetch("assets/items_500.json")
+        .then(res => res.json())
+        .then(json => {
+          items = json;
           spawnStuff();
           draw();
           playMusic();
           toast("Welcome to HitPoint Dungeon!");
-        }
+        });
+    }
+
+    Object.values(sprites).forEach(img => {
+      img.onload = () => {
+        loadedImages++;
+        if (loadedImages === totalImages) init();
       };
     });
   </script>
