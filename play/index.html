@@ -77,12 +77,14 @@
       tilemap: new Image(),
       player: new Image(),
       bat: new Image(),
+      knight: new Image(),
       chest: new Image()
     };
 
     sprites.tilemap.src = "assets/tilemapfloor1to100.png";
     sprites.player.src = "assets/playercharacter.png";
     sprites.bat.src = "assets/goblintbat.png";
+    sprites.knight.src = "assets/knightenemy1.png";
     sprites.chest.src = "assets/itemchestpickup.png";
 
     function toast(msg, color = "#ccc") {
@@ -100,7 +102,8 @@
       enemies = [];
       chests = [];
       for (let i = 0; i < 3; i++) {
-        enemies.push({ x: randPos(), y: randPos(), carrying: null });
+        const type = Math.random() < 0.5 ? "bat" : "knight";
+        enemies.push({ x: randPos(), y: randPos(), carrying: null, type });
       }
       for (let i = 0; i < 2; i++) {
         chests.push({ x: randPos(), y: randPos() });
@@ -116,7 +119,10 @@
       ctx.drawImage(sprites.tilemap, offsetX, offsetY, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
 
       for (let chest of chests) drawTile(chest.x, chest.y, sprites.chest);
-      for (let enemy of enemies) drawTile(enemy.x, enemy.y, sprites.bat);
+      for (let enemy of enemies) {
+        const sprite = enemy.type === "bat" ? sprites.bat : sprites.knight;
+        drawTile(enemy.x, enemy.y, sprite);
+      }
       drawTile(player.x, player.y, sprites.player);
 
       ctx.font = "14px monospace";
@@ -178,6 +184,13 @@
           chests.push({ x: newX, y: newY });
         }
         enemies.splice(enemyIndex, 1);
+
+        // Check for floor clear
+        if (enemies.length === 0) {
+          toast("Floor cleared!", "lime");
+          setTimeout(nextFloor, 1200);
+          return;
+        }
       }
 
       moveEnemies();
@@ -206,7 +219,6 @@
       currentMusic.loop = true;
       currentMusic.volume = musicMuted ? 0 : 1;
       currentMusic.play().catch(() => {
-        // Retry on user interaction
         const handler = () => {
           currentMusic.play();
           document.removeEventListener("keydown", handler);
@@ -231,7 +243,6 @@
       }
     });
 
-    // Wait for all assets to load before starting
     let loadedImages = 0;
     const totalImages = Object.keys(sprites).length;
 
