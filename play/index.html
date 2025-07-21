@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +44,7 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const TILE_SIZE = 59; // scaled down from 64
+    const TILE_SIZE = 59; // tightly fits tilemap grid
     const GRID_WIDTH = 6;
     const GRID_HEIGHT = 6;
     const offsetX = (canvas.width - GRID_WIDTH * TILE_SIZE) / 2;
@@ -109,13 +110,13 @@
         chests.push({ x: randPos(), y: randPos() });
       }
 
+      // Spawn potion 98.5% of the time near the player
       if (Math.random() > 0.015) {
-        let dx = Math.random() < 0.5 ? -1 : 1;
-        let dy = Math.random() < 0.5 ? -1 : 1;
-        potion = {
-          x: Math.max(0, Math.min(GRID_WIDTH - 1, player.x + dx)),
-          y: Math.max(0, Math.min(GRID_HEIGHT - 1, player.y + dy))
-        };
+        const dx = Math.floor(Math.random() * 3) - 1;
+        const dy = Math.floor(Math.random() * 3) - 1;
+        let px = Math.max(0, Math.min(GRID_WIDTH - 1, player.x + dx));
+        let py = Math.max(0, Math.min(GRID_HEIGHT - 1, player.y + dy));
+        potion = { x: px, y: py };
       }
     }
 
