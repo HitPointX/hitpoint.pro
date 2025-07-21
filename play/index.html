@@ -20,12 +20,24 @@
       color: #ccc; z-index: 999;
     }
     #speaker.muted { color: red; }
+
+    #tierBar {
+      width: 100%;
+      height: 24px;
+      background: #222;
+      font-family: monospace;
+      font-size: 14px;
+      color: white;
+      text-align: center;
+      line-height: 24px;
+    }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="1024" height="768"></canvas>
   <div id="toast"></div>
   <div id="speaker" title="Toggle Music">🔊</div>
+  <div id="tierBar">Tier: 0</div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -39,6 +51,7 @@
 
     const speaker = document.getElementById("speaker");
     const toastDiv = document.getElementById("toast");
+    const tierBar = document.getElementById("tierBar");
 
     let floor = 1;
     let tier = 0;
@@ -48,7 +61,7 @@
     let currentTrackIndex = 0;
     const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
 
-    let player = { x: 3, y: 3, hp: 10 };
+    let player = { x: 3, y: 3, hp: 10, flash: 0, color: "normal" };
     let enemies = [];
     let chests = [];
     let items = [];
@@ -83,14 +96,18 @@
       chests = [];
       for (let i = 0; i < 3; i++) {
         const type = Math.random() < 0.5 ? "bat" : "knight";
-        enemies.push({ x: randPos(), y: randPos(), carrying: null, type });
+        enemies.push({ x: randPos(), y: randPos(), carrying: null, type, flash: 0 });
       }
       for (let i = 0; i < 2; i++) {
         chests.push({ x: randPos(), y: randPos() });
       }
     }
 
-    function drawTile(x, y, sprite) {
+    function drawTile(x, y, sprite, tint) {
+      if (tint) {
+        ctx.fillStyle = tint;
+        ctx.fillRect(offsetX + x * TILE_SIZE, offsetY + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      }
       ctx.drawImage(sprite, offsetX + x * TILE_SIZE, offsetY + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
     }
 
@@ -101,13 +118,14 @@
       for (let chest of chests) drawTile(chest.x, chest.y, sprites.chest);
       for (let enemy of enemies) {
         const sprite = enemy.type === "bat" ? sprites.bat : sprites.knight;
-        drawTile(enemy.x, enemy.y, sprite);
+        drawTile(enemy.x, enemy.y, sprite, enemy.flash > 0 ? "rgba(255,0,0,0.5)" : null);
       }
-      drawTile(player.x, player.y, sprites.player);
+      drawTile(player.x, player.y, sprites.player, player.flash > 0 ? (player.color === "gold" ? "rgba(255,215,0,0.5)" : "rgba(255,0,0,0.5)") : null);
 
       ctx.font = "14px monospace";
       ctx.fillStyle = "white";
-      ctx.fillText(`Floor ${floor} | HP: ${player.hp} | Tier: ${tier}`, offsetX, offsetY + GRID_HEIGHT * TILE_SIZE + 16);
+      ctx.fillText(`Floor ${floor} | HP: ${player.hp}`, offsetX, offsetY + GRID_HEIGHT * TILE_SIZE + 16);
+      tierBar.innerText = `Tier: ${tier}`;
     }
 
     function moveEnemies() {
@@ -132,20 +150,21 @@
 
     function applyItem() {
       if (!items.length) return;
-
       const item = items[Math.floor(Math.random() * items.length)];
       const color = getRarityColor(item.rarity);
+
       if (item.effect === "tier") {
         tier += item.value;
         toast(`${item.name} [+${item.value} Tier]`, color);
+        player.flash = 5;
+        player.color = "gold";
       } else if (item.effect === "heal") {
         player.hp += item.value;
         toast(`${item.name} [+${item.value} HP]`, color);
       } else {
         toast(item.name, color);
       }
-
-      draw(); // update tier in footer
+      draw();
     }
 
     function getRarityColor(rarity) {
@@ -178,6 +197,11 @@
       if (enemyIndex !== -1) {
         toast("You fight the enemy!", "red");
         player.hp -= 3;
+        player.flash = 5;
+        player.color = "red";
+
+        enemies[enemyIndex].flash = 5;
+
         if (player.hp <= 0) {
           player.hp = 0;
           toast("You died!", "red");
@@ -246,6 +270,13 @@
     let loadedImages = 0;
     const totalImages = Object.keys(sprites).length;
 
+    function tick() {
+      if (player.flash > 0) player.flash--;
+      enemies.forEach(e => { if (e.flash > 0) e.flash--; });
+      draw();
+      requestAnimationFrame(tick);
+    }
+
     function init() {
       fetch("assets/items_500.json")
         .then(res => res.json())
@@ -255,6 +286,7 @@
           draw();
           playMusic();
           toast("Welcome to HitPoint Dungeon!");
+          tick();
         });
     }
 
