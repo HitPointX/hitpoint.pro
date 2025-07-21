@@ -10,7 +10,7 @@
       background-color: #111;
       overflow: hidden;
     }
-    #gameCanvas {
+    canvas {
       display: block;
       margin: auto;
       background-color: #111;
@@ -34,16 +34,19 @@
       right: 8px;
       font-size: 24px;
       cursor: pointer;
-      filter: drop-shadow(0 0 2px #000);
       user-select: none;
       color: #ccc;
+    }
+    #speaker.muted {
+      color: red;
     }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="1024" height="768"></canvas>
   <div id="toast"></div>
-  <div id="speaker">🔊</div>
+  <div id="speaker" title="Toggle Music">🔊</div>
+
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -59,17 +62,6 @@
     let floor = 1;
     let tier = 0;
     let isGameOver = false;
-    let musicMuted = false;
-    let currentMusic = null;
-    let currentTrackIndex = 0;
-    const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
-
-    const speaker = document.getElementById("speaker");
-    speaker.addEventListener("click", () => {
-      musicMuted = !musicMuted;
-      speaker.style.color = musicMuted ? "red" : "#ccc";
-      if (currentMusic) currentMusic.volume = musicMuted ? 0 : 1;
-    });
 
     const toastDiv = document.getElementById("toast");
     function toast(msg, color = "#ccc") {
@@ -79,13 +71,29 @@
       setTimeout(() => (toastDiv.style.opacity = 0), 1500);
     }
 
+    const speaker = document.getElementById("speaker");
+    let musicMuted = false;
+    let currentMusic = null;
+    let currentTrackIndex = 0;
+    const musicTracks = ["renderme.mp3", "senderbeware.mp3"];
+
+    speaker.onclick = () => {
+      musicMuted = !musicMuted;
+      speaker.classList.toggle("muted", musicMuted);
+      if (currentMusic) currentMusic.volume = musicMuted ? 0 : 1;
+    };
+
     function playMusic() {
       const track = musicTracks[currentTrackIndex];
       currentMusic = new Audio(`assets/${track}`);
       currentMusic.loop = true;
       currentMusic.volume = musicMuted ? 0 : 1;
-      currentMusic.onerror = () => console.error("Audio failed to load:", track);
-      currentMusic.play().catch(err => console.warn("Music playback error:", err));
+
+      // Attempt to autoplay — modern browsers block autoplay until interaction
+      currentMusic.play().catch(err => {
+        console.warn("Autoplay blocked, waiting for user interaction...");
+        document.addEventListener("keydown", () => currentMusic.play(), { once: true });
+      });
     }
 
     function nextTrack() {
@@ -116,10 +124,10 @@
     function spawnStuff() {
       enemies = [];
       chests = [];
-      for (let i = 0; i < Math.random() * 3 + 1; i++) {
+      for (let i = 0; i < 2; i++) {
         enemies.push({ x: randPos(), y: randPos(), carrying: null });
       }
-      for (let i = 0; i < Math.random() * 3 + 2; i++) {
+      for (let i = 0; i < 2; i++) {
         chests.push({ x: randPos(), y: randPos() });
       }
     }
@@ -161,15 +169,16 @@
 
       let chestIndex = chests.findIndex(c => c.x === newX && c.y === newY);
       if (chestIndex !== -1) {
-        toast("Found chest!", "yellow");
+        toast("You opened a chest!", "yellow");
         chests.splice(chestIndex, 1);
       }
 
       let enemyIndex = enemies.findIndex(e => e.x === newX && e.y === newY);
       if (enemyIndex !== -1) {
-        toast("You fight!", "red");
+        toast("You fight the enemy!", "red");
         player.hp -= 3;
         if (player.hp <= 0) {
+          player.hp = 0;
           toast("You died!", "red");
           isGameOver = true;
           setTimeout(() => location.reload(), 2000);
@@ -208,21 +217,16 @@
     }
 
     window.addEventListener("keydown", e => {
-      switch (e.key) {
-        case "ArrowUp":
-        case "w": movePlayer(0, -1); break;
-        case "ArrowDown":
-        case "s": movePlayer(0, 1); break;
-        case "ArrowLeft":
-        case "a": movePlayer(-1, 0); break;
-        case "ArrowRight":
-        case "d": movePlayer(1, 0); break;
+      switch (e.key.toLowerCase()) {
+        case "w": case "arrowup": movePlayer(0, -1); break;
+        case "s": case "arrowdown": movePlayer(0, 1); break;
+        case "a": case "arrowleft": movePlayer(-1, 0); break;
+        case "d": case "arrowright": movePlayer(1, 0); break;
         case " ": nextFloor(); break;
       }
     });
 
     window.onload = () => {
-      toast("Loading...", "#aaa");
       tileSprite.onload = () => {
         spawnStuff();
         draw();
