@@ -620,16 +620,16 @@ window.ParticleSystem = class ParticleSystem {
         if (t > 420 && !this._starStarted) this._starDone = true;
       }
 
-      // One-time cat formation: trigger once between 2:00 and 3:00.
+      // One-time cat formation: trigger once between 2:00 and 4:00.
       // Pre-schedule target time to avoid missing the window due to background tab throttling.
       if (!this._catDone) {
         const t = tAudioNow;
         if (!this._catScheduled) {
-          this._catAt = 120 + Math.random() * 60; // [120, 180]
+          this._catAt = 120 + Math.random() * 120; // [120, 240]
           this._catScheduled = true;
           try { console.log('[cat] scheduled at', this._catAt.toFixed(2), 's'); } catch {}
         }
-        const inWindow = t >= 120 && t <= 180;
+        const inWindow = t >= 120 && t <= 240;
         if (!this._catStarted && inWindow && t >= (this._catAt || 1e9)) {
           const u = this.points.material.uniforms;
           // duration 6–10s for visibility
@@ -639,7 +639,7 @@ window.ParticleSystem = class ParticleSystem {
           const R = this.sphereRadius || 40;
           u.uCatScale.value = R * 0.65; // roughly fill area
           u.uCatCenter.value.set(0, 0, 0);
-          u.uCatStrength.value = 1.0;
+          u.uCatStrength.value = 1.1; // slight boost to ensure convergence
           u.uCatPlane.value = 1.2;
           this._catStarted = true;
           try { console.log('[cat] start at audio t=', t.toFixed(2), 'dur=', u.uCatDur.value.toFixed(2)); } catch {}
@@ -647,7 +647,7 @@ window.ParticleSystem = class ParticleSystem {
           setTimeout(() => { this._catDone = true; }, u.uCatDur.value * 1000 + 200);
         }
         // If we pass the window without triggering, mark done to prevent later fire
-        if (t > 180 && !this._catStarted) {
+        if (t > 240 && !this._catStarted) {
           this._catDone = true;
           try { console.log('[cat] window passed without trigger'); } catch {}
         }
@@ -1367,4 +1367,3 @@ window.ParticleSystem = class ParticleSystem {
     uniforms.uSpoutDur.value[slot] = dur;
   }
 }
-
