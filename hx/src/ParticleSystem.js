@@ -338,6 +338,14 @@ window.ParticleSystem = class ParticleSystem {
   uStarInner: { value: 0.42 },
   uStarStrength: { value: 1.0 },
   uStarCenter: { value: new window.THREE.Vector3(0, 0, 0) },
+  uStarSpin: { value: 0.0 },
+  // cat formation event
+  uCatStart: { value: -1.0 },
+  uCatDur: { value: 5.0 },
+  uCatCenter: { value: new window.THREE.Vector3(0, 0, 0) },
+  uCatScale: { value: 22.0 },
+  uCatStrength: { value: 1.0 },
+  uCatPlane: { value: 1.2 },
   // blue-face event (emoji-like faces)
   uFaceStart: { value: -1.0 },
   uFaceDur: { value: 3.5 },
@@ -599,6 +607,10 @@ window.ParticleSystem = class ParticleSystem {
           u.uStarInner.value = 0.35 + Math.random()*0.2;
           u.uStarStrength.value = 1.0;
           u.uStarCenter.value.set(0, 0, 0);
+          // Initialize spin state
+          u.uStarSpin.value = 0.0;
+          this._starSpinBurstAt = performance.now() + 300 + Math.random()*500; // first burst soon
+          this._starSpinVel = 0.0; // radians per second
           this._starStarted = true;
           // mark done after total duration
           const totalMs = (u.uStarHold.value + u.uStarExplode.value) * 1000;
@@ -606,6 +618,33 @@ window.ParticleSystem = class ParticleSystem {
         }
         // If we pass the window without triggering, mark done to prevent later fire
         if (t > 420 && !this._starStarted) this._starDone = true;
+      }
+
+      // One-time cat formation: trigger once between 2:00 and 3:00
+      if (!this._catDone) {
+        const t = tAudioNow;
+        if (!this._catScheduled && t >= 120 && t <= 180) {
+          // choose a random trigger within [120, 180]
+          this._catAt = 120 + Math.random() * (180 - 120);
+          this._catScheduled = true;
+        }
+        if (this._catScheduled && !this._catStarted && t >= (this._catAt || 1e9)) {
+          const u = this.points.material.uniforms;
+          // duration 6–10s for visibility
+          u.uCatDur.value = 6.0 + Math.random()*4.0;
+          u.uCatStart.value = nowSec;
+          // scale relative to sphere radius
+          const R = this.sphereRadius || 40;
+          u.uCatScale.value = R * 0.65; // roughly fill area
+          u.uCatCenter.value.set(0, 0, 0);
+          u.uCatStrength.value = 1.0;
+          u.uCatPlane.value = 1.2;
+          this._catStarted = true;
+          // mark done after duration
+          setTimeout(() => { this._catDone = true; }, u.uCatDur.value * 1000 + 200);
+        }
+        // If we pass the window without triggering, mark done to prevent later fire
+        if (t > 180 && !this._catStarted) this._catDone = true;
       }
 
       // Pink spout scheduler: after 3:00 gate, higher spawn rate than inner tornado.
@@ -672,6 +711,50 @@ window.ParticleSystem = class ParticleSystem {
   const pDt = performance.now() - this.pointerLastMove;
   const pointerStrength = Math.max(0, 1 - pDt / this.pointerDecayMs);
       m.uniforms.uPointerStrength.value = pointerStrength;
+
+      // Star spin bursts: while star is active (during hold), apply quick random spins
+      if (m.uniforms.uStarStart.value >= 0) {
+        const ageS = nowSec - m.uniforms.uStarStart.value;
+        const totalS = m.uniforms.uStarHold.value + m.uniforms.uStarExplode.value;
+        const inHold = ageS >= 0 && ageS <= m.uniforms.uStarHold.value;
+        if (inHold) {
+          // schedule random bursts a few times per second
+          if (!this._starSpinBurstAt) this._starSpinBurstAt = performance.now() + 250 + Math.random()*500;
+          if (performance.now() >= this._starSpinBurstAt) {
+            // new burst: high angular velocity for a short time
+            const dir = Math.random() < 0.5 ? -1 : 1;
+            const speed = (8 + Math.random()*22) * dir; // rad/s
+            this._starSpinVel = speed;
+            // burst duration 100–250 ms
+            this._starSpinEndAt = performance.now() + (100 + Math.random()*150);
+            // next burst time
+            this._starSpinBurstAt = performance.now() + (160 + Math.random()*320);
+          }
+          // decay current burst when time elapsed
+          if (this._starSpinEndAt && performance.now() > this._starSpinEndAt) {
+            this._starSpinVel = 0.0;
+            this._starSpinEndAt = null;
+          }
+          // integrate spin angle
+          m.uniforms.uStarSpin.value += this._starSpinVel * (this._emaDt/1000);
+        } else {
+          // outside hold: stop spin and slowly reset angle so the explode phase isn’t spinning
+          this._starSpinVel = 0.0;
+          // gentle ease back towards 0
+          m.uniforms.uStarSpin.value *= 0.92;
+          if (ageS < 0 || ageS > totalS) {
+            // fully reset state once event is over
+            m.uniforms.uStarSpin.value = 0.0;
+            this._starSpinBurstAt = null;
+            this._starSpinEndAt = null;
+          }
+        }
+      } else {
+        // no star event active
+        this._starSpinVel = 0.0;
+        this._starSpinBurstAt = null;
+        this._starSpinEndAt = null;
+      }
       // GPU timer query begin
       const gl = this.renderer.getContext();
       if (this.gpuExt && !this._gpuActiveQuery) {
