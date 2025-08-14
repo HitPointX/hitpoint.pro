@@ -282,7 +282,7 @@ window.startFinalMessage = function startFinalMessage() {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   // Click-through to external video after text completes
-  const targetUrl = 'https://youtu.be/dQw4w9WgXcQ?si=XSXB8Xws7UcC5Gks';
+  const targetUrl = 'https://youtu.be/tT9Eh8wNMkw?si=NsJ-isNPgSNb849Y&t=1';
   let clickArmed = false;
   const armClick = () => {
     if (clickArmed) return; // only once
@@ -407,3 +407,4 @@ window.startFinalMessage = function startFinalMessage() {
   }
   requestAnimationFrame(frame);
 };
+
