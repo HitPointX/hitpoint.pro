@@ -451,21 +451,21 @@ void main() {
       float dy = sdCat(P + vec2(0.0,e)) - d;
       vec2 n2 = normalize(vec2(dx, dy) + 1e-5);
       vec3 n = normalize(vec3(n2, 0.0));
-      // edge and interior masks
-      float w = 0.08;
-      float edge = 1.0 - smoothstep(w*0.6, w, abs(d));
-      float inside = smoothstep(0.0, 0.35, -d);
       // temporal envelope (ease in/out over duration)
       float x = clamp(ageC / max(0.001, uCatDur), 0.0, 1.0);
       float env = smoothstep(0.0, 0.15, x) * smoothstep(1.0, 0.85, x);
-      // Always exert some pull, stronger when near the plane
-      float strength = uCatStrength * env * mix(0.25, 1.0, planeW);
-      // push toward silhouette
-      pos += n * (uCatScale * 0.25 * (edge * 1.2 + inside * 0.6) * strength);
-      // flatten to plane for crispness (weighted by plane proximity)
-      pos.z = mix(pos.z, uCatCenter.z, strength * (0.5 + 0.5*planeW));
-      // slight darkening at edges for contrast
-      vDarken = max(vDarken, edge * planeW * 0.8);
+  // Always exert some pull, stronger when near the plane
+  float strength = uCatStrength * env * mix(0.35, 1.0, planeW);
+  // Move toward the silhouette (d -> 0) along the gradient; affects inside/outside
+  // Small per-frame step for stability
+  float stepK = 0.12;
+  vec2 toward = -n2 * d; // descent toward the zero level set
+  pos.xy += toward * (uCatScale * stepK) * strength;
+  // flatten to plane for crispness (weighted by plane proximity)
+  pos.z = mix(pos.z, uCatCenter.z, strength * (0.65 + 0.35*planeW));
+  // subtle edge emphasis for contrast
+  float edge = 1.0 - smoothstep(0.04, 0.12, abs(d));
+  vDarken = max(vDarken, edge * planeW * 0.85);
     }
   }
 
