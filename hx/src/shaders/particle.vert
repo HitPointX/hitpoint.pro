@@ -36,6 +36,7 @@ uniform float uStarRadius;    // world units outer radius of the star
 uniform float uStarInner;     // inner radius ratio (0.2..0.6)
 uniform float uStarStrength;  // 0..1 attraction strength
 uniform vec3  uStarCenter;    // center of star plane
+uniform float uStarSpin;      // radians, rotation of star arms over time
 // collapse phase near track end
 uniform float uCollapsePhase; // 0..1
 // blue-face event
@@ -81,6 +82,14 @@ uniform float uDrawFadeStart; // time seconds
 uniform float uDrawFadeDur;
 uniform float uDrawScatter;   // sideways jitter amount within stroke region
 
+// Cat formation (2D silhouette on plane z = uCatCenter.z)
+uniform float uCatStart;     // seconds, -1 inactive
+uniform float uCatDur;       // seconds duration
+uniform vec3  uCatCenter;    // world center
+uniform float uCatScale;     // world units half-width
+uniform float uCatStrength;  // 0..1 push strength
+uniform float uCatPlane;     // half-thickness of active z-slab
+
 attribute float aSeed;
 attribute vec3 aColor;
 varying vec3 vColor;
@@ -95,6 +104,57 @@ float sdCapsule(vec2 p, vec2 a, vec2 b, float r){
   vec2 pa = p - a, ba = b - a;
   float h = clamp(dot(pa, ba)/dot(ba,ba), 0.0, 1.0);
   return length(pa - ba*h) - r;
+}
+
+// Signed distance to a triangle (Inigo Quilez)
+float sdTriangle(vec2 p, vec2 a, vec2 b, vec2 c)
+{
+  vec2 ba = b - a; vec2 pa = p - a;
+  vec2 cb = c - b; vec2 pb = p - b;
+  vec2 ac = a - c; vec2 pc = p - c;
+  vec2 nor = vec2(ba.y, -ba.x) + vec2(cb.y, -cb.x) + vec2(ac.y, -ac.x);
+  float s = sign(dot(nor, a) + dot(nor, b) + dot(nor, c));
+  float d = min(min(
+    dot(pa - ba*clamp(dot(pa,ba)/dot(ba,ba),0.0,1.0), pa - ba*clamp(dot(pa,ba)/dot(ba,ba),0.0,1.0)),
+    dot(pb - cb*clamp(dot(pb,cb)/dot(cb,cb),0.0,1.0), pb - cb*clamp(dot(pb,cb)/dot(cb,cb),0.0,1.0))),
+    dot(pc - ac*clamp(dot(pc,ac)/dot(ac,ac),0.0,1.0), pc - ac*clamp(dot(pc,ac)/dot(ac,ac),0.0,1.0)) );
+  return s * sqrt(d + 1e-8);
+}
+
+// A playful standing cat silhouette: head + ears + body + arms up + legs + tail
+float sdCat(vec2 p)
+{
+  float d = 1e9;
+  // Head
+  d = min(d, sdCircle(p - vec2(0.0, 0.68), 0.25));
+  // Ears (two small triangles)
+  vec2 eL0 = vec2(-0.18, 0.78), eL1 = vec2(-0.05, 1.02), eL2 = vec2(-0.32, 0.95);
+  vec2 eR0 = vec2( 0.18, 0.78), eR1 = vec2( 0.05, 1.02), eR2 = vec2( 0.32, 0.95);
+  d = min(d, sdTriangle(p, eL0, eL1, eL2));
+  d = min(d, sdTriangle(p, eR0, eR1, eR2));
+  // Body (rounded capsule)
+  d = min(d, sdCapsule(p, vec2(0.0, 0.55), vec2(0.0, -0.35), 0.33));
+  // Arms raised
+  vec2 sL = vec2(-0.16, 0.52);
+  vec2 pL = sL + rot(-0.9) * vec2(0.0, 0.54);
+  vec2 sR = vec2( 0.16, 0.52);
+  vec2 pR = sR + rot( 0.9) * vec2(0.0, 0.54);
+  d = min(d, sdCapsule(p, sL, pL, 0.10));
+  d = min(d, sdCapsule(p, sR, pR, 0.10));
+  // Legs
+  vec2 hL = vec2(-0.10, -0.32);
+  vec2 fL = vec2(-0.13, -0.80);
+  vec2 hR = vec2( 0.10, -0.32);
+  vec2 fR = vec2( 0.13, -0.78);
+  d = min(d, sdCapsule(p, hL, fL, 0.11));
+  d = min(d, sdCapsule(p, hR, fR, 0.11));
+  // Tail (two curved segments approximated by capsules)
+  vec2 t0 = vec2(0.30, -0.10);
+  vec2 t1 = vec2(0.58,  0.12);
+  vec2 t2 = vec2(0.74,  0.42);
+  d = min(d, sdCapsule(p, t0, t1, 0.08));
+  d = min(d, sdCapsule(p, t1, t2, 0.07));
+  return d;
 }
 
 float sdHumanoid(vec2 p, float t, float mirrorSign){
@@ -344,7 +404,8 @@ void main() {
       vec3 rel = pos - uStarCenter;
       vec2 p = rel.xy;
       float r = length(p);
-      float a = atan(p.y, p.x);
+  // Rotate star arms by adding uStarSpin to the angular evaluation
+  float a = atan(p.y, p.x) + uStarSpin;
       float n = float(uStarPoints);
       // radial profile: mix inner and outer radius based on |cos(n*a)| power for crisp points
       float wave = pow(abs(cos(a * n)), 3.0);
@@ -371,6 +432,40 @@ void main() {
         pos += nrm * push;
         // allow temporary expansion
         flareExtend = max(flareExtend, push);
+      }
+    }
+  }
+
+  // Cat formation: during [uCatStart, uCatStart+uCatDur], attract into a cat silhouette.
+  if (uCatStart >= 0.0) {
+    float ageC = uTime - uCatStart;
+    if (ageC >= 0.0 && ageC <= uCatDur) {
+      // project to plane and evaluate SDF
+      vec3 rel = pos - uCatCenter;
+      float plane = 1.0 - smoothstep(uCatPlane, uCatPlane*1.8, abs(rel.z));
+      if (plane > 0.0) {
+        vec2 P = rel.xy / max(1e-3, uCatScale);
+        float d = sdCat(P);
+        // gradient approx
+        float e = 0.01;
+        float dx = sdCat(P + vec2(e,0.0)) - d;
+        float dy = sdCat(P + vec2(0.0,e)) - d;
+        vec2 n2 = normalize(vec2(dx, dy) + 1e-5);
+        vec3 n = normalize(vec3(n2, 0.0));
+        // edge and interior masks
+        float w = 0.08;
+        float edge = 1.0 - smoothstep(w*0.6, w, abs(d));
+        float inside = smoothstep(0.0, 0.35, -d);
+        // temporal envelope (ease in/out over duration)
+        float x = clamp(ageC / max(0.001, uCatDur), 0.0, 1.0);
+        float env = smoothstep(0.0, 0.15, x) * smoothstep(1.0, 0.85, x);
+        float strength = uCatStrength * env * plane;
+        // push toward silhouette
+        pos += n * (uCatScale * 0.25 * (edge * 1.2 + inside * 0.6) * strength);
+        // flatten to plane for crispness
+        pos.z = mix(pos.z, uCatCenter.z, strength * 0.9);
+        // slight darkening at edges for contrast
+        vDarken = max(vDarken, edge * plane * 0.8);
       }
     }
   }
