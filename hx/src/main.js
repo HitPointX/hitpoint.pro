@@ -281,6 +281,32 @@ window.startFinalMessage = function startFinalMessage() {
   ctx.font = `${fontPx}px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
+  // Click-through to external video after text completes
+  const targetUrl = 'https://youtu.be/dQw4w9WgXcQ?si=XSXB8Xws7UcC5Gks';
+  let clickArmed = false;
+  const armClick = () => {
+    if (clickArmed) return; // only once
+    clickArmed = true;
+    // Visual hint
+    c.style.cursor = 'pointer';
+    // Define a circular hotspot around the collapsed hole (screen center)
+    const radiusPx = Math.max(48 * DPR, Math.round(Math.min(c.width, c.height) * 0.06));
+    const onClick = (ev) => {
+      const r = c.getBoundingClientRect();
+      const x = (ev.clientX - r.left) * DPR;
+      const y = (ev.clientY - r.top) * DPR;
+      const dx = x - centerX;
+      const dy = y - centerY;
+      if (dx*dx + dy*dy <= radiusPx*radiusPx) {
+        // Navigate to the video in the same tab
+        window.location.href = targetUrl;
+      }
+    };
+    c.addEventListener('click', onClick);
+    // Clean up if the canvas is ever removed
+    const mo = new MutationObserver(() => { if (!document.body.contains(c)) mo.disconnect(); });
+    mo.observe(document.body, { childList: true, subtree: true });
+  };
   // Typewriter state
   let i = 0;
   const startTs = performance.now();
@@ -354,7 +380,11 @@ window.startFinalMessage = function startFinalMessage() {
       requestAnimationFrame(frame);
       return;
     }
-    if (finishedAt == null) finishedAt = now;
+    if (finishedAt == null) {
+      finishedAt = now;
+      // Arm the click hotspot as soon as the full text is visible
+      armClick();
+    }
     if (now - finishedAt < 3000) {
       requestAnimationFrame(frame);
     }
