@@ -442,31 +442,30 @@ void main() {
     if (ageC >= 0.0 && ageC <= uCatDur) {
       // project to plane and evaluate SDF
       vec3 rel = pos - uCatCenter;
-      float plane = 1.0 - smoothstep(uCatPlane, uCatPlane*1.8, abs(rel.z));
-      if (plane > 0.0) {
-        vec2 P = rel.xy / max(1e-3, uCatScale);
-        float d = sdCat(P);
-        // gradient approx
-        float e = 0.01;
-        float dx = sdCat(P + vec2(e,0.0)) - d;
-        float dy = sdCat(P + vec2(0.0,e)) - d;
-        vec2 n2 = normalize(vec2(dx, dy) + 1e-5);
-        vec3 n = normalize(vec3(n2, 0.0));
-        // edge and interior masks
-        float w = 0.08;
-        float edge = 1.0 - smoothstep(w*0.6, w, abs(d));
-        float inside = smoothstep(0.0, 0.35, -d);
-        // temporal envelope (ease in/out over duration)
-        float x = clamp(ageC / max(0.001, uCatDur), 0.0, 1.0);
-        float env = smoothstep(0.0, 0.15, x) * smoothstep(1.0, 0.85, x);
-        float strength = uCatStrength * env * plane;
-        // push toward silhouette
-        pos += n * (uCatScale * 0.25 * (edge * 1.2 + inside * 0.6) * strength);
-        // flatten to plane for crispness
-        pos.z = mix(pos.z, uCatCenter.z, strength * 0.9);
-        // slight darkening at edges for contrast
-        vDarken = max(vDarken, edge * plane * 0.8);
-      }
+      float planeW = 1.0 - smoothstep(uCatPlane, uCatPlane*1.8, abs(rel.z));
+      vec2 P = rel.xy / max(1e-3, uCatScale);
+      float d = sdCat(P);
+      // gradient approx
+      float e = 0.01;
+      float dx = sdCat(P + vec2(e,0.0)) - d;
+      float dy = sdCat(P + vec2(0.0,e)) - d;
+      vec2 n2 = normalize(vec2(dx, dy) + 1e-5);
+      vec3 n = normalize(vec3(n2, 0.0));
+      // edge and interior masks
+      float w = 0.08;
+      float edge = 1.0 - smoothstep(w*0.6, w, abs(d));
+      float inside = smoothstep(0.0, 0.35, -d);
+      // temporal envelope (ease in/out over duration)
+      float x = clamp(ageC / max(0.001, uCatDur), 0.0, 1.0);
+      float env = smoothstep(0.0, 0.15, x) * smoothstep(1.0, 0.85, x);
+      // Always exert some pull, stronger when near the plane
+      float strength = uCatStrength * env * mix(0.25, 1.0, planeW);
+      // push toward silhouette
+      pos += n * (uCatScale * 0.25 * (edge * 1.2 + inside * 0.6) * strength);
+      // flatten to plane for crispness (weighted by plane proximity)
+      pos.z = mix(pos.z, uCatCenter.z, strength * (0.5 + 0.5*planeW));
+      // slight darkening at edges for contrast
+      vDarken = max(vDarken, edge * planeW * 0.8);
     }
   }
 
