@@ -2,84 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HitPoint 7 Days to Die Server</title>
+  <title>Redirecting...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <style>
-    body {
-      --bg-x: 0px;
-      --bg-y: 0px;
-    }
-  </style>
-
-  <link rel="stylesheet" href="style.css" />
+  <meta http-equiv="refresh" content="0; url=https://hitpoint.pro/hx" />
+  <script>
+    // JavaScript fallback redirect
+    window.location.href = "https://hitpoint.pro/hx";
+  </script>
 </head>
 <body>
-  <div id="fog-overlay"></div>
-  <div id="vignette"></div>
-  <div class="content">
-    <h1>🧟‍♀️</h1>
-
-    <p>
-      <strong>Server Address:</strong> play.hitpoint.pro<br />
-      <button onclick="navigator.clipboard.writeText('play.hitpoint.pro'); alert('IP copied to clipboard!');">
-        📋 Copy Server Address
-      </button><br />
-      <small style="color: gray;">Add the server manually in 7 Days to Die using <strong>play.hitpoint.pro</strong></small>
-    </p>
-
-    <p><strong>Game:</strong> 7 Days to Die (Stable Build)</p>
-    <p><strong>Status:</strong> <span id="status">Manual connection required</span></p>
-
-    <div id="uptime-chart">
-      <h2>📈 Server Uptime</h2>
-      <canvas id="uptimeCanvas" width="300" height="200"></canvas>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    // Simulated uptime chart
-    const ctx = document.getElementById('uptimeCanvas').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        datasets: [{
-          label: 'Uptime (%)',
-          data: [100, 100, 100, 100, 100, 100],
-          borderColor: 'lime',
-          backgroundColor: 'rgba(0,255,0,0.1)',
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true, max: 100 }
-        }
-      }
-    });
-
-    document.addEventListener("mousemove", e => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 30;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      document.body.style.setProperty("--bg-x", `${x}px`);
-      document.body.style.setProperty("--bg-y", `${y}px`);
-    });
-  </script>
-
-  <noscript>
-    <div id="js-toast">
-      ⚠️ JavaScript is disabled in your browser.<br /><br />
-      You won’t be able to use uptime data or quick-copy buttons.<br /><br />
-      <strong>To join manually:</strong><br />
-      1. Open 7 Days to Die<br />
-      2. Go to "Join Game" → Add Favorite<br />
-      3. Use: <strong>play.hitpoint.pro</strong><br />
-      4. Click Connect
-    </div>
-  </noscript>
+  <p>If you are not redirected automatically, <a href="https://hitpoint.pro/hx">click here</a>.</p>
 </body>
 </html>
