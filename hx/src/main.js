@@ -289,6 +289,9 @@ window.startFinalMessage = function startFinalMessage() {
     clickArmed = true;
     // Visual hint
     c.style.cursor = 'pointer';
+    // Ensure this canvas sits on top and can receive clicks
+    c.style.pointerEvents = 'auto';
+    c.style.zIndex = '1000';
     // Define a circular hotspot around the collapsed hole (screen center)
     const radiusPx = Math.max(48 * DPR, Math.round(Math.min(c.width, c.height) * 0.06));
     const onClick = (ev) => {
@@ -303,6 +306,19 @@ window.startFinalMessage = function startFinalMessage() {
       }
     };
     c.addEventListener('click', onClick);
+    // Also support touch
+    c.addEventListener('touchend', (ev) => {
+      const touch = ev.changedTouches && ev.changedTouches[0];
+      if (!touch) return;
+      const r = c.getBoundingClientRect();
+      const x = (touch.clientX - r.left) * DPR;
+      const y = (touch.clientY - r.top) * DPR;
+      const dx = x - centerX;
+      const dy = y - centerY;
+      if (dx*dx + dy*dy <= radiusPx*radiusPx) {
+        window.location.href = targetUrl;
+      }
+    }, { passive: true });
     // Clean up if the canvas is ever removed
     const mo = new MutationObserver(() => { if (!document.body.contains(c)) mo.disconnect(); });
     mo.observe(document.body, { childList: true, subtree: true });
