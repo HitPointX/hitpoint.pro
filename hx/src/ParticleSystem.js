@@ -156,7 +156,7 @@ window.ParticleSystem = class ParticleSystem {
   this.trackDuration = 459; // seconds (7:39) fallback
   this.collapseDur = 15; // seconds
   // Auto particle growth config
-  this.maxParticles = 200000;
+  this.maxParticles = 487500;
   this._autoGrowEnabled = true;
   this._lastGrowCheck = performance.now();
   this._growCount = this.count || 2;
@@ -1367,3 +1367,4 @@ window.ParticleSystem = class ParticleSystem {
     uniforms.uSpoutDur.value[slot] = dur;
   }
 }
+
