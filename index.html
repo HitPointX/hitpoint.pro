@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voxel Particle Sphere Stress Test</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; }
+    canvas { display: block; }
+    #info { position: absolute; top: 10px; left: 10px; color: #fff; font-family: sans-serif; }
+    #quoteOverlay {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      max-width: min(90vw, 900px);
+      padding: 0 1rem;
+      color: #f6f6ff;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      text-align: center;
+      line-height: 1.4;
+      letter-spacing: 0.2px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+      opacity: 0;
+      transition: opacity 4s ease;
+      z-index: 10;
+      pointer-events: none;
+      user-select: none;
+    }
+    #quoteOverlay.show { opacity: 1; }
+    #quoteOverlay .text { font-size: clamp(16px, 2.3vw, 28px); font-weight: 600; }
+    #quoteOverlay .caret { display: inline-block; width: 1ch; color: #ffd1f7; }
+    @keyframes caretBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    #quoteOverlay .caret { animation: caretBlink 1s step-end infinite; }
+    /* Energy nudge text under the quote */
+    #energyNudge {
+      margin-top: 14px;
+      font-size: clamp(12px, 1.6vw, 18px);
+      letter-spacing: 2.5px;
+      opacity: 0;
+      color: #b7f2ff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+      transition: opacity 1.6s ease;
+      position: relative;
+    }
+    #energyNudge.show { opacity: 1; }
+    #energyNudge.hide { opacity: 0; transition: opacity 2.4s ease; }
+    #energyWord { position: relative; font-weight: 700; color: #d8fbff; }
+    #energyOrb {
+      position: absolute; width: 8px; height: 8px; border-radius: 50%;
+      background: radial-gradient(closest-side, #bff1ff, #7dd3ff 60%, rgba(0,0,0,0) 70%);
+      box-shadow: 0 0 8px rgba(125, 211, 255, 0.85), 0 0 16px rgba(125,211,255,0.35);
+      pointer-events: none; z-index: 2;
+    }
+    #quoteCanvas {
+      position: absolute;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      z-index: 11; pointer-events: none;
+    }
+  #hud { position: absolute; top: 8px; right: 10px; z-index: 12; color: #e8e8ef; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; opacity: 0.9; }
+  #hud span { display: inline-block; min-width: 52px; text-align: right; }
+  #hud .label { color: #a2a2b5; margin-right: 6px; }
+  /* Smoke overlay sits above the 3D canvas but below quote overlay */
+  #smokeCanvas {
+    position: absolute;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    z-index: 6; pointer-events: none; opacity: 1;
+    transition: opacity 1.8s ease;
+  }
+    /* Fullscreen black fade-in */
+    #blackFade {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      opacity: 1;
+      transition: opacity 2.5s ease;
+      z-index: 9;
+      pointer-events: none;
+    }
+    #blackFade.hide { opacity: 0; }
+  </style>
+</head>
+<body>
+  <div id="info">Voxel Particle Sphere Stress Test<br>Particles: <span id="particleCount">2</span></div>
+  <div id="quoteOverlay">
+    <span class="text" id="quoteText"></span><span class="caret">|</span>
+  <div id="energyNudge">USE YOUR <span id="energyWord">ENERGY</span></div>
+  </div>
+  <canvas id="smokeCanvas"></canvas>
+  <canvas id="quoteCanvas"></canvas>
+  <div id="blackFade"></div>
+  <div id="hud" style="display: none;">
+    <div><span class="label">FPS</span><span id="fps">-</span></div>
+    <div><span class="label">GPU</span><span id="gpu">-</span></div>
+    <div><span class="label">MEM</span><span id="mem">-</span></div>
+  </div>
+  <!-- Load Three.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+  <!-- Avoid inline scripts to play nice with CSP -->
+  <script src="./src/ParticleSystem.js"></script>
+  <script src="./src/controls.js"></script>
+  <script src="./src/main.js"></script>
+</body>
+</html>
