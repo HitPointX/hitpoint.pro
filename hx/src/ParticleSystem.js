@@ -620,15 +620,17 @@ window.ParticleSystem = class ParticleSystem {
         if (t > 420 && !this._starStarted) this._starDone = true;
       }
 
-      // One-time cat formation: trigger once between 2:00 and 3:00
+      // One-time cat formation: trigger once between 2:00 and 3:00.
+      // Pre-schedule target time to avoid missing the window due to background tab throttling.
       if (!this._catDone) {
         const t = tAudioNow;
-        if (!this._catScheduled && t >= 120 && t <= 180) {
-          // choose a random trigger within [120, 180]
-          this._catAt = 120 + Math.random() * (180 - 120);
+        if (!this._catScheduled) {
+          this._catAt = 120 + Math.random() * 60; // [120, 180]
           this._catScheduled = true;
+          try { console.log('[cat] scheduled at', this._catAt.toFixed(2), 's'); } catch {}
         }
-        if (this._catScheduled && !this._catStarted && t >= (this._catAt || 1e9)) {
+        const inWindow = t >= 120 && t <= 180;
+        if (!this._catStarted && inWindow && t >= (this._catAt || 1e9)) {
           const u = this.points.material.uniforms;
           // duration 6–10s for visibility
           u.uCatDur.value = 6.0 + Math.random()*4.0;
@@ -640,11 +642,15 @@ window.ParticleSystem = class ParticleSystem {
           u.uCatStrength.value = 1.0;
           u.uCatPlane.value = 1.2;
           this._catStarted = true;
+          try { console.log('[cat] start at audio t=', t.toFixed(2), 'dur=', u.uCatDur.value.toFixed(2)); } catch {}
           // mark done after duration
           setTimeout(() => { this._catDone = true; }, u.uCatDur.value * 1000 + 200);
         }
         // If we pass the window without triggering, mark done to prevent later fire
-        if (t > 180 && !this._catStarted) this._catDone = true;
+        if (t > 180 && !this._catStarted) {
+          this._catDone = true;
+          try { console.log('[cat] window passed without trigger'); } catch {}
+        }
       }
 
       // Pink spout scheduler: after 3:00 gate, higher spawn rate than inner tornado.
