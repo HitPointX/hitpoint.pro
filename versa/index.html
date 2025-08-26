@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Versant &lt;VERSA&gt; — FFXIV Free Company</title>
+  <meta name="description" content="Versant &lt;VERSA&gt; — a friendly, active Free Company on Zalera (Crystal). Raids, roulettes, glam, housing, maps, and mentor help for sprouts." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0b0f17;--ink:#e8eefc;--muted:#a9b5cc;--accent:#66e2ff;--accent2:#9b8cff;--card:#121a27;--glass:rgba(255,255,255,.06)}
+    *{box-sizing:border-box}
+    html,body{margin:0;background:radial-gradient(1200px 800px at 80% -10%,#1b2440 0%,#0b0f17 55%), var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    a{color:var(--accent)}
+    .wrap{max-width:1150px;margin:0 auto;padding:24px}
+    .hero{position:relative;padding:88px 24px 72px;background:
+      linear-gradient(180deg,rgba(7,10,18,.8),rgba(7,10,18,.6)),
+      url('https://images.ctfassets.net/wn7ipiv9ue5v/6wK6uJ8FCP1o0qQp0jL2D8/6a730d2d6a04f24e7a6b5774b79b3a29/ffxiv-endwalker-01.jpg?q=80&w=2000&fm=webp');
+      background-size:cover;background-position:center;border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+    .hero h1{font-size: clamp(32px, 4.5vw, 60px); line-height:1.05; margin:0 0 12px;font-weight:800; letter-spacing:-.02em}
+    .badge{display:inline-flex;gap:10px;align-items:center;background:linear-gradient(135deg,rgba(102,226,255,.25),rgba(155,140,255,.25));border:1px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:999px;color:#dff7ff;font-weight:600;backdrop-filter:blur(6px)}
+    .lead{max-width:860px;color:var(--muted);font-size: clamp(16px, 1.7vw, 20px);line-height:1.7}
+    .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+    .btn{--ring:0 0 0 0 rgba(102,226,255,.0);display:inline-flex;align-items:center;gap:10px;background:linear-gradient(180deg,#1b293f,#0f1726);color:#dfe7ff;border:1px solid rgba(255,255,255,.12);padding:12px 16px;border-radius:12px;text-decoration:none;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.35);transition:transform .15s ease, box-shadow .15s ease}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.45)}
+    .btn.primary{background:linear-gradient(180deg,#4dcdf0 0%,#3aa9f2 45%,#3a8bf2 100%);color:#06101a;border:none}
+    .btn.ghost{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));color:#e9f5ff}
+
+    .grid{display:grid;gap:18px}
+    .cards{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:-38px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:18px;backdrop-filter:blur(6px);box-shadow:0 4px 18px rgba(0,0,0,.25)}
+    .card h3{margin:2px 0 6px;font-size:14px;color:#b9c6de;font-weight:700;text-transform:uppercase;letter-spacing:.12em}
+    .stat{font-size: clamp(24px,3.2vw,34px); font-weight:800; letter-spacing:-.02em}
+
+    .section{padding:64px 24px}
+    .section h2{font-size: clamp(24px,3.2vw,36px);margin:0 0 14px;font-weight:800;letter-spacing:-.02em}
+    .muted{color:var(--muted)}
+
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--glass);border:1px solid rgba(255,255,255,.12);font-size:12px;color:#cdd7ee}
+
+    .two-col{display:grid;grid-template-columns: 1.2fr .8fr;gap:28px}
+    @media (max-width: 900px){.two-col{grid-template-columns:1fr}}
+
+    .profile{display:flex;gap:14px;align-items:center}
+    .pfp{width:64px;height:64px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:#223555 url('https://na.finalfantasyxiv.com/lodestone/character/placeholder.png') center/cover no-repeat}
+
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{border-bottom:1px dashed rgba(255,255,255,.1);padding:10px 0;text-align:left}
+    .table th{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#a9b5cc}
+
+    footer{padding:48px 24px;border-top:1px solid rgba(255,255,255,.06);color:#94a3b8}
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <span class="badge">Versant &lt;VERSA&gt; · Zalera (Crystal)</span>
+      <h1>Welcome to Versant — a friendly, stylish home for sprouts and vets alike.</h1>
+      <p class="lead">We’re a social-first Free Company clearing roulettes, maps, EX trials, and story together. We help new players learn, glam out in style, and see <em>Endwalker</em> and beyond at a chill pace. Housing hangs at Lavender Beds · Plot 44, Ward 12 (Small).</p>
+      <div class="cta">
+        <a class="btn primary" href="https://na.finalfantasyxiv.com/lodestone/freecompany/9229142273877473591/" target="_blank" rel="noopener">View us on the Lodestone</a>
+        <a class="btn ghost" href="#recruit">Apply / DM a Recruiter</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap grid cards" id="stats">
+      <article class="card"><h3>Active Members</h3><div class="stat" id="fc-members">—</div><div class="muted">Updated live from Lodestone</div></article>
+      <article class="card"><h3>Rank</h3><div class="stat" id="fc-rank">—</div><div class="muted">Company standing</div></article>
+      <article class="card"><h3>Founded</h3><div class="stat" id="fc-formed">—</div><div class="muted">Original formation date</div></article>
+      <article class="card"><h3>Estate</h3><div class="stat" id="fc-estate">Lavender Beds — W12 P44</div><div class="muted">Come say hi!</div></article>
+    </section>
+
+    <section class="section">
+      <div class="wrap two-col">
+        <div>
+          <h2>What we’re about</h2>
+          <p class="muted">Versant is a laid‑back FC that values kindness, teaching, and a good glam. Whether you’re a fresh sprout or a returning veteran, we run daily roulettes, weekly treasure maps, mount farms, and casual raid learning parties. No parse pressure — just clear content, learn at your pace, and have fun.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 0">
+            <span class="pill">Sprout‑friendly mentors</span>
+            <span class="pill">EX trial learning</span>
+            <span class="pill">Maps & glam nights</span>
+            <span class="pill">Housing & buffs</span>
+            <span class="pill">Chill discord</span>
+          </div>
+        </div>
+        <aside>
+          <h2>Company Buffs</h2>
+          <table class="table">
+            <thead><tr><th>Buff</th><th>Usual Day</th></tr></thead>
+            <tbody>
+              <tr><td>Heat of Battle II</td><td>Weeknights</td></tr>
+              <tr><td>Reduced Rates II</td><td>Weekends</td></tr>
+              <tr><td>Helping Hand</td><td>On request for sprouts</td></tr>
+            </tbody>
+          </table>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="recruit">
+      <div class="wrap two-col">
+        <div>
+          <h2>Recruitment</h2>
+          <p class="muted">We’re recruiting friendly players of all levels and jobs on Zalera (Crystal). If you like a drama‑free, helpful vibe with regular casual content — you’ll fit right in.</p>
+          <ul class="muted" style="line-height:1.9">
+            <li>All roles welcome (including crafters/gatherers)</li>
+            <li>New and returning players encouraged — we’ll teach!</li>
+            <li>Static‑curious? We occasionally spin up learning groups</li>
+            <li>Age 18+ suggested, be kind and respectful</li>
+          </ul>
+          <div class="cta">
+            <a class="btn" href="https://na.finalfantasyxiv.com/lodestone/freecompany/9229142273877473591/" target="_blank" rel="noopener">Apply via Lodestone</a>
+            <a class="btn" href="#contact">Message a Recruiter</a>
+          </div>
+        </div>
+        <aside>
+          <h2>Recruiter</h2>
+          <div class="profile">
+            <div class="pfp" aria-hidden="true"></div>
+            <div>
+              <div style="font-weight:800;font-size:18px">Altercate Xero</div>
+              <div class="muted">Community Member · Zalera (Crystal)</div>
+              <div class="muted" style="margin-top:6px">/tell Altercate Xero @ Zalera · Discord: <span id="discordTag">your‑discord‑here</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="wrap">
+        <h2>How to join</h2>
+        <ol class="muted" style="line-height:1.9">
+          <li>Click “Apply via Lodestone” and submit a short note, or /tell a recruiter in‑game.</li>
+          <li>Hop in our Discord for role selection and event pings (invite link goes here).</li>
+          <li>Get a tour of the estate at Lavender Beds — Ward 12, Plot 44.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center">
+      <div>© <span id="year"></span> Versant &lt;VERSA&gt; — Fan site. FINAL FANTASY XIV © SQUARE ENIX CO., LTD.</div>
+      <a class="pill" href="https://na.finalfantasyxiv.com/lodestone/freecompany/9229142273877473591/" target="_blank" rel="noopener">Lodestone Profile</a>
+    </div>
+  </footer>
+
+  <script>
+    
+    const LODESTONE_FC_ID = '9229142273877473591';
+    const XIVAPI_BASE = 'https://cafemaker.wakingsands.com'; // CORS friendly mirror of XIVAPI
+
+    async function loadFreeCompany() {
+      const url = `${XIVAPI_BASE}/freecompany/${LODESTONE_FC_ID}?data=FCM`;
+      try {
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' }});
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const fc = data?.FreeCompany || {};
+        // Populate stats
+        document.querySelector('#fc-members').textContent = (data?.FreeCompanyMembers?.length ?? fc.ActiveMemberCount) || '—';
+        document.querySelector('#fc-rank').textContent = fc.Rank || '—';
+        document.querySelector('#fc-formed').textContent = fc.Formed ? new Date(fc.Formed * 1000).toLocaleDateString() : '—';
+        if (fc.Estate?.Name) {
+          document.querySelector('#fc-estate').textContent = fc.Estate.Name;
+        }
+      } catch (err) {
+        console.warn('Could not fetch XIVAPI / Lodestone data:', err);
+        // Graceful fallback
+        document.querySelector('#fc-members').textContent = '—';
+      }
+    }
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+    loadFreeCompany();
+  </script>
+</body>
+</html>
