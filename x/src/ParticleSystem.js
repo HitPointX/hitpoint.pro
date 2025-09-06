@@ -396,7 +396,9 @@ window.ParticleSystem = class ParticleSystem {
     });
 
   this.points = new window.THREE.Points(geometry, material);
-    this.scene.add(this.points);
+  this._orbGroup = new window.THREE.Group();
+  this._orbGroup.add(this.points);
+  this.scene.add(this._orbGroup);
   this.updatePointSize();
   console.log('Particles capacity:', capacity, 'visible:', this.count);
   }
@@ -412,7 +414,7 @@ window.ParticleSystem = class ParticleSystem {
 
   animate() {
     requestAnimationFrame(() => this.animate());
-    if (this.points) {
+  if (this.points) {
       const nowSec = performance.now() * 0.001;
       const m = this.points.material;
       m.uniforms.uTime.value = nowSec;
@@ -502,7 +504,8 @@ window.ParticleSystem = class ParticleSystem {
         if (tAudio >= startCollapse) {
           phase = Math.min(1, (tAudio - startCollapse) / this.collapseDur);
         }
-        m.uniforms.uCollapsePhase.value = phase;
+  m.uniforms.uCollapsePhase.value = phase;
+  this._collapsePhase = phase;
 
         if (phase >= 0.999) {
           if (!this._finalMsgScheduled && !this._finalMsgTimer) {
@@ -513,7 +516,8 @@ window.ParticleSystem = class ParticleSystem {
             }, 4500);
           }
         } else {
-              if (!this.standbyMode) m.uniforms.uCollapsePhase.value = phase; else m.uniforms.uCollapsePhase.value = 1.0;
+        if (!this.standbyMode) m.uniforms.uCollapsePhase.value = phase; else m.uniforms.uCollapsePhase.value = 1.0;
+      this._collapsePhase = this.standbyMode ? 1.0 : phase;
           if (this._finalMsgTimer) { clearTimeout(this._finalMsgTimer); this._finalMsgTimer = null; }
         }
       } else {
@@ -771,6 +775,19 @@ window.ParticleSystem = class ParticleSystem {
           requestAnimationFrame(check);
         }
       } catch {}
+        const cp = this._collapsePhase == null ? 0 : this._collapsePhase;
+        if (this._orbGroup) {
+          if (cp >= 0.999 || (this.standbyMode && cp >= 1.0)) {
+            const t = performance.now() * 0.001;
+            const period = 600.0; // 10 minutes
+            const ang = (t / period) * Math.PI * 2;
+            const r = 12; // orbital radius around halo center
+            this._orbGroup.position.set(Math.cos(ang)*r, 0, Math.sin(ang)*r);
+            this._orbGroup.rotation.y = ang;
+          } else {
+            this._orbGroup.position.set(0,0,0);
+          }
+        }
     }
 
   const now = performance.now();
