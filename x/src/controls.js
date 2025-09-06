@@ -7,7 +7,25 @@ window.setupControls = function(system) {
   const len = Math.hypot(cam.position.x, cam.position.y, cam.position.z);
   let radius = len > 0 ? len : 60;
   const maxRadius = radius;
-  const minRadius = 2;
+  const baseMinRadius = 2;
+  const collapseThreshold = 0.95;
+  function getMinRadius() {
+    try {
+      if (system && system.points && system.points.material && system.points.material.uniforms) {
+        const cp = system.points.material.uniforms.uCollapsePhase.value;
+        if (cp >= collapseThreshold) return 15; // expanded minimum distance when collapsed
+      }
+    } catch {}
+    return baseMinRadius;
+  }
+  function isCollapsed() {
+    try {
+      if (system && system.points && system.points.material && system.points.material.uniforms) {
+        return system.points.material.uniforms.uCollapsePhase.value >= collapseThreshold;
+      }
+    } catch {}
+    return false;
+  }
 
   const syncAnglesFromCamera = () => {
     const c = system.camera.position;
@@ -28,6 +46,7 @@ window.setupControls = function(system) {
 
   system.canvas.addEventListener('mousedown', (e) => {
     if (e.button === 0) {
+      if (isCollapsed()) return; // disable initiating rotation when collapsed
       leftDown = true;
       prevX = e.clientX;
       prevY = e.clientY;
@@ -38,6 +57,7 @@ window.setupControls = function(system) {
   });
   window.addEventListener('mousemove', (e) => {
     if (!leftDown) return;
+    if (isCollapsed()) { leftDown = false; return; } // stop rotation if collapse reached mid-drag
     theta += (e.clientX - prevX) * 0.01;
     phi += (e.clientY - prevY) * 0.01;
     phi = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, phi));
@@ -52,7 +72,8 @@ window.setupControls = function(system) {
     if (dy === 0) return;
     const factor = dy < 0 ? 0.9 : 1.1;
     radius *= factor;
-    radius = Math.max(minRadius, Math.min(maxRadius, radius));
+  radius = Math.max(getMinRadius(), Math.min(maxRadius, radius));
+  if (radius < getMinRadius()) radius = getMinRadius();
     updateCamera();
   }, { passive: false });
 }
