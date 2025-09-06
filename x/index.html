@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>X.X</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; }
+    canvas { display: block; }
+    #info { position: absolute; top: 10px; left: 10px; color: #fff; font-family: sans-serif; }
+    #quoteOverlay {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      max-width: min(90vw, 900px);
+      padding: 0 1rem;
+      color: #f6f6ff;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      text-align: center;
+      line-height: 1.4;
+      letter-spacing: 0.2px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+      opacity: 0;
+      transition: opacity 4s ease;
+      z-index: 10;
+      pointer-events: none;
+      user-select: none;
+    }
+    #quoteOverlay.show { opacity: 1; }
+    #quoteOverlay .text { font-size: clamp(16px, 2.3vw, 28px); font-weight: 600; }
+    #quoteOverlay .caret { display: inline-block; width: 1ch; color: #ffd1f7; }
+    @keyframes caretBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    #quoteOverlay .caret { animation: caretBlink 1s step-end infinite; }
+    #energyNudge {
+      margin-top: 14px;
+      font-size: clamp(12px, 1.6vw, 18px);
+      letter-spacing: 2.5px;
+      opacity: 0;
+      color: #b7f2ff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+      transition: opacity 1.6s ease;
+      position: relative;
+    }
+    #energyNudge.show { opacity: 1; }
+    #energyNudge.hide { opacity: 0; transition: opacity 2.4s ease; }
+    #energyWord { position: relative; font-weight: 700; color: #d8fbff; }
+    #energyOrb {
+      position: absolute; width: 8px; height: 8px; border-radius: 50%;
+      background: radial-gradient(closest-side, #bff1ff, #7dd3ff 60%, rgba(0,0,0,0) 70%);
+      box-shadow: 0 0 8px rgba(125, 211, 255, 0.85), 0 0 16px rgba(125,211,255,0.35);
+      pointer-events: none; z-index: 2;
+    }
+    #quoteCanvas {
+      position: absolute;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      z-index: 11; pointer-events: none;
+    }
+  #hud { position: absolute; top: 8px; right: 10px; z-index: 12; color: #e8e8ef; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; opacity: 0.9; }
+  #hud span { display: inline-block; min-width: 52px; text-align: right; }
+  #hud .label { color: #a2a2b5; margin-right: 6px; }
+  
+  #smokeCanvas {
+    position: absolute;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    z-index: 6; pointer-events: none; opacity: 1;
+    transition: opacity 1.8s ease;
+  }
+    #blackFade {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      opacity: 1;
+      transition: opacity 2.5s ease;
+      z-index: 9;
+      pointer-events: none;
+    }
+    #blackFade.hide { opacity: 0; }
+    #standbyLayer {
+      position: absolute;
+      left: 50%; top: 58%; transform: translate(-50%, 0);
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      gap: 18px;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color: #e9faff; text-align: center; letter-spacing: 0.5px;
+      z-index: 1002; pointer-events: auto; width: min(90vw, 560px);
+    }
+    #breatherText { font-size: clamp(20px, 3vw, 40px); font-weight: 600; text-shadow: 0 4px 22px rgba(0,180,255,0.2), 0 0 12px rgba(160,230,255,0.35); }
+    #passphraseWrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  #passphraseLabel { font-size: 13px; text-transform: uppercase; opacity: 0.55; letter-spacing: 2px; }
+    #passphraseInput {
+      background: rgba(10,25,35,0.55);
+      border: 1px solid rgba(120,200,255,0.35);
+      color: #d6f6ff; outline: none; width: 100%;
+      padding: 14px 16px 14px 16px; font-size: 18px; font-weight: 600;
+      letter-spacing: 3px; text-align: center; border-radius: 10px;
+      backdrop-filter: blur(6px) saturate(160%);
+      box-shadow: 0 6px 28px -8px rgba(0,180,255,0.4), inset 0 0 0 1px rgba(180,255,255,0.05);
+      caret-color: #8bf1ff;
+    }
+    #passphraseInput:focus { border-color: #8bf1ff; box-shadow: 0 0 0 2px rgba(100,210,255,0.25), 0 8px 30px -6px rgba(0,140,230,0.5); }
+  #passphraseHint { font-size: 12px; opacity: 0.65; letter-spacing: 1.5px; color: #9ed9ec; }
+    #passphraseWrap.success #passphraseInput { border-color: #5dff9a; color: #d9ffe8; box-shadow: 0 0 0 2px rgba(93,255,154,0.28), 0 8px 30px -6px rgba(0,255,160,0.35); }
+    #passphraseWrap.success #passphraseHint { color: #89ffbf; opacity: 0.85; }
+    .blinkCaret::after { content: '\2588'; display: inline-block; width: 0.6ch; margin-left: 4px; animation: blink 1s steps(1,end) infinite; }
+    @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+  #standbyNote { font-size: 12px; opacity: 0.4; letter-spacing: 1.2px; margin-top: 4px; }
+  #passphraseLabel, #passphraseHint, #standbyNote { display: none !important; }
+  #glitchHint { position: relative; min-height: 18px; width: 100%; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; letter-spacing: 1.5px; color: #8ff; opacity: 0; pointer-events: none; user-select: none; mix-blend-mode: screen; filter: drop-shadow(0 0 6px rgba(90,240,255,0.35)); transition: opacity 0.35s ease, transform 0.6s cubic-bezier(.55,.2,.1,1); }
+  #glitchHint.show { opacity: 1; }
+  #glitchHint.fade { opacity: 0; transform: translateY(4px) scale(0.96); }
+  #glitchHint .layer { position: absolute; left: 50%; top: 0; transform: translateX(-50%); white-space: nowrap; }
+  #glitchHint .base { position: relative; }
+    @media (max-width: 600px) { #passphraseInput { font-size: 16px; letter-spacing: 2px; } }
+  </style>
+</head>
+<body>
+  <div id="info">X.X<br>Particles: <span id="particleCount">2</span></div>
+  <div id="quoteOverlay">
+    <span class="text" id="quoteText"></span><span class="caret">|</span>
+  <div id="energyNudge">USE YOUR <span id="energyWord">ENERGY</span></div>
+  </div>
+  <canvas id="smokeCanvas"></canvas>
+  <canvas id="quoteCanvas"></canvas>
+  <div id="blackFade"></div>
+  <div id="standbyLayer" style="display:none;">
+    <div id="breatherText" class="blinkCaret">Take a breather.</div>
+    <div id="passphraseWrap">
+      <input id="passphraseInput" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="16" placeholder="ENTER CODE" />
+  <div id="glitchHint"></div>
+    </div>
+  </div>
+  <div id="hud" style="display: none;">
+    <div><span class="label">FPS</span><span id="fps">-</span></div>
+    <div><span class="label">GPU</span><span id="gpu">-</span></div>
+    <div><span class="label">MEM</span><span id="mem">-</span></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+  <script id="shader-vert" type="x-shader/x-vertex" style="display:none; white-space:pre;">
+ 
+uniform float uTime;uniform float uSize;uniform float uRadius;uniform float uAudioActive;uniform float uAudioBass;uniform float uAudioMid;uniform float uAudioTreble;uniform float uPulse;uniform float uBeatPulse;uniform vec3 uFlareDir[6];uniform float uFlareSpawn[6];uniform float uFlareCone[6];uniform float uFlarePower[6];uniform float uFlareDur[6];uniform vec3 uSpoutDir[8];uniform float uSpoutSpawn[8];uniform float uSpoutCone[8];uniform float uSpoutPower[8];uniform float uSpoutDur[8];uniform float uTornadoStart;uniform float uTornadoDur;uniform vec3 uTornadoAxis;uniform float uTornadoSpeed;uniform float uTornadoInner;uniform float uStarStart;uniform float uStarHold;uniform float uStarExplode;uniform int uStarPoints;uniform float uStarRadius;uniform float uStarInner;uniform float uStarStrength;uniform vec3 uStarCenter;uniform float uStarSpin;uniform float uCollapsePhase;uniform float uFaceStart;uniform float uFaceDur;uniform int uFaceStyle;uniform vec3 uFaceCenter;uniform float uFaceScale;uniform float uFaceStrength;uniform vec3 uPointer;uniform float uPointerStrength;uniform float uPointerRadius;uniform vec3 uBulletStart[3];uniform vec3 uBulletDir[3];uniform float uBulletSpawn[3];uniform float uBulletSpeed;uniform float uBulletRadius;uniform float uBulletFade;uniform vec3 uHeartStart[2];uniform vec3 uHeartDir[2];uniform float uHeartSpawn[2];uniform float uHeartSpeed;uniform float uHeartScale;uniform float uHeartFade;uniform float uDanceActive;uniform float uDanceClock;uniform float uDanceScale;uniform float uDanceWidth;uniform float uDanceOutline;uniform float uDanceIntensity;uniform float uDancePlane;uniform float uDanceFill;uniform float uDanceSizeBoost;uniform vec3 uDrawPts[64];uniform int uDrawCount;uniform float uDrawRadius;uniform float uDrawHold;uniform float uDrawFadeStart;uniform float uDrawFadeDur;uniform float uDrawScatter;uniform float uCatStart;uniform float uCatDur;uniform vec3 uCatCenter;uniform float uCatScale;uniform float uCatStrength;uniform float uCatPlane;uniform float uEasterHeartStart;uniform float uEasterHeartDur;uniform float uEasterHeart;attribute float aSeed;attribute vec3 aColor;varying vec3 vColor;varying float vDarken;varying float vSeed;varying vec2 vTrailDir;mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}float sdCircle(vec2 p,float r){return length(p)-r;}float sdCapsule(vec2 p,vec2 a,vec2 b,float r){vec2 pa=p-a,ba=b-a;float h=clamp(dot(pa,ba)/dot(ba,ba),0.,1.);return length(pa-ba*h)-r;}float sdTriangle(vec2 p,vec2 a,vec2 b,vec2 c){vec2 ba=b-a;vec2 pa=p-a;vec2 cb=c-b;vec2 pb=p-b;vec2 ac=a-c;vec2 pc=p-c;vec2 nor=vec2(ba.y,-ba.x)+vec2(cb.y,-cb.x)+vec2(ac.y,-ac.x);float s=sign(dot(nor,a)+dot(nor,b)+dot(nor,c));float d=min(min(dot(pa-ba*clamp(dot(pa,ba)/dot(ba,ba),0.,1.),pa-ba*clamp(dot(pa,ba)/dot(ba,ba),0.,1.)),dot(pb-cb*clamp(dot(pb,cb)/dot(cb,cb),0.,1.),pb-cb*clamp(dot(pb,cb)/dot(cb,cb),0.,1.))),dot(pc-ac*clamp(dot(pc,ac)/dot(ac,ac),0.,1.),pc-ac*clamp(dot(pc,ac)/dot(ac,ac),0.,1.)));return s*sqrt(d+1e-8);}float sdCat(vec2 p){float d=1e9;d=min(d,sdCircle(p-vec2(0.,0.68),0.25));vec2 eL0=vec2(-0.18,0.78),eL1=vec2(-0.05,1.02),eL2=vec2(-0.32,0.95);vec2 eR0=vec2(0.18,0.78),eR1=vec2(0.05,1.02),eR2=vec2(0.32,0.95);d=min(d,sdTriangle(p,eL0,eL1,eL2));d=min(d,sdTriangle(p,eR0,eR1,eR2));d=min(d,sdCapsule(p,vec2(0.,0.55),vec2(0.,-0.35),0.33));vec2 sL=vec2(-0.16,0.52);vec2 pL=sL+rot(-0.9)*vec2(0.,0.54);vec2 sR=vec2(0.16,0.52);vec2 pR=sR+rot(0.9)*vec2(0.,0.54);d=min(d,sdCapsule(p,sL,pL,0.10));d=min(d,sdCapsule(p,sR,pR,0.10));vec2 hL=vec2(-0.10,-0.32);vec2 fL=vec2(-0.13,-0.80);vec2 hR=vec2(0.10,-0.32);vec2 fR=vec2(0.13,-0.78);d=min(d,sdCapsule(p,hL,fL,0.11));d=min(d,sdCapsule(p,hR,fR,0.11));vec2 t0=vec2(0.30,-0.10);vec2 t1=vec2(0.58,0.12);vec2 t2=vec2(0.74,0.42);d=min(d,sdCapsule(p,t0,t1,0.08));d=min(d,sdCapsule(p,t1,t2,0.07));return d;}float sdHumanoid(vec2 p,float t,float mirrorSign){p.x*=mirrorSign;float head=sdCircle(p-vec2(0.,1.8),0.35);float torso=sdCapsule(p,vec2(0.,1.6),vec2(0.,0.6),0.28);float s1=sin(t*0.7+0.3)*0.35;float h1=sin(t*0.53+1.2)*0.25;vec2 Ls=vec2(-0.42+s1,1.45);vec2 Rs=vec2(0.42+s1,1.45);vec2 Lh=vec2(-0.18+h1,0.6);vec2 Rh=vec2(0.18+h1,0.6);float aL=0.8+0.5*sin(t*0.9+0.4);float aR=-0.8+0.5*sin(t*0.85+1.7);vec2 Lel=Ls+(rot(aL)*vec2(0.,-0.6));vec2 Rel=Rs+(rot(aR)*vec2(0.,-0.6));vec2 Lhnd=Lel+(rot(aL-0.9)*vec2(0.,-0.7));vec2 Rhnd=Rel+(rot(aR+0.9)*vec2(0.,-0.7));float lL=0.2+0.4*sin(t*0.6+0.6);float lR=-0.2+0.4*sin(t*0.62+2.1);vec2 Lkn=Lh+(rot(lL)*vec2(0.05,-0.55));vec2 Rkn=Rh+(rot(lR)*vec2(-0.05,-0.55));vec2 Lft=Lkn+(rot(lL-0.2)*vec2(0.,-0.7));vec2 Rft=Rkn+(rot(lR+0.2)*vec2(0.,-0.7));float d=head;d=min(d,torso);d=min(d,sdCapsule(p,Ls,Lel,0.18));d=min(d,sdCapsule(p,Lel,Lhnd,0.15));d=min(d,sdCapsule(p,Rs,Rel,0.18));d=min(d,sdCapsule(p,Rel,Rhnd,0.15));d=min(d,sdCapsule(p,Lh,Lkn,0.22));d=min(d,sdCapsule(p,Lkn,Lft,0.18));d=min(d,sdCapsule(p,Rh,Rkn,0.22));d=min(d,sdCapsule(p,Rkn,Rft,0.18));return d;}varying vec3 vColor;varying float vDarken;varying float vSeed;varying vec2 vTrailDir;void main(){vColor=aColor;vDarken=0.;vSeed=fract(aSeed);vec3 pos=position;float t=uTime*(0.6+fract(aSeed));vec3 jiggle=vec3(sin(t+pos.y*0.15+aSeed),cos(t*1.2+pos.z*0.1+aSeed*1.3),sin(t*0.8+pos.x*0.12+aSeed*2.1));float musicAmp=mix(1.,clamp(uAudioBass*2.2+uAudioMid*1.8+uAudioTreble*1.,0.,4.),step(0.5,uAudioActive));pos+=jiggle*(3.*musicAmp);pos*=clamp(1.+uPulse,0.6,1.6);/* trimmed body for brevity in inline fallback - full file used when served over http */ gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.0);gl_PointSize=uSize*(300.0/-(modelViewMatrix*vec4(pos,1.,1.)).z);} 
+  </script>
+  <script id="shader-frag" type="x-shader/x-fragment" style="display:none; white-space:pre;">
+ 
+uniform vec3 uLightPos;uniform float uDrawHold;uniform float uCollapsePhase;varying vec3 vColor;varying float vDarken;varying float vSeed;varying vec2 vTrailDir;uniform float uEasterHeart;void main(){vec2 uv=gl_PointCoord-vec2(0.5);float d=length(uv);if(d>0.5) discard;float alpha=smoothstep(0.5,0.,d);float shade=0.5+0.5*dot(normalize(uLightPos),vec3(0.,0.,1.));vec3 base=vColor;if(uDrawHold>0.5){vec3 babyBlue=vec3(0.6,0.85,1.);vec3 navy=vec3(0.05,0.12,0.35);base=mix(navy,babyBlue,vSeed);}vec3 col=base*shade;col*=(1.-clamp(vDarken,0.,0.9));col+=vec3(0.15,0.2,0.25)*(1.-d);if(uCollapsePhase>0.){float glow=pow(1.-d,2.)*uCollapsePhase*1.5;col+=vec3(1.,0.95,0.9)*glow;}if(uEasterHeart>0.001){float pulse=0.6+0.4*sin(uEasterHeart*6.283+vSeed*6.+uEasterHeart*12.);vec3 heartColor=mix(vec3(0.95,0.35,0.65),vec3(1.,0.75,0.9),0.5+0.5*sin(vSeed*12.));col=mix(col,heartColor*(1.2+0.6*pulse),uEasterHeart);}gl_FragColor=vec4(col,alpha);} 
+  </script>
+  <script src="./src/ParticleSystem.js"></script>
+  <script src="./src/controls.js"></script>
+  <script src="./src/main.js"></script>
+</body>
+</html>
