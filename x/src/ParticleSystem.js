@@ -196,7 +196,7 @@ window.ParticleSystem = class ParticleSystem {
   e.preventDefault();
         const hud = document.getElementById('hud');
         if (hud) hud.style.display = (hud.style.display === 'none') ? 'block' : 'none';
-      } else if (e.key.toLowerCase() === 'm') {
+  } else if (e.key === 'F2') {
         if (this._gainOut) {
           this._gainOut.gain.value = this._gainOut.gain.value > 0 ? 0.0 : 1.0;
         }
