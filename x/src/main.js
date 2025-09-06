@@ -77,6 +77,21 @@ window.addEventListener('DOMContentLoaded', () => {
   
   const standbyLayer = document.getElementById('standbyLayer');
   if (standbyLayer) standbyLayer.style.display = 'flex';
+  const breatherEl = document.getElementById('breatherText');
+  if (breatherEl) {
+    const full = 'Take a breather...';
+    breatherEl.textContent = '';
+    const totalMs = 5600;
+    const steps = full.length;
+    const interval = totalMs / steps;
+    let idx = 0;
+    function typeChar(){
+      breatherEl.textContent = full.slice(0, idx);
+      idx++;
+      if (idx <= steps) setTimeout(typeChar, interval);
+    }
+    setTimeout(typeChar, 400);
+  }
   
   const forceCollapse = () => {
     try {
