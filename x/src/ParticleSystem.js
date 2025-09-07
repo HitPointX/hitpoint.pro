@@ -404,6 +404,9 @@ window.ParticleSystem = class ParticleSystem {
   this._arrivalCompleted = false;
   this._arrivalStartTime = 0;
   this._arrivalDur = 6500;
+  // Orbit state (used for smooth radial ramp when orbit begins)
+  this._orbitStarted = false;
+  this._orbitStartTime = 0;
   this._orbGroup.visible = false;
   this._orbGroup.position.set(0,0,-220);
   this._orbGroup.scale.setScalar(0.05);
@@ -796,16 +799,20 @@ window.ParticleSystem = class ParticleSystem {
             if (tA >= 1) { this._arrivalCompleted = true; this._arrivalPending = false; this._orbGroup.position.set(0,0,0); this._orbGroup.scale.setScalar(1); }
           } else if (this._arrivalCompleted) {
             if (cp >= 0.999 || (this.standbyMode && cp >= 1.0)) {
-              const t = performance.now() * 0.001;
+              if (!this._orbitStarted) { this._orbitStarted = true; this._orbitStartTime = performance.now(); }
+              const tNow = performance.now();
+              const t = tNow * 0.001;
               const period = 600.0;
               const ang = (t / period) * Math.PI * 2;
-              const r = 12;
+              // Radius ramps from 0 to target over 12s so initial position is center (no lateral pop)
+              const orbitRamp = Math.min(1, (tNow - this._orbitStartTime) / 12000);
+              const rTarget = 12;
+              const r = rTarget * (orbitRamp * orbitRamp * (3 - 2 * orbitRamp)); // smoothstep
               this._orbGroup.position.set(Math.cos(ang)*r, 0, Math.sin(ang)*r);
               this._orbGroup.rotation.y = ang;
             } else {
-              this._orbGroup.position.x = 0;
-              this._orbGroup.position.y = 0;
-              this._orbGroup.position.z = 0;
+              this._orbitStarted = false; // reset so ramp plays again if we leave full collapse
+              this._orbGroup.position.set(0,0,0);
               this._orbGroup.rotation.y = 0;
             }
           } else {
