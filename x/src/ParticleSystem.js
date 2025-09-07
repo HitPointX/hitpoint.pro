@@ -196,7 +196,7 @@ window.ParticleSystem = class ParticleSystem {
   e.preventDefault();
         const hud = document.getElementById('hud');
         if (hud) hud.style.display = (hud.style.display === 'none') ? 'block' : 'none';
-  } else if (e.key === 'F2') {
+      } else if (e.key.toLowerCase() === 'm') {
         if (this._gainOut) {
           this._gainOut.gain.value = this._gainOut.gain.value > 0 ? 0.0 : 1.0;
         }
@@ -399,6 +399,14 @@ window.ParticleSystem = class ParticleSystem {
   this._orbGroup = new window.THREE.Group();
   this._orbGroup.add(this.points);
   this.scene.add(this._orbGroup);
+  this._arrivalPending = true;
+  this._arrivalStarted = false;
+  this._arrivalCompleted = false;
+  this._arrivalStartTime = 0;
+  this._arrivalDur = 6500;
+  this._orbGroup.visible = false;
+  this._orbGroup.position.set(0,0,-220);
+  this._orbGroup.scale.setScalar(0.05);
   this.updatePointSize();
   console.log('Particles capacity:', capacity, 'visible:', this.count);
   }
@@ -777,15 +785,32 @@ window.ParticleSystem = class ParticleSystem {
       } catch {}
         const cp = this._collapsePhase == null ? 0 : this._collapsePhase;
         if (this._orbGroup) {
-          if (cp >= 0.999 || (this.standbyMode && cp >= 1.0)) {
-            const t = performance.now() * 0.001;
-            const period = 600.0; // 10 minutes
-            const ang = (t / period) * Math.PI * 2;
-            const r = 12; // orbital radius around halo center
-            this._orbGroup.position.set(Math.cos(ang)*r, 0, Math.sin(ang)*r);
-            this._orbGroup.rotation.y = ang;
+          const nowMs = performance.now();
+          if (this._arrivalStarted && !this._arrivalCompleted) {
+            const tA = (nowMs - this._arrivalStartTime) / this._arrivalDur;
+            const e = tA < 0 ? 0 : tA > 1 ? 1 : (tA*tA*(3-2*tA));
+            const z = -220 + 220 * e; // from -220 to 0
+            this._orbGroup.position.set(0,0,z);
+            const scl = 0.05 + (1.0 - 0.05) * e;
+            this._orbGroup.scale.setScalar(scl);
+            if (tA >= 1) { this._arrivalCompleted = true; this._arrivalPending = false; this._orbGroup.position.set(0,0,0); this._orbGroup.scale.setScalar(1); }
+          } else if (this._arrivalCompleted) {
+            if (cp >= 0.999 || (this.standbyMode && cp >= 1.0)) {
+              const t = performance.now() * 0.001;
+              const period = 600.0;
+              const ang = (t / period) * Math.PI * 2;
+              const r = 12;
+              this._orbGroup.position.set(Math.cos(ang)*r, 0, Math.sin(ang)*r);
+              this._orbGroup.rotation.y = ang;
+            } else {
+              this._orbGroup.position.x = 0;
+              this._orbGroup.position.y = 0;
+              this._orbGroup.position.z = 0;
+              this._orbGroup.rotation.y = 0;
+            }
           } else {
-            this._orbGroup.position.set(0,0,0);
+            // still pending (not started) keep hidden
+            this._orbGroup.visible = false;
           }
         }
     }
@@ -877,6 +902,7 @@ window.ParticleSystem = class ParticleSystem {
         this.audioStarted = true;
         this.audio.removeEventListener('playing', onPlaying);
         if (this.audioBtn) this.audioBtn.style.display = 'none';
+  if (this._arrivalPending && !this._arrivalStarted) this._beginArrival();
       };
       this.audio.addEventListener('playing', onPlaying);
       const tryNext = () => {
@@ -905,6 +931,7 @@ window.ParticleSystem = class ParticleSystem {
 
   installAudioGestureListeners() {
     const startAudio = () => {
+  if (this._arrivalPending && !this._arrivalStarted) this._beginArrival();
       this.ensureAudio().catch(() => {
         if (this.audio && !this._audioTriedFallback) {
           this._audioTriedFallback = true;
@@ -958,6 +985,7 @@ window.ParticleSystem = class ParticleSystem {
           this.bufferDuration = buf.duration;
           this.trackDuration = buf.duration;
           this.audioStarted = true;
+          if (this._arrivalPending && !this._arrivalStarted) this._beginArrival();
           this.usingBuffer = true;
           this.bufferSource.onended = () => { this.audioEnded = true; };
           return true;
@@ -1010,6 +1038,16 @@ window.ParticleSystem = class ParticleSystem {
       setTimeout(() => { if (input.parentNode) input.parentNode.removeChild(input); }, 0);
     }, { once: true });
     input.click();
+  }
+
+  _beginArrival() {
+    this._arrivalStarted = true;
+    this._arrivalStartTime = performance.now();
+    if (this._orbGroup) {
+      this._orbGroup.visible = true;
+      this._orbGroup.position.set(0,0,-220);
+      this._orbGroup.scale.setScalar(0.05);
+    }
   }
 
   updatePointSize() {
