@@ -1,4 +1,30 @@
 window.addEventListener('DOMContentLoaded', () => {
+  const UNLOCK_COOKIE = 'hp_menu_unlocked';
+  const getCookie = (name) => {
+    try {
+      const parts = document.cookie ? document.cookie.split(';') : [];
+      for (const p of parts) {
+        const [k, ...rest] = p.trim().split('=');
+        if (k === name) return decodeURIComponent(rest.join('=') || '');
+      }
+    } catch {}
+    return null;
+  };
+  const setCookie = (name, value, { maxAgeSec } = {}) => {
+    try {
+      const attrs = [
+        `${name}=${encodeURIComponent(value)}`,
+        'Path=/',
+        'SameSite=Lax'
+      ];
+      if (typeof maxAgeSec === 'number') attrs.push(`Max-Age=${Math.max(0, Math.floor(maxAgeSec))}`);
+      if (location && location.protocol === 'https:') attrs.push('Secure');
+      document.cookie = attrs.join('; ');
+    } catch {}
+  };
+  const clearCookie = (name) => setCookie(name, '', { maxAgeSec: 0 });
+  const hasUnlock = () => getCookie(UNLOCK_COOKIE) === '1';
+
   const canvas = document.createElement('canvas');
   canvas.style.position = 'absolute';
   canvas.style.top = '0';
@@ -76,9 +102,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   
   const standbyLayer = document.getElementById('standbyLayer');
-  if (standbyLayer) standbyLayer.style.display = 'flex';
+  const unlockedAtLoad = hasUnlock();
+  if (standbyLayer) standbyLayer.style.display = unlockedAtLoad ? 'none' : 'flex';
   const breatherEl = document.getElementById('breatherText');
-  if (breatherEl) {
+  if (breatherEl && !unlockedAtLoad) {
     const full = 'Take a breather...';
     breatherEl.textContent = '';
     const totalMs = 5600;
@@ -113,6 +140,7 @@ window.addEventListener('DOMContentLoaded', () => {
   
   const _pfCodes = [91,73,84,79,43,77,81,95,79,44,70];
   const targetPhrase = String.fromCharCode(..._pfCodes.map((b,i)=> b - ((i%5)+7)));
+  const ACCEPTED_PHRASES = [targetPhrase, 'BREATH'];
   let _secretHashHex = null;
   (async()=>{ try { const enc=new TextEncoder().encode(targetPhrase); const d=await crypto.subtle.digest('SHA-256',enc); _secretHashHex=[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join(''); } catch(e){} })();
   
@@ -254,44 +282,43 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     requestAnimationFrame(jitter);
   }
-  if (input) {
-    input.value = '';
-    input.focus();
-    const updateState = () => {
-  const raw = input.value.toUpperCase();
-      if (input.value !== raw) {
-        const pos = input.selectionStart;
-        input.value = raw; input.setSelectionRange(pos, pos);
-      }
-  const trimmed = raw.replace(/\s+/g, ' ').trim();
-      if (targetPhrase.startsWith(trimmed)) {
-        haloProgress = trimmed.length / targetPhrase.length;
-      } else {
-        haloTriggerFail();
-      }
-      const tryHashMatch = async () => {
-        if (!_secretHashHex) return false;
-        try {
-          const enc=new TextEncoder().encode(trimmed);
-          const d=await crypto.subtle.digest('SHA-256',enc);
-          const h=[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('');
-          return h === _secretHashHex && trimmed.length === targetPhrase.length;
-        } catch { return false; }
-      };
-      if (trimmed === targetPhrase) {
-        wrap.classList.add('success');
-        haloSuccess = true;
-        if (!window._standbyTriggered) {
-          window._standbyTriggered = true;
-          document.dispatchEvent(new CustomEvent('standby:passphrase', { detail: { phrase: targetPhrase } }));
-        }
-      } else {
-        wrap.classList.remove('success');
-        if (!targetPhrase.startsWith(trimmed)) haloSuccess = false;
-      }
-      if (!wrap.classList.contains('success')) {
-        tryHashMatch().then(ok=>{ if (ok) { wrap.classList.add('success'); haloSuccess=true; if (!window._standbyTriggered) { window._standbyTriggered=true; document.dispatchEvent(new CustomEvent('standby:passphrase',{detail:{phrase:'(hidden)'}})); } } });
-      }
+	  if (input) {
+	    input.value = '';
+	    if (!unlockedAtLoad) input.focus();
+	    const updateState = () => {
+	  const raw = input.value.toUpperCase();
+	      if (input.value !== raw) {
+	        const pos = input.selectionStart;
+	        input.value = raw; input.setSelectionRange(pos, pos);
+	      }
+	  const trimmed = raw.replace(/\s+/g, ' ').trim();
+	      const prefixMatch = ACCEPTED_PHRASES.find(p => p.startsWith(trimmed));
+	      if (prefixMatch) haloProgress = trimmed.length / prefixMatch.length;
+	      else haloTriggerFail();
+	      const tryHashMatch = async () => {
+	        if (!_secretHashHex) return false;
+	        try {
+	          const enc=new TextEncoder().encode(trimmed);
+	          const d=await crypto.subtle.digest('SHA-256',enc);
+	          const h=[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('');
+	          return h === _secretHashHex && trimmed.length === targetPhrase.length;
+	        } catch { return false; }
+	      };
+	      const exactMatch = ACCEPTED_PHRASES.includes(trimmed);
+	      if (exactMatch) {
+	        wrap.classList.add('success');
+	        haloSuccess = true;
+	        if (!window._standbyTriggered) {
+	          window._standbyTriggered = true;
+	          document.dispatchEvent(new CustomEvent('standby:passphrase', { detail: { phrase: trimmed } }));
+	        }
+	      } else {
+	        wrap.classList.remove('success');
+	        if (!prefixMatch) haloSuccess = false;
+	      }
+	      if (!wrap.classList.contains('success')) {
+	        tryHashMatch().then(ok=>{ if (ok) { wrap.classList.add('success'); haloSuccess=true; if (!window._standbyTriggered) { window._standbyTriggered=true; document.dispatchEvent(new CustomEvent('standby:passphrase',{detail:{phrase:'(hidden)'}})); } } });
+	      }
   haloTypedActivity = 1.0;
       const rawUpper = raw.toUpperCase();
       const hasHeartSymbol = /<3/.test(rawUpper);
@@ -335,14 +362,59 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
     input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') updateState();
-    });
+	  if (e.key === 'Enter') updateState();
+	    });
+	  }
+
+  const enterMenuMode = ({ persist } = {}) => {
+    if (window._hpMenuEntering || document.body.classList.contains('hp-menu-mode')) return;
+    window._hpMenuEntering = true;
+    if (persist) setCookie(UNLOCK_COOKIE, '1', { maxAgeSec: 60 * 60 * 24 * 365 * 10 });
+
+    document.body.classList.add('hp-menu-transitioning');
+    if (standbyLayer) {
+      standbyLayer.style.pointerEvents = 'none';
+      standbyLayer.style.opacity = '0';
+    }
+    const info = document.getElementById('info');
+    if (info) info.style.opacity = '0';
+
+    const whiteout = document.getElementById('whiteout');
+    if (whiteout) requestAnimationFrame(() => whiteout.classList.add('show'));
+
+    try { if (system && typeof system.fadeOutAudio === 'function') system.fadeOutAudio(2400); } catch {}
+    try { if (system && typeof system.beginMenuFocus === 'function') system.beginMenuFocus({ durationMs: 2600, cameraZ: 8 }); } catch {}
+
+    document.dispatchEvent(new CustomEvent('menu:entering'));
+
+    setTimeout(() => {
+      document.body.classList.add('hp-menu-mode');
+      document.body.classList.remove('hp-menu-transitioning');
+      if (standbyLayer) standbyLayer.style.display = 'none';
+      window._hpMenuEntering = false;
+      document.dispatchEvent(new CustomEvent('menu:enter'));
+    }, 2650);
+  };
+  const exitMenuMode = () => {
+    clearCookie(UNLOCK_COOKIE);
+    location.reload();
+  };
+
+  document.addEventListener('standby:passphrase', (e) => {
+    const phrase = (e && e.detail && e.detail.phrase) ? String(e.detail.phrase) : '';
+    enterMenuMode({ persist: true, phrase });
+  });
+  document.addEventListener('menu:exit', exitMenuMode);
+  document.addEventListener('menu:refresh', () => location.reload());
+
+  if (unlockedAtLoad) {
+    setTimeout(() => enterMenuMode({ persist: false }), 250);
   }
 
-  let haloCanvas = document.createElement('canvas');
-  haloCanvas.id = 'haloOverlay';
-  Object.assign(haloCanvas.style, {
-    position: 'absolute', left: '0', top: '0', width: '100vw', height: '100vh',
+	  let haloCanvas = document.createElement('canvas');
+	  haloCanvas.id = 'haloOverlay';
+	  Object.assign(haloCanvas.style, {
+	    position: 'absolute', left: '0', top: '0', width: '100vw', height: '100vh',
     zIndex: '1001', pointerEvents: 'none'
   });
   document.body.appendChild(haloCanvas);

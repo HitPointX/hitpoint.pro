@@ -75,6 +75,16 @@
       pointer-events: none;
     }
     #blackFade.hide { opacity: 0; }
+    #whiteout {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      transition: opacity 2.2s ease;
+      z-index: 1003;
+      pointer-events: none;
+    }
+    #whiteout.show { opacity: 1; }
     #standbyLayer {
       position: absolute;
       left: 50%; top: 58%; transform: translate(-50%, 0);
@@ -83,6 +93,7 @@
       font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       color: #e9faff; text-align: center; letter-spacing: 0.5px;
       z-index: 1002; pointer-events: auto; width: min(90vw, 560px);
+      transition: opacity 1.3s ease;
     }
     #breatherText { font-size: clamp(20px, 3vw, 40px); font-weight: 600; text-shadow: 0 4px 22px rgba(0,180,255,0.2), 0 0 12px rgba(160,230,255,0.35); }
     #passphraseWrap { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -111,6 +122,167 @@
   #glitchHint .layer { position: absolute; left: 50%; top: 0; transform: translateX(-50%); white-space: nowrap; }
   #glitchHint .base { position: relative; }
     @media (max-width: 600px) { #passphraseInput { font-size: 16px; letter-spacing: 2px; } }
+
+    #info { transition: opacity 1.3s ease; }
+    body.hp-menu-transitioning #quoteOverlay,
+    body.hp-menu-transitioning #quoteCanvas,
+    body.hp-menu-transitioning #smokeCanvas,
+    body.hp-menu-transitioning #haloOverlay,
+    body.hp-menu-transitioning #hud,
+    body.hp-menu-transitioning #audioBtn {
+      opacity: 0 !important;
+    }
+    body.hp-menu-mode #quoteOverlay,
+    body.hp-menu-mode #quoteCanvas,
+    body.hp-menu-mode #smokeCanvas,
+    body.hp-menu-mode #haloOverlay,
+    body.hp-menu-mode #hud,
+    body.hp-menu-mode #audioBtn,
+    body.hp-menu-mode #blackFade {
+      display: none !important;
+    }
+
+    #menuUI {
+      position: fixed;
+      inset: 0;
+      z-index: 2005;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.9s ease;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+    body.hp-menu-mode #menuUI { opacity: 1; pointer-events: auto; }
+
+    #menuBar {
+      height: 54px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 16px;
+      background: rgba(255,255,255,0.94);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      backdrop-filter: blur(10px) saturate(140%);
+      color: #0c0c10;
+      user-select: none;
+    }
+    .hpMenuBtn {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      font-size: 12px;
+      padding: 10px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .hpMenuBtn[aria-expanded="true"] { background: rgba(0,0,0,0.06); }
+    .hpMenuBtn:focus { outline: 2px solid rgba(0,120,255,0.35); outline-offset: 2px; }
+    .hpMenuSpacer { flex: 1 1 auto; }
+    .hpMenuEnd {
+      background: rgba(255,60,80,0.10);
+      border: 1px solid rgba(255,60,80,0.22);
+      color: #8d0f1f;
+    }
+    .hpMenuEnd:hover { background: rgba(255,60,80,0.14); }
+
+    #menuDropdownRoot {
+      position: absolute;
+      left: 0;
+      top: 54px;
+      width: 100%;
+      height: calc(100% - 54px);
+      pointer-events: none;
+    }
+    .hpDropdown {
+      position: absolute;
+      top: 10px;
+      min-width: min(560px, calc(100vw - 24px));
+      max-width: min(780px, calc(100vw - 24px));
+      background: rgba(255,255,255,0.98);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 14px;
+      box-shadow: 0 26px 80px rgba(0,0,0,0.22);
+      padding: 12px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      pointer-events: none;
+    }
+    .hpDropdown.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .hpDropTitle {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 8px 10px 10px 10px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      margin-bottom: 10px;
+    }
+    .hpDropTitle .name { font-weight: 800; letter-spacing: 1.8px; font-size: 12px; color: #101018; }
+    .hpDropTitle .sub { font-size: 12px; opacity: 0.6; }
+
+    .hpList { display: flex; flex-direction: column; gap: 8px; padding: 2px; }
+    .hpRow, .hpLinkRow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-radius: 12px;
+      padding: 10px 10px;
+      background: rgba(0,0,0,0.03);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .hpLinkRow { text-decoration: none; color: inherit; }
+    .hpLinkRow:hover, .hpRow:hover { background: rgba(0,0,0,0.05); }
+    .hpMain { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .hpMain .t { font-weight: 750; letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hpMain .d { font-size: 12px; opacity: 0.72; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hpMeta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .hpBadge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 10px;
+      border-radius: 999px;
+      letter-spacing: 1.2px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(0,0,0,0.04);
+      color: rgba(0,0,0,0.72);
+    }
+    .hpBadge.on { background: rgba(0,200,120,0.12); color: #0b6a3b; border-color: rgba(0,200,120,0.28); }
+    .hpBadge.off { background: rgba(255,60,80,0.10); color: #a31224; border-color: rgba(255,60,80,0.22); }
+
+    .hpBtnMini {
+      appearance: none;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.9);
+      color: #0c0c10;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+    .hpBtnMini:hover { background: rgba(255,255,255,1); }
+
+    .hpScroll {
+      max-height: min(60vh, 520px);
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .hpNote {
+      padding: 10px 10px;
+      font-size: 12px;
+      opacity: 0.75;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -122,6 +294,7 @@
   <canvas id="smokeCanvas"></canvas>
   <canvas id="quoteCanvas"></canvas>
   <div id="blackFade"></div>
+  <div id="whiteout" aria-hidden="true"></div>
   <div id="standbyLayer" style="display:none;">
     <div id="breatherText" class="blinkCaret"></div>
     <div id="passphraseWrap">
@@ -129,6 +302,66 @@
   <div id="glitchHint"></div>
     </div>
   </div>
+
+  <div id="menuUI" aria-hidden="true">
+    <div id="menuBar" role="menubar" aria-label="Hitpoint Menu">
+      <button class="hpMenuBtn" data-menu="file" aria-expanded="false">FILE</button>
+      <button class="hpMenuBtn" data-menu="projects" aria-expanded="false">PROJECTS</button>
+      <button class="hpMenuBtn" data-menu="servers" aria-expanded="false">SERVERS</button>
+      <button class="hpMenuBtn" data-menu="music" aria-expanded="false">MUSIC</button>
+      <button class="hpMenuBtn" data-menu="why" aria-expanded="false">WHY?</button>
+      <span class="hpMenuSpacer" aria-hidden="true"></span>
+      <button class="hpMenuBtn hpMenuEnd" data-action="end-transmission">END TRANSMISSION</button>
+    </div>
+    <div id="menuDropdownRoot" aria-hidden="false">
+      <div class="hpDropdown" data-panel="file" role="menu" aria-label="File menu">
+        <div class="hpDropTitle"><div class="name">FILE</div><div class="sub">local</div></div>
+        <div class="hpList">
+          <div class="hpRow"><div class="hpMain"><div class="t">Refresh Page</div><div class="d">Reloads this scene</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="refresh">REFRESH</button></div></div>
+          <div class="hpRow"><div class="hpMain"><div class="t">Quit</div><div class="d">Returns to passphrase</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="quit">QUIT</button></div></div>
+        </div>
+      </div>
+
+      <div class="hpDropdown" data-panel="projects" role="menu" aria-label="Projects menu">
+        <div class="hpDropTitle"><div class="name">PROJECTS</div><div class="sub">GitHub</div></div>
+        <div class="hpNote">Public repos from <a href="https://github.com/HitPointX" target="_blank" rel="noopener">HitPointX</a>.</div>
+        <div class="hpScroll">
+          <div class="hpList" id="hpProjectsList">
+            <div class="hpNote">Loading projects…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hpDropdown" data-panel="servers" role="menu" aria-label="Servers menu">
+        <div class="hpDropTitle"><div class="name">SERVERS</div><div class="sub">Status</div></div>
+        <div class="hpScroll">
+          <div class="hpList" id="hpServersList"></div>
+          <div class="hpNote">
+            Live updates are posted in <span style="font-weight:800; letter-spacing:1px;">#server-status</span>.
+            <div style="height:10px;"></div>
+            <div style="font-weight:800; letter-spacing:1.5px; font-size:12px;">HOW TO JOIN (MCVS)</div>
+            <div style="margin-top:8px;">
+              Requires Fabric (API & Launcher) and our Mod:
+              <a href="https://fabricmc.net/" target="_blank" rel="noopener">fabricmc.net</a>
+              +
+              <a href="https://github.com/HitPointX/Minepires/releases" target="_blank" rel="noopener">Minepires/releases</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hpDropdown" data-panel="music" role="menu" aria-label="Music menu">
+        <div class="hpDropTitle"><div class="name">MUSIC</div><div class="sub">later</div></div>
+        <div class="hpNote">Nothing here yet.</div>
+      </div>
+
+      <div class="hpDropdown" data-panel="why" role="menu" aria-label="Why menu">
+        <div class="hpDropTitle"><div class="name">WHY?</div><div class="sub">easter egg</div></div>
+        <div class="hpNote">Not yet.</div>
+      </div>
+    </div>
+  </div>
+
   <div id="hud" style="display: none;">
     <div><span class="label">FPS</span><span id="fps">-</span></div>
     <div><span class="label">GPU</span><span id="gpu">-</span></div>
@@ -145,6 +378,7 @@ uniform vec3 uLightPos;uniform float uDrawHold;uniform float uCollapsePhase;vary
   </script>
   <script src="./src/ParticleSystem.js"></script>
   <script src="./src/controls.js"></script>
+  <script src="./src/menu.js"></script>
   <script src="./src/main.js"></script>
 </body>
 </html>
