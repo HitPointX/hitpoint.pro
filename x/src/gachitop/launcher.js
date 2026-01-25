@@ -1,6 +1,6 @@
 const GCH = (() => {
   // Bump to bust caches on GitHub Pages/CDNs when changing wasm/js.
-  const GCH_ASSET_VERSION = '2026-01-25-2';
+  const GCH_ASSET_VERSION = '2026-01-25-3';
   const LCD_W = 160;
   const LCD_H = 160;
   const RGBA_LEN = LCD_W * LCD_H * 4;
@@ -41,6 +41,8 @@ const GCH = (() => {
     raf: 0,
     lastNowMs: 0,
     pressMask: 0,
+    autosaveTimer: 0,
+    autosaveWired: false,
 
     canvas: null,
     scaleSelect: null,
@@ -339,10 +341,13 @@ const GCH = (() => {
   };
 
   const quit = () => {
+    try { save(); } catch {}
     state.running = false;
     if (state.raf) cancelAnimationFrame(state.raf);
     state.raf = 0;
     state.lastNowMs = 0;
+    if (state.autosaveTimer) clearInterval(state.autosaveTimer);
+    state.autosaveTimer = 0;
     try { document.body.classList.remove('hp-game-running'); } catch {}
     try {
       const dock = document.getElementById('gameDock');
@@ -368,6 +373,23 @@ const GCH = (() => {
     state.running = true;
     state.lastNowMs = 0;
     state.raf = requestAnimationFrame(renderFrame);
+
+    // Autosave: every minute + on close/hidden. Manual save stays available in FILE.
+    if (state.autosaveTimer) clearInterval(state.autosaveTimer);
+    state.autosaveTimer = setInterval(() => {
+      try { save(); } catch {}
+    }, 60_000);
+
+    if (!state.autosaveWired) {
+      state.autosaveWired = true;
+      window.addEventListener('pagehide', () => { try { save(); } catch {} });
+      window.addEventListener('beforeunload', () => { try { save(); } catch {} });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          try { save(); } catch {}
+        }
+      });
+    }
   };
 
   const initDom = () => {
