@@ -1,6 +1,6 @@
 (() => {
   const USERNAME = 'HitPointX';
-  const CACHE_KEY = 'hp_projects_cache_v1';
+  const CACHE_KEY = 'hp_projects_cache_v2';
   const CACHE_TTL_MS = 60 * 60 * 1000;
 
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -62,9 +62,11 @@
 
   const normalizeProjects = (repos) => {
     const pinned = new Set(['REGPS', 'MCVS', 'LiveMTRX', 'DoomMC3D']);
+    const hidden = new Set(['hitpoint.pro']);
     const items = repos
       .filter(r => r && r.private === false)
       .filter(r => !r.archived)
+      .filter(r => !hidden.has(String(r.name || '').toLowerCase()))
       .map(r => ({
         name: String(r.name || ''),
         url: String(r.html_url || ''),
