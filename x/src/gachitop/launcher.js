@@ -1,6 +1,6 @@
 const GCH = (() => {
   // Bump to bust caches on GitHub Pages/CDNs when changing wasm/js.
-  const GCH_ASSET_VERSION = '2026-01-25-3';
+  const GCH_ASSET_VERSION = '2026-01-25-4';
   const LCD_W = 160;
   const LCD_H = 160;
   const RGBA_LEN = LCD_W * LCD_H * 4;
@@ -57,6 +57,134 @@ const GCH = (() => {
 
     rulesJson: '',
     illnessJson: '',
+
+    audio: {
+      ready: false,
+      ctx: null,
+      master: null,
+      musicGain: null,
+      sfxGain: null,
+      buffers: new Map(),
+      musicSource: null,
+      musicEnabled: false,
+      inFlight: null,
+    },
+  };
+
+  const SFX = {
+    UiMove: 0,
+    UiConfirm: 1,
+    UiBack: 2,
+    AttentionCall: 3,
+    Feed: 4,
+    Play: 5,
+    Medicine: 6,
+    IllnessSymptom: 7,
+    IllnessWarning: 8,
+    Death: 9,
+  };
+
+  const SFX_FILES = new Map([
+    [SFX.UiMove, 'ui_move.wav'],
+    [SFX.UiConfirm, 'ui_confirm.wav'],
+    [SFX.UiBack, 'ui_back.wav'],
+    [SFX.AttentionCall, 'attention_call.wav'],
+    [SFX.Feed, 'feed.wav'],
+    [SFX.Play, 'play.wav'],
+    [SFX.Medicine, 'medicine.wav'],
+    [SFX.IllnessSymptom, 'illness_symptom.wav'],
+    [SFX.IllnessWarning, 'illness_warning.wav'],
+    [SFX.Death, 'death.wav'],
+  ]);
+
+  const audioEnsure = async () => {
+    if (state.audio.inFlight) return state.audio.inFlight;
+    state.audio.inFlight = (async () => {
+      if (state.audio.ready) return;
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) throw new Error('Web Audio not supported');
+      const ctx = new Ctx();
+      if (ctx.state === 'suspended') {
+        try { await ctx.resume(); } catch {}
+      }
+
+      const master = ctx.createGain();
+      master.gain.value = 0.9;
+      master.connect(ctx.destination);
+
+      const sfxGain = ctx.createGain();
+      sfxGain.gain.value = 0.95;
+      sfxGain.connect(master);
+
+      const musicGain = ctx.createGain();
+      musicGain.gain.value = 0.18;
+      musicGain.connect(master);
+
+      state.audio.ctx = ctx;
+      state.audio.master = master;
+      state.audio.sfxGain = sfxGain;
+      state.audio.musicGain = musicGain;
+
+      const loadBuffer = async (url) => {
+        const res = await fetch(url, { cache: 'no-cache' });
+        if (!res.ok) throw new Error(`audio fetch failed ${res.status} ${url}`);
+        const ab = await res.arrayBuffer();
+        return await ctx.decodeAudioData(ab);
+      };
+
+      const base = new URL(`../../games/gachitop/assets/sfx/`, import.meta.url);
+      const loads = [];
+      for (const [id, fname] of SFX_FILES.entries()) {
+        const url = new URL(`${fname}?v=${encodeURIComponent(GCH_ASSET_VERSION)}`, base);
+        loads.push(loadBuffer(url.href).then(buf => state.audio.buffers.set(id, buf)).catch(() => {}));
+      }
+
+      const musicUrl = new URL(`../../games/gachitop/assets/music/tamagotop_loop.wav?v=${encodeURIComponent(GCH_ASSET_VERSION)}`, import.meta.url);
+      loads.push(loadBuffer(musicUrl.href).then(buf => state.audio.buffers.set('music', buf)).catch(() => {}));
+
+      await Promise.all(loads);
+      state.audio.ready = true;
+    })().finally(() => {
+      state.audio.inFlight = null;
+    });
+    return state.audio.inFlight;
+  };
+
+  const audioPlaySfx = (id) => {
+    try {
+      if (!state.audio.ready || !state.audio.ctx) return;
+      const buf = state.audio.buffers.get(id);
+      if (!buf) return;
+      const src = state.audio.ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(state.audio.sfxGain);
+      src.start();
+    } catch {}
+  };
+
+  const audioSyncMusic = (enabled) => {
+    if (!state.audio.ready || !state.audio.ctx) return;
+    const want = !!enabled;
+    if (want === state.audio.musicEnabled) return;
+    state.audio.musicEnabled = want;
+
+    try {
+      if (state.audio.musicSource) {
+        state.audio.musicSource.stop();
+        state.audio.musicSource.disconnect();
+      }
+    } catch {}
+    state.audio.musicSource = null;
+
+    if (!want) return;
+    const buf = state.audio.buffers.get('music');
+    if (!buf) return;
+    const src = state.audio.ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    src.connect(state.audio.musicGain);
+    src.start();
+    state.audio.musicSource = src;
   };
 
   const InputBits = {
@@ -226,6 +354,8 @@ const GCH = (() => {
       step: Module.cwrap('gch_step', null, ['number', 'number', 'number', 'number']),
       pointerMove: Module.cwrap('gch_pointer_move', null, ['number', 'number']),
       pointerClick: Module.cwrap('gch_pointer_click', null, ['number', 'number', 'number']),
+      popSfx: Module.cwrap('gch_pop_sfx', 'number', []),
+      musicEnabled: Module.cwrap('gch_music_enabled', 'number', []),
       rgbaPtr: Module.cwrap('gch_rgba_ptr', 'number', []),
       savePtr: Module.cwrap('gch_save_json_ptr', 'number', []),
       saveLen: Module.cwrap('gch_save_json_len', 'number', []),
@@ -281,6 +411,20 @@ const GCH = (() => {
       quit();
       return;
     }
+
+    // Drain audio cues.
+    try {
+      if (state.audio.ready && state.api.popSfx) {
+        for (let i = 0; i < 32; i++) {
+          const id = state.api.popSfx();
+          if (id == null || id < 0) break;
+          audioPlaySfx(id);
+        }
+      }
+      if (state.audio.ready && state.api.musicEnabled) {
+        audioSyncMusic(state.api.musicEnabled() === 1);
+      }
+    } catch {}
 
     applyCanvasSize();
 
@@ -368,6 +512,7 @@ const GCH = (() => {
     applyCanvasSize();
 
     if (!state.gl) initGL();
+    try { await audioEnsure(); } catch {}
     await initGameState();
 
     state.running = true;
