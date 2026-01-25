@@ -251,6 +251,8 @@ struct WebState {
   LCDBuffer lcd = LCDBuffer(kLcdW, kLcdH);
   std::vector<std::uint8_t> rgba;
 
+  int pendingInputMask = 0;
+
   std::int64_t createdAtUnixSeconds = 0;
   std::int64_t lastMonthlyTickAtUnixSeconds = 0;
   std::int64_t lastSimUpdateUnixSeconds = 0;
@@ -512,6 +514,9 @@ EMSCRIPTEN_KEEPALIVE void gch_step(float dtSeconds, std::uint32_t nowTicks, doub
   if (!g.initialized) return;
   const std::int64_t nowUnixSeconds = static_cast<std::int64_t>(nowUnixSecondsF);
 
+  inputMask |= g.pendingInputMask;
+  g.pendingInputMask = 0;
+
   UIInput in;
   in.pressA = (inputMask & 1) != 0;
   in.pressB = (inputMask & 2) != 0;
@@ -535,6 +540,57 @@ EMSCRIPTEN_KEEPALIVE void gch_step(float dtSeconds, std::uint32_t nowTicks, doub
   // Render.
   uiRender(g.ui, g.sim, g.ageMonths, g.careMistakesTotal, g.careMistakesThisMonth, g.lcd, nowTicks);
   renderToRgba(nowTicks);
+}
+
+EMSCRIPTEN_KEEPALIVE void gch_pointer_move(int lcdX, int lcdY) {
+  if (!g.initialized) return;
+
+  if (lcdX < 0 || lcdY < 0 || lcdX >= g.lcd.width || lcdY >= g.lcd.height) {
+    g.ui.musicHover = false;
+    g.ui.hoverActive = false;
+    return;
+  }
+
+  g.ui.musicHover = uiHitTestMusicIcon(g.lcd.width, g.lcd.height, lcdX, lcdY);
+
+  IconId hit = IconId::Feed;
+  if (uiHitTestIconBar(g.lcd.width, g.lcd.height, lcdX, lcdY, hit)) {
+    g.ui.hoverActive = true;
+    g.ui.hoveredIcon = hit;
+  } else {
+    g.ui.hoverActive = false;
+  }
+}
+
+EMSCRIPTEN_KEEPALIVE void gch_pointer_click(int lcdX, int lcdY, int button) {
+  if (!g.initialized) return;
+
+  if (lcdX < 0 || lcdY < 0 || lcdX >= g.lcd.width || lcdY >= g.lcd.height) {
+    return;
+  }
+
+  // Toggle music icon with left click (UI-only; actual audio is handled elsewhere).
+  if (button == 0 && uiHitTestMusicIcon(g.lcd.width, g.lcd.height, lcdX, lcdY)) {
+    g.ui.musicEnabled = !g.ui.musicEnabled;
+    return;
+  }
+
+  IconId hit = IconId::Feed;
+  const bool onIcon = uiHitTestIconBar(g.lcd.width, g.lcd.height, lcdX, lcdY, hit);
+
+  if (onIcon) {
+    g.ui.selectedIcon = hit;
+    // Web behavior: left OR right click activates, middle click backs out.
+    if (button == 0 || button == 2) {
+      g.pendingInputMask |= 2; // pressB
+    } else if (button == 1) {
+      g.pendingInputMask |= 4; // pressC
+    }
+  } else {
+    if (button == 1) {
+      g.pendingInputMask |= 4; // pressC
+    }
+  }
 }
 
 EMSCRIPTEN_KEEPALIVE const std::uint8_t* gch_rgba_ptr() {
