@@ -36,7 +36,7 @@ em++ -std=c++20 -O2 \
   -s ALLOW_MEMORY_GROWTH=1 \
   -s FILESYSTEM=0 \
   -s EXIT_RUNTIME=0 \
-  -s EXPORTED_FUNCTIONS='["_gch_init","_gch_step","_gch_rgba_ptr","_gch_rgba_len","_gch_save_json_ptr","_gch_save_json_len","_gch_reset","_gch_load_save_json","_malloc","_free"]' \
+  -s EXPORTED_FUNCTIONS='["_gch_init","_gch_step","_gch_rgba_ptr","_gch_rgba_len","_gch_save_json_ptr","_gch_save_json_len","_gch_reset","_gch_load_save_json","_gch_pointer_move","_gch_pointer_click","_malloc","_free"]' \
   -s EXPORTED_RUNTIME_METHODS='["cwrap","UTF8ToString","lengthBytesUTF8","stringToUTF8"]' \
   -o "$OUT_DIR/gachitop.js"
 

@@ -1,6 +1,6 @@
 const GCH = (() => {
   // Bump to bust caches on GitHub Pages/CDNs when changing wasm/js.
-  const GCH_ASSET_VERSION = '2026-01-25-1';
+  const GCH_ASSET_VERSION = '2026-01-25-2';
   const LCD_W = 160;
   const LCD_H = 160;
   const RGBA_LEN = LCD_W * LCD_H * 4;
@@ -159,13 +159,15 @@ const GCH = (() => {
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 
     // Fullscreen quad (two triangles), interleaved pos+uv.
+    // WebGL textures are addressed with (0,0) at bottom-left; our LCD buffer is top-left origin,
+    // so we flip V here to avoid an upside-down image.
     const verts = new Float32Array([
-      -1, -1, 0, 0,
-       1, -1, 1, 0,
-      -1,  1, 0, 1,
-      -1,  1, 0, 1,
-       1, -1, 1, 0,
-       1,  1, 1, 1,
+      -1, -1, 0, 1,
+       1, -1, 1, 1,
+      -1,  1, 0, 0,
+      -1,  1, 0, 0,
+       1, -1, 1, 1,
+       1,  1, 1, 0,
     ]);
     gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
@@ -220,6 +222,8 @@ const GCH = (() => {
     state.api = {
       init: Module.cwrap('gch_init', 'number', ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']),
       step: Module.cwrap('gch_step', null, ['number', 'number', 'number', 'number']),
+      pointerMove: Module.cwrap('gch_pointer_move', null, ['number', 'number']),
+      pointerClick: Module.cwrap('gch_pointer_click', null, ['number', 'number', 'number']),
       rgbaPtr: Module.cwrap('gch_rgba_ptr', 'number', []),
       savePtr: Module.cwrap('gch_save_json_ptr', 'number', []),
       saveLen: Module.cwrap('gch_save_json_len', 'number', []),
@@ -294,6 +298,17 @@ const GCH = (() => {
     if (btn === 'a') state.pressMask |= InputBits.A;
     if (btn === 'b') state.pressMask |= InputBits.B;
     if (btn === 'c') state.pressMask |= InputBits.C;
+  };
+
+  const canvasToLcd = (clientX, clientY) => {
+    if (!state.canvas) return null;
+    const rect = state.canvas.getBoundingClientRect();
+    const nx = (clientX - rect.left) / Math.max(1, rect.width);
+    const ny = (clientY - rect.top) / Math.max(1, rect.height);
+    if (nx < 0 || ny < 0 || nx > 1 || ny > 1) return null;
+    const x = Math.max(0, Math.min(LCD_W - 1, Math.floor(nx * LCD_W)));
+    const y = Math.max(0, Math.min(LCD_H - 1, Math.floor(ny * LCD_H)));
+    return { x, y };
   };
 
   const save = () => {
@@ -374,6 +389,29 @@ const GCH = (() => {
         const btn = t.getAttribute('data-gch-btn');
         if (!btn) return;
         queuePress(btn);
+      });
+    }
+
+    if (state.canvas) {
+      state.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+      state.canvas.addEventListener('pointermove', (e) => {
+        if (!state.running || !state.api) return;
+        const p = canvasToLcd(e.clientX, e.clientY);
+        if (!p) {
+          state.api.pointerMove(-1, -1);
+          return;
+        }
+        state.api.pointerMove(p.x, p.y);
+      });
+      state.canvas.addEventListener('pointerleave', () => {
+        if (!state.running || !state.api) return;
+        state.api.pointerMove(-1, -1);
+      });
+      state.canvas.addEventListener('pointerdown', (e) => {
+        if (!state.running || !state.api) return;
+        const p = canvasToLcd(e.clientX, e.clientY);
+        if (!p) return;
+        state.api.pointerClick(p.x, p.y, e.button ?? 0);
       });
     }
 
