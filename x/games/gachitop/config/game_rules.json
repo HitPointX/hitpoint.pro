@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": 1,
+  "time": {
+    "monthlyTickHours": 24,
+    "offlineSim": {
+      "maxCatchupSeconds": 7776000,
+      "chunkSeconds": 300,
+      "maxDeltaClampSeconds": 60
+    }
+  },
+  "stages": {
+    "boundariesMonths": {
+      "babyEnd": 2,
+      "childEnd": 11,
+      "teenEnd": 23
+    }
+  },
+  "meters": {
+    "ranges": {
+      "hunger": [0, 100],
+      "happiness": [0, 100],
+      "energy": [0, 100],
+      "cleanliness": [0, 100],
+      "discipline": [0, 100]
+    },
+    "attentionThresholds": {
+      "hunger": 25,
+      "happiness": 25,
+      "energy": 20,
+      "cleanliness": 30
+    },
+    "decayPerHourAwake": {
+      "hunger": 6.0,
+      "happiness": 2.0,
+      "energy": 5.0,
+      "cleanliness": 1.0,
+      "discipline": 0.3
+    },
+    "decayMultiplierSleeping": {
+      "hunger": 0.25,
+      "happiness": 0.25,
+      "cleanliness": 0.5,
+      "discipline": 1.0,
+      "energy": 0.0
+    },
+    "sleep": {
+      "energyRestorePerHour": 18.0,
+      "autoWakeAtEnergy": 90,
+      "tiredAtEnergy": 55
+    }
+  },
+  "actions": {
+    "food": {
+      "meal": {
+        "hungerDelta": 35,
+        "happinessDelta": 2,
+        "cleanlinessDelta": -1
+      },
+      "snack": {
+        "hungerDelta": 10,
+        "happinessDelta": 10,
+        "cleanlinessDelta": -1,
+        "misbehaviorSnackSpam": {
+          "enabled": true,
+          "snacksWithinHours": 4,
+          "threshold": 3,
+          "extraMisbehaviorChancePerHour": 0.15
+        }
+      }
+    },
+    "play": {
+      "happinessDelta": 18,
+      "energyDelta": -5,
+      "cooldownSeconds": 60
+    },
+    "clean": {
+      "cleanlinessDelta": 35,
+      "removesAllPoop": true
+    },
+    "medicine": {
+      "severityDelta": -35,
+      "cooldownSeconds": 30
+    },
+    "discipline": {
+      "disciplineDelta": 15,
+      "cooldownSeconds": 30
+    }
+  },
+  "poop": {
+    "poopIntervalHoursAwake": 5.0,
+    "dirtyingPerPoop": 12,
+    "maxPoopOnScreen": 6
+  },
+  "careMistakes": {
+    "enabled": true,
+    "graceMinutes": 20,
+    "babyStageWeight": 0.25,
+    "criticalRanges": {
+      "hunger": 5,
+      "happiness": 5,
+      "energy": 5,
+      "cleanliness": 10
+    },
+    "criticalFatalAfterHours": {
+      "hunger": 10,
+      "energy": 12,
+      "cleanliness": 24
+    }
+  },
+  "misbehavior": {
+    "baseChancePerHour": 0.03,
+    "disciplineThreshold": 40,
+    "attentionCallReason": "misbehavior"
+  },
+  "mortality": {
+    "maxAgeYears": 100,
+    "naturalDeath": {
+      "enabled": true,
+      "baseMonthlyProbability": 0.00001,
+      "ageYearsRampStart": 60,
+      "ageYearsRampEnd": 100,
+      "additionalMonthlyProbabilityAtMaxAge": 0.002,
+      "warningDaysRange": [2, 7]
+    }
+  }
+}

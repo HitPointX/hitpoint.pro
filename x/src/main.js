@@ -1,33 +1,57 @@
-window.addEventListener('DOMContentLoaded', () => {
-  const UNLOCK_COOKIE = 'hp_menu_unlocked';
-  const getCookie = (name) => {
-    try {
-      const parts = document.cookie ? document.cookie.split(';') : [];
+	window.addEventListener('DOMContentLoaded', () => {
+	  const UNLOCK_COOKIE = 'hp_menu_unlocked';
+	  const getCookie = (name) => {
+	    try {
+	      const parts = document.cookie ? document.cookie.split(';') : [];
       for (const p of parts) {
         const [k, ...rest] = p.trim().split('=');
         if (k === name) return decodeURIComponent(rest.join('=') || '');
       }
-    } catch {}
-    return null;
-  };
-  const setCookie = (name, value, { maxAgeSec } = {}) => {
-    try {
-      const attrs = [
-        `${name}=${encodeURIComponent(value)}`,
-        'Path=/',
-        'SameSite=Lax'
-      ];
+	    } catch {}
+	    return null;
+	  };
+	  const setCookie = (name, value, { maxAgeSec } = {}) => {
+	    try {
+	      if (value == null) return;
+	      const attrs = [
+	        `${name}=${encodeURIComponent(value)}`,
+	        'Path=/',
+	        'SameSite=Lax'
+	      ];
       if (typeof maxAgeSec === 'number') attrs.push(`Max-Age=${Math.max(0, Math.floor(maxAgeSec))}`);
       if (location && location.protocol === 'https:') attrs.push('Secure');
       document.cookie = attrs.join('; ');
-    } catch {}
-  };
-  const clearCookie = (name) => setCookie(name, '', { maxAgeSec: 0 });
-  const hasUnlock = () => getCookie(UNLOCK_COOKIE) === '1';
+	    } catch {}
+	  };
+	  const clearCookie = (name) => setCookie(name, '', { maxAgeSec: 0 });
+	  const getUnlockKey = () => {
+	    const v = getCookie(UNLOCK_COOKIE);
+	    if (!v) return null;
+	    if (v === '0') return null;
+	    return v;
+	  };
+	  const hasUnlock = () => !!getUnlockKey();
+	  const genUnlockKey = () => {
+	    try {
+	      const bytes = new Uint8Array(16);
+	      crypto.getRandomValues(bytes);
+	      return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+	    } catch {
+	      return `k${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`;
+	    }
+	  };
+	  const ensureUnlockKey = ({ maxAgeSec } = {}) => {
+	    const cur = getUnlockKey();
+	    if (cur && cur !== '1') return cur;
+	    const next = genUnlockKey();
+	    setCookie(UNLOCK_COOKIE, next, { maxAgeSec });
+	    return next;
+	  };
+	  try { window.hpGetUnlockKey = getUnlockKey; } catch {}
 
-  const canvas = document.createElement('canvas');
-  canvas.style.position = 'absolute';
-  canvas.style.top = '0';
+	  const canvas = document.createElement('canvas');
+	  canvas.style.position = 'absolute';
+	  canvas.style.top = '0';
   canvas.style.left = '0';
   canvas.style.width = '100vw';
   canvas.style.height = '100vh';
@@ -366,14 +390,14 @@ window.addEventListener('DOMContentLoaded', () => {
 	    });
 	  }
 
-  const enterMenuMode = ({ persist } = {}) => {
-    if (window._hpMenuEntering || document.body.classList.contains('hp-menu-mode')) return;
-    window._hpMenuEntering = true;
-    if (persist) setCookie(UNLOCK_COOKIE, '1', { maxAgeSec: 60 * 60 * 24 * 365 * 10 });
+	  const enterMenuMode = ({ persist } = {}) => {
+	    if (window._hpMenuEntering || document.body.classList.contains('hp-menu-mode')) return;
+	    window._hpMenuEntering = true;
+	    if (persist) ensureUnlockKey({ maxAgeSec: 60 * 60 * 24 * 365 * 10 });
 
-    document.body.classList.add('hp-menu-transitioning');
-    if (standbyLayer) {
-      standbyLayer.style.pointerEvents = 'none';
+	    document.body.classList.add('hp-menu-transitioning');
+	    if (standbyLayer) {
+	      standbyLayer.style.pointerEvents = 'none';
       standbyLayer.style.opacity = '0';
     }
     const info = document.getElementById('info');
@@ -404,12 +428,14 @@ window.addEventListener('DOMContentLoaded', () => {
     const phrase = (e && e.detail && e.detail.phrase) ? String(e.detail.phrase) : '';
     enterMenuMode({ persist: true, phrase });
   });
-  document.addEventListener('menu:exit', exitMenuMode);
-  document.addEventListener('menu:refresh', () => location.reload());
+	  document.addEventListener('menu:exit', exitMenuMode);
+	  document.addEventListener('menu:refresh', () => location.reload());
 
-  if (unlockedAtLoad) {
-    setTimeout(() => enterMenuMode({ persist: false }), 250);
-  }
+	  if (unlockedAtLoad) {
+	    // Upgrade legacy unlock cookie value ('1') to a stable per-browser key.
+	    ensureUnlockKey({ maxAgeSec: 60 * 60 * 24 * 365 * 10 });
+	    setTimeout(() => enterMenuMode({ persist: false }), 250);
+	  }
 
 	  let haloCanvas = document.createElement('canvas');
 	  haloCanvas.id = 'haloOverlay';
