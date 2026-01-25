@@ -38,6 +38,7 @@ window.ParticleSystem = class ParticleSystem {
     this.loadShadersAndInitParticles();
     this.animate();
     this.standbyMode = true;
+    this._menuFocus = null;
   }
 
   async loadShadersAndInitParticles() {
@@ -177,6 +178,7 @@ window.ParticleSystem = class ParticleSystem {
   this._growCount = this.count || 2;
     this.installAudioGestureListeners();
     this.audioBtn = document.createElement('button');
+    this.audioBtn.id = 'audioBtn';
     this.audioBtn.textContent = 'Load music';
     Object.assign(this.audioBtn.style, {
       position: 'fixed', right: '14px', bottom: '12px', zIndex: 10000,
@@ -421,6 +423,51 @@ window.ParticleSystem = class ParticleSystem {
   this.count = next;
   this.points.geometry.setDrawRange(0, next);
   this.updatePointSize();
+  }
+
+  beginMenuFocus({ durationMs = 2600, cameraZ = 8 } = {}) {
+    try {
+      if (!this.camera) return;
+      const fromZ = this.camera.position.z;
+      const toZ = Math.max(1, Number(cameraZ) || 8);
+      this._menuFocus = {
+        startMs: performance.now(),
+        durMs: Math.max(200, Number(durationMs) || 2600),
+        fromZ,
+        toZ
+      };
+    } catch {}
+  }
+
+  fadeOutAudio(durationMs = 2200) {
+    try { if (this.audioBtn) this.audioBtn.style.display = 'none'; } catch {}
+    const ms = Math.max(0, Number(durationMs) || 0);
+    try {
+      if (this._gainOut && this.audioCtx && this.audioCtx.currentTime != null) {
+        const now = this.audioCtx.currentTime;
+        const g = this._gainOut.gain;
+        const current = Math.max(0, g.value || 0);
+        g.cancelScheduledValues(now);
+        g.setValueAtTime(current, now);
+        g.linearRampToValueAtTime(0.0001, now + ms / 1000);
+      } else if (this.audio) {
+        const start = Math.max(0, this.audio.volume == null ? 1 : this.audio.volume);
+        const t0 = performance.now();
+        const tick = (now) => {
+          const t = ms > 0 ? Math.min(1, (now - t0) / ms) : 1;
+          const e = t * t * (3 - 2 * t);
+          this.audio.volume = start * (1 - e);
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    } catch {}
+    setTimeout(() => {
+      try {
+        if (this.audio) this.audio.pause();
+        if (this.bufferSource && this.usingBuffer) this.bufferSource.stop();
+      } catch {}
+    }, ms + 120);
   }
 
   animate() {
@@ -741,6 +788,19 @@ window.ParticleSystem = class ParticleSystem {
             this.gpuExt.beginQueryEXT(this.gpuExt.TIME_ELAPSED_EXT, this._gpuActiveQuery);
           }
         } catch {}
+      }
+
+  if (this._menuFocus && this.camera) {
+        const nowMs = performance.now();
+        const x = (nowMs - this._menuFocus.startMs) / Math.max(1, this._menuFocus.durMs);
+        const t = x < 0 ? 0 : x > 1 ? 1 : x;
+        const e = t * t * (3 - 2 * t);
+        this.camera.position.z = this._menuFocus.fromZ + (this._menuFocus.toZ - this._menuFocus.fromZ) * e;
+        try {
+          if (this._orbGroup) this.camera.lookAt(this._orbGroup.position);
+          else this.camera.lookAt(0, 0, 0);
+        } catch {}
+        if (t >= 1) this._menuFocus = null;
       }
 
   this.points.rotation.y += 0.0006;
