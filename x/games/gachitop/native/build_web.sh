@@ -28,6 +28,7 @@ em++ -std=c++20 -O2 \
   "$NATIVE_DIR/src/save_system.cpp" \
   "$NATIVE_DIR/src/ui.cpp" \
   "$NATIVE_DIR/src/web_api.cpp" \
+  -s DISABLE_EXCEPTION_CATCHING=0 \
   -s MODULARIZE=1 \
   -s EXPORT_ES6=1 \
   -s EXPORT_NAME=createGachitopModule \

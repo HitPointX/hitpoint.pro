@@ -184,13 +184,16 @@ const GCH = (() => {
     state.tex = tex;
   };
 
+  // Allocates a NUL-terminated UTF-8 string but passes the byte-length *excluding* the terminator.
+  // Our wasm APIs take (ptr, len) and build std::string(ptr, ptr+len) so len must not include the NUL.
   const withCString = (Module, str, fn) => {
     const s = String(str ?? '');
-    const len = Module.lengthBytesUTF8(s) + 1;
-    const ptr = Module._malloc(len);
-    Module.stringToUTF8(s, ptr, len);
+    const byteLen = Module.lengthBytesUTF8(s);
+    const bufLen = byteLen + 1;
+    const ptr = Module._malloc(bufLen);
+    Module.stringToUTF8(s, ptr, bufLen);
     try {
-      return fn(ptr, len);
+      return fn(ptr, byteLen);
     } finally {
       Module._free(ptr);
     }
@@ -382,7 +385,16 @@ const GCH = (() => {
     }, { passive: false });
 
     // Menu actions.
-    document.addEventListener('gachitop:launch', () => launch().catch((e) => console.error('[gachitop] launch failed', e)));
+    document.addEventListener('gachitop:launch', () => {
+      launch().catch((e) => {
+        console.error('[gachitop] launch failed', e);
+        try {
+          const hint = document.getElementById('gchHint');
+          if (hint) hint.textContent = `Launch failed: ${String(e)} (check console)`;
+        } catch {}
+        quit();
+      });
+    });
     document.addEventListener('gachitop:save', () => save());
     document.addEventListener('gachitop:reset', () => reset());
     document.addEventListener('gachitop:quit', () => quit());
@@ -394,4 +406,3 @@ const GCH = (() => {
 window.addEventListener('DOMContentLoaded', () => {
   try { GCH.initDom(); } catch (e) { console.warn('[gachitop] init failed', e); }
 });
-
