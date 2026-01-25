@@ -19,6 +19,19 @@ namespace {
 constexpr int kLcdW = 160;
 constexpr int kLcdH = 160;
 
+enum class WebSfxId : int {
+  UiMove = 0,
+  UiConfirm = 1,
+  UiBack = 2,
+  AttentionCall = 3,
+  Feed = 4,
+  Play = 5,
+  Medicine = 6,
+  IllnessSymptom = 7,
+  IllnessWarning = 8,
+  Death = 9,
+};
+
 constexpr std::uint8_t kBgR = 0xC7;
 constexpr std::uint8_t kBgG = 0xD9;
 constexpr std::uint8_t kBgB = 0xB7;
@@ -253,6 +266,14 @@ struct WebState {
 
   int pendingInputMask = 0;
 
+  static constexpr int kSfxQueueCap = 64;
+  int sfxQueue[kSfxQueueCap]{};
+  int sfxHead = 0;
+  int sfxTail = 0;
+
+  std::uint32_t lastAttentionBeepTicks = 0;
+  std::uint32_t lastLightsBeepTicks = 0;
+
   std::int64_t createdAtUnixSeconds = 0;
   std::int64_t lastMonthlyTickAtUnixSeconds = 0;
   std::int64_t lastSimUpdateUnixSeconds = 0;
@@ -271,6 +292,24 @@ struct WebState {
 };
 
 WebState g;
+
+void pushSfx(WebSfxId id) {
+  const int next = (g.sfxTail + 1) % WebState::kSfxQueueCap;
+  if (next == g.sfxHead) {
+    return;
+  }
+  g.sfxQueue[g.sfxTail] = static_cast<int>(id);
+  g.sfxTail = next;
+}
+
+int popSfx() {
+  if (g.sfxHead == g.sfxTail) {
+    return -1;
+  }
+  const int v = g.sfxQueue[g.sfxHead];
+  g.sfxHead = (g.sfxHead + 1) % WebState::kSfxQueueCap;
+  return v;
+}
 
 void renderToRgba(std::uint32_t /*nowTicks*/) {
   g.rgba.resize(static_cast<size_t>(kLcdW * kLcdH * 4));
@@ -458,6 +497,10 @@ EMSCRIPTEN_KEEPALIVE int gch_init(const char* rulesJson, int rulesLen, const cha
     g.attentionEpisodeStartUnixSeconds = 0;
     g.careMistakeCountedThisEpisode = false;
     g.saveJsonScratch.clear();
+    g.sfxHead = 0;
+    g.sfxTail = 0;
+    g.lastAttentionBeepTicks = nowTicks;
+    g.lastLightsBeepTicks = nowTicks;
 
     const auto load = loadSaveFromJsonOrDefault(saveJson, saveLen, nowUnixSeconds);
 
@@ -522,8 +565,36 @@ EMSCRIPTEN_KEEPALIVE void gch_step(float dtSeconds, std::uint32_t nowTicks, doub
   in.pressB = (inputMask & 2) != 0;
   in.pressC = (inputMask & 4) != 0;
 
+  const bool wasDead = g.sim.isDead;
+  const bool beforeSym = g.sim.illnessSymptomatic;
+  const bool beforeWarn = g.sim.illnessWarning;
+
   // UI first (can set actions/requests).
   uiUpdate(g.ui, in, g.sim, g.rules, nowTicks);
+
+  // UI action SFX (one-shot cues emitted by uiUpdate).
+  switch (uiConsumeSfx(g.ui)) {
+    case UISfxCue::UiMove:
+      pushSfx(WebSfxId::UiMove);
+      break;
+    case UISfxCue::UiConfirm:
+      pushSfx(WebSfxId::UiConfirm);
+      break;
+    case UISfxCue::UiBack:
+      pushSfx(WebSfxId::UiBack);
+      break;
+    case UISfxCue::Feed:
+      pushSfx(WebSfxId::Feed);
+      break;
+    case UISfxCue::Play:
+      pushSfx(WebSfxId::Play);
+      break;
+    case UISfxCue::Medicine:
+      pushSfx(WebSfxId::Medicine);
+      break;
+    default:
+      break;
+  }
 
   // Medicine is applied outside UI (depends on illness DB + wall-clock).
   processMedicine(nowUnixSeconds, nowTicks);
@@ -532,14 +603,54 @@ EMSCRIPTEN_KEEPALIVE void gch_step(float dtSeconds, std::uint32_t nowTicks, doub
   g.sim.update(dtSeconds, g.rules);
   updateIllness(nowUnixSeconds);
 
+  // Illness transition SFX (one-shot).
+  if (!g.sim.isDead) {
+    if (!beforeSym && g.sim.illnessSymptomatic) {
+      pushSfx(WebSfxId::IllnessSymptom);
+    }
+    if (!beforeWarn && g.sim.illnessWarning) {
+      pushSfx(WebSfxId::IllnessWarning);
+    }
+  }
+
+  // Attention cue: beep on new attention call; optionally beep on added reasons with rate limiting.
+  constexpr std::uint32_t kBeepMinIntervalMs = 3500u;
+  if (g.sim.attentionJustRaised) {
+    pushSfx(WebSfxId::AttentionCall);
+    g.lastAttentionBeepTicks = nowTicks;
+  } else if (any(g.sim.attentionReasonsAdded) && (nowTicks - g.lastAttentionBeepTicks) >= kBeepMinIntervalMs) {
+    pushSfx(WebSfxId::AttentionCall);
+    g.lastAttentionBeepTicks = nowTicks;
+  }
+
+  // Lights complaint: repeat attention call sound until the player turns lights back on.
+  if (any(g.sim.attentionReasons & AttentionReason::Lights) && (nowTicks - g.lastLightsBeepTicks) >= kBeepMinIntervalMs) {
+    pushSfx(WebSfxId::AttentionCall);
+    g.lastLightsBeepTicks = nowTicks;
+  }
+
   applyMonthlyTicks(nowUnixSeconds, nowTicks);
   updateCareMistakes(nowUnixSeconds, nowTicks);
 
   g.lastSimUpdateUnixSeconds = nowUnixSeconds;
 
+  if (!wasDead && g.sim.isDead) {
+    pushSfx(WebSfxId::Death);
+  }
+
   // Render.
   uiRender(g.ui, g.sim, g.ageMonths, g.careMistakesTotal, g.careMistakesThisMonth, g.lcd, nowTicks);
   renderToRgba(nowTicks);
+}
+
+EMSCRIPTEN_KEEPALIVE int gch_pop_sfx() {
+  if (!g.initialized) return -1;
+  return popSfx();
+}
+
+EMSCRIPTEN_KEEPALIVE int gch_music_enabled() {
+  if (!g.initialized) return 0;
+  return g.ui.musicEnabled ? 1 : 0;
 }
 
 EMSCRIPTEN_KEEPALIVE void gch_pointer_move(int lcdX, int lcdY) {
@@ -613,6 +724,10 @@ EMSCRIPTEN_KEEPALIVE void gch_reset(double nowUnixSecondsF, std::uint32_t nowTic
   g.attentionEpisodeStartUnixSeconds = 0;
   g.careMistakeCountedThisEpisode = false;
   g.saveJsonScratch.clear();
+  g.sfxHead = 0;
+  g.sfxTail = 0;
+  g.lastAttentionBeepTicks = nowTicks;
+  g.lastLightsBeepTicks = nowTicks;
 
   g.createdAtUnixSeconds = load.data.createdAtUnixSeconds;
   g.lastMonthlyTickAtUnixSeconds = load.data.lastMonthlyTickAtUnixSeconds;
@@ -654,6 +769,10 @@ EMSCRIPTEN_KEEPALIVE int gch_load_save_json(const char* saveJson, int saveLen, d
   g.attentionEpisodeStartUnixSeconds = 0;
   g.careMistakeCountedThisEpisode = false;
   g.saveJsonScratch.clear();
+  g.sfxHead = 0;
+  g.sfxTail = 0;
+  g.lastAttentionBeepTicks = nowTicks;
+  g.lastLightsBeepTicks = nowTicks;
 
   g.createdAtUnixSeconds = load.data.createdAtUnixSeconds;
   g.lastMonthlyTickAtUnixSeconds = load.data.lastMonthlyTickAtUnixSeconds;
