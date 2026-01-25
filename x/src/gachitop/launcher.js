@@ -1,4 +1,6 @@
 const GCH = (() => {
+  // Bump to bust caches on GitHub Pages/CDNs when changing wasm/js.
+  const GCH_ASSET_VERSION = '2026-01-25-1';
   const LCD_W = 160;
   const LCD_H = 160;
   const RGBA_LEN = LCD_W * LCD_H * 4;
@@ -202,16 +204,16 @@ const GCH = (() => {
   const loadWasm = async () => {
     if (state.Module) return state.Module;
 
-    const rulesUrl = new URL('../../games/gachitop/config/game_rules.json', import.meta.url);
-    const illnessUrl = new URL('../../games/gachitop/config/illness_db.json', import.meta.url);
+    const rulesUrl = new URL(`../../games/gachitop/config/game_rules.json?v=${encodeURIComponent(GCH_ASSET_VERSION)}`, import.meta.url);
+    const illnessUrl = new URL(`../../games/gachitop/config/illness_db.json?v=${encodeURIComponent(GCH_ASSET_VERSION)}`, import.meta.url);
     state.rulesJson = await fetchText(rulesUrl);
     state.illnessJson = await fetchText(illnessUrl);
 
-    const modUrl = new URL('../../games/gachitop/gachitop.js', import.meta.url);
+    const modUrl = new URL(`../../games/gachitop/gachitop.js?v=${encodeURIComponent(GCH_ASSET_VERSION)}`, import.meta.url);
     const { default: createModule } = await import(modUrl.href);
 
     const Module = await createModule({
-      locateFile: (p) => new URL(`../../games/gachitop/${p}`, import.meta.url).href,
+      locateFile: (p) => new URL(`../../games/gachitop/${p}?v=${encodeURIComponent(GCH_ASSET_VERSION)}`, import.meta.url).href,
     });
 
     state.Module = Module;
