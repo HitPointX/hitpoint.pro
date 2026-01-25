@@ -142,29 +142,145 @@
       display: none !important;
     }
 
-    #menuUI {
-      position: fixed;
-      inset: 0;
-      z-index: 2005;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.9s ease;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    }
-    body.hp-menu-mode #menuUI { opacity: 1; pointer-events: auto; }
+	    #menuUI {
+	      position: fixed;
+	      inset: 0;
+	      z-index: 2005;
+	      opacity: 0;
+	      pointer-events: none;
+	      transition: opacity 0.9s ease;
+	      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+	    }
+	    body.hp-menu-mode #menuUI { opacity: 1; pointer-events: none; }
 
-    #menuBar {
-      height: 54px;
-      display: flex;
-      align-items: center;
+	    /* Game dock (runs inside menu mode) */
+	    #gameDock {
+	      position: fixed;
+	      left: 0;
+	      right: 0;
+	      top: 54px;
+	      bottom: 0;
+	      z-index: 2000;
+	      display: none;
+	      align-items: center;
+	      justify-content: center;
+	      padding: 18px;
+	      pointer-events: none;
+	    }
+	    body.hp-game-running #gameDock { display: flex; pointer-events: auto; }
+	    #gameWindow {
+	      width: min(860px, calc(100vw - 36px));
+	      height: min(720px, calc(100vh - 54px - 36px));
+	      background: rgba(255,255,255,0.96);
+	      border: 1px solid rgba(0,0,0,0.12);
+	      border-radius: 18px;
+	      box-shadow: 0 40px 120px rgba(0,0,0,0.25);
+	      overflow: hidden;
+	      display: flex;
+	      flex-direction: column;
+	    }
+	    #gameTitleBar {
+	      height: 54px;
+	      display: flex;
+	      align-items: center;
+	      justify-content: space-between;
+	      padding: 0 14px 0 16px;
+	      border-bottom: 1px solid rgba(0,0,0,0.10);
+	      background: linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(245,245,247,0.94));
+	      user-select: none;
+	    }
+	    #gameTitle {
+	      font-weight: 800;
+	      letter-spacing: 2.5px;
+	      font-size: 12px;
+	      color: #111018;
+	    }
+	    #gameTitleBar .right {
+	      display: flex;
+	      align-items: center;
+	      gap: 10px;
+	    }
+	    #gchScaleSelect {
+	      appearance: none;
+	      border: 1px solid rgba(0,0,0,0.12);
+	      background: rgba(255,255,255,0.95);
+	      padding: 8px 10px;
+	      border-radius: 10px;
+	      font-weight: 700;
+	      letter-spacing: 1px;
+	      font-size: 12px;
+	      cursor: pointer;
+	    }
+	    #gameBody {
+	      flex: 1 1 auto;
+	      display: flex;
+	      align-items: center;
+	      justify-content: center;
+	      padding: 18px;
+	    }
+	    #gachitopStage {
+	      display: flex;
+	      flex-direction: column;
+	      align-items: center;
+	      justify-content: center;
+	      gap: 14px;
+	      width: 100%;
+	      height: 100%;
+	    }
+	    #gachitopCanvas {
+	      width: 160px;
+	      height: 160px;
+	      border-radius: 16px;
+	      background: #0b0b10;
+	      box-shadow: 0 18px 60px rgba(0,0,0,0.28);
+	      image-rendering: pixelated;
+	      image-rendering: crisp-edges;
+	    }
+	    #gachitopPad {
+	      display: flex;
+	      gap: 10px;
+	      align-items: center;
+	      justify-content: center;
+	      flex-wrap: wrap;
+	    }
+	    .gchPadBtn {
+	      appearance: none;
+	      border: 1px solid rgba(0,0,0,0.14);
+	      background: rgba(255,255,255,0.96);
+	      border-radius: 14px;
+	      padding: 10px 14px;
+	      font-weight: 900;
+	      letter-spacing: 2px;
+	      cursor: pointer;
+	      min-width: 72px;
+	    }
+	    .gchPadBtn:active { transform: translateY(1px); }
+	    #gchHint {
+	      font-size: 12px;
+	      letter-spacing: 0.4px;
+	      color: rgba(0,0,0,0.62);
+	      text-align: center;
+	      max-width: 58ch;
+	    }
+
+	    /* FILE menu rows that depend on game state */
+	    .hpWhenGame { display: none; }
+	    body.hp-game-running .hpWhenGame { display: flex; }
+	    body.hp-game-running .hpWhenNoGame { display: none; }
+
+	    #menuBar {
+	      height: 54px;
+	      display: flex;
+	      align-items: center;
       gap: 16px;
       padding: 0 16px;
       background: rgba(255,255,255,0.94);
       border-bottom: 1px solid rgba(0,0,0,0.08);
-      backdrop-filter: blur(10px) saturate(140%);
-      color: #0c0c10;
-      user-select: none;
-    }
+	      backdrop-filter: blur(10px) saturate(140%);
+	      color: #0c0c10;
+	      user-select: none;
+	      pointer-events: auto;
+	    }
     .hpMenuBtn {
       appearance: none;
       border: 0;
@@ -303,24 +419,28 @@
     </div>
   </div>
 
-  <div id="menuUI" aria-hidden="true">
-    <div id="menuBar" role="menubar" aria-label="Hitpoint Menu">
-      <button class="hpMenuBtn" data-menu="file" aria-expanded="false">FILE</button>
-      <button class="hpMenuBtn" data-menu="projects" aria-expanded="false">PROJECTS</button>
-      <button class="hpMenuBtn" data-menu="servers" aria-expanded="false">SERVERS</button>
-      <button class="hpMenuBtn" data-menu="music" aria-expanded="false">MUSIC</button>
-      <button class="hpMenuBtn" data-menu="why" aria-expanded="false">WHY?</button>
-      <span class="hpMenuSpacer" aria-hidden="true"></span>
-      <button class="hpMenuBtn hpMenuEnd" data-action="end-transmission">END TRANSMISSION</button>
-    </div>
+	  <div id="menuUI" aria-hidden="true">
+	    <div id="menuBar" role="menubar" aria-label="Hitpoint Menu">
+	      <button class="hpMenuBtn" data-menu="file" aria-expanded="false">FILE</button>
+	      <button class="hpMenuBtn" data-menu="projects" aria-expanded="false">PROJECTS</button>
+	      <button class="hpMenuBtn" data-menu="servers" aria-expanded="false">SERVERS</button>
+	      <button class="hpMenuBtn" data-menu="music" aria-expanded="false">MUSIC</button>
+	      <button class="hpMenuBtn" data-menu="games" aria-expanded="false">GAMES</button>
+	      <button class="hpMenuBtn" data-menu="why" aria-expanded="false">WHY?</button>
+	      <span class="hpMenuSpacer" aria-hidden="true"></span>
+	      <button class="hpMenuBtn hpMenuEnd" data-action="end-transmission">END TRANSMISSION</button>
+	    </div>
     <div id="menuDropdownRoot" aria-hidden="false">
-      <div class="hpDropdown" data-panel="file" role="menu" aria-label="File menu">
-        <div class="hpDropTitle"><div class="name">FILE</div><div class="sub">local</div></div>
-        <div class="hpList">
-          <div class="hpRow"><div class="hpMain"><div class="t">Refresh Page</div><div class="d">Reloads this scene</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="refresh">REFRESH</button></div></div>
-          <div class="hpRow"><div class="hpMain"><div class="t">Quit</div><div class="d">Returns to passphrase</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="quit">QUIT</button></div></div>
-        </div>
-      </div>
+	      <div class="hpDropdown" data-panel="file" role="menu" aria-label="File menu">
+	        <div class="hpDropTitle"><div class="name">FILE</div><div class="sub">local</div></div>
+	        <div class="hpList">
+	          <div class="hpRow"><div class="hpMain"><div class="t">Refresh Page</div><div class="d">Reloads this scene</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="refresh">REFRESH</button></div></div>
+	          <div class="hpRow hpWhenNoGame"><div class="hpMain"><div class="t">Quit</div><div class="d">Returns to passphrase</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="quit">QUIT</button></div></div>
+	          <div class="hpRow hpWhenGame"><div class="hpMain"><div class="t">Save Game</div><div class="d">Persist your pet to this browser</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="gch-save">SAVE</button></div></div>
+	          <div class="hpRow hpWhenGame"><div class="hpMain"><div class="t">Reset Pet</div><div class="d">Starts a new pet (this cannot be undone)</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="gch-reset">RESET</button></div></div>
+	          <div class="hpRow hpWhenGame"><div class="hpMain"><div class="t">Quit Gachitop</div><div class="d">Closes the game window</div></div><div class="hpMeta"><button class="hpBtnMini" data-action="gch-quit">QUIT</button></div></div>
+	        </div>
+	      </div>
 
       <div class="hpDropdown" data-panel="projects" role="menu" aria-label="Projects menu">
         <div class="hpDropTitle"><div class="name">PROJECTS</div><div class="sub">GitHub</div></div>
@@ -350,21 +470,68 @@
         </div>
       </div>
 
-      <div class="hpDropdown" data-panel="music" role="menu" aria-label="Music menu">
-        <div class="hpDropTitle"><div class="name">MUSIC</div><div class="sub">later</div></div>
-        <div class="hpNote">Nothing here yet.</div>
-      </div>
+	      <div class="hpDropdown" data-panel="music" role="menu" aria-label="Music menu">
+	        <div class="hpDropTitle"><div class="name">MUSIC</div><div class="sub">later</div></div>
+	        <div class="hpNote">Nothing here yet.</div>
+	      </div>
 
-      <div class="hpDropdown" data-panel="why" role="menu" aria-label="Why menu">
-        <div class="hpDropTitle"><div class="name">WHY?</div><div class="sub">because</div></div>
-        <div class="hpNote">Not yet.</div>
-      </div>
-    </div>
-  </div>
+	      <div class="hpDropdown" data-panel="games" role="menu" aria-label="Games menu">
+	        <div class="hpDropTitle"><div class="name">GAMES</div><div class="sub">BREATH</div></div>
+	        <div class="hpNote">
+	          Games run inside this window. Saves persist to this browser (clearing site data wipes them).
+	          <div style="height:10px;"></div>
+	          <div style="font-weight:800; letter-spacing:1.5px; font-size:12px;">GACHITOP</div>
+	          <div style="margin-top:8px; opacity:0.9;">
+	            A tiny always-on pet sim. Keep meters up, answer attention calls, and avoid care mistakes.
+	            Feed when hungry, play when sad, and use lights to let your pet sleep + recover energy.
+	          </div>
+	          <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+	            <button class="hpBtnMini" data-action="gch-launch">LAUNCH</button>
+	            <div style="font-size:12px; opacity:0.75;">Controls: A = cycle, B = confirm, C = back</div>
+	          </div>
+	        </div>
+	      </div>
 
-  <div id="hud" style="display: none;">
-    <div><span class="label">FPS</span><span id="fps">-</span></div>
-    <div><span class="label">GPU</span><span id="gpu">-</span></div>
+	      <div class="hpDropdown" data-panel="why" role="menu" aria-label="Why menu">
+	        <div class="hpDropTitle"><div class="name">WHY?</div><div class="sub">because</div></div>
+	        <div class="hpNote">Not yet.</div>
+	      </div>
+	    </div>
+	  </div>
+
+	  <div id="gameDock" aria-hidden="true">
+	    <div id="gameWindow" role="region" aria-label="Game window">
+	      <div id="gameTitleBar">
+	        <div id="gameTitle">GACHITOP</div>
+	        <div class="right">
+	          <select id="gchScaleSelect" aria-label="Scale">
+	            <option value="fit" selected>FIT</option>
+	            <option value="0.5">0.5×</option>
+	            <option value="1">1×</option>
+	            <option value="2">2×</option>
+	            <option value="3">3×</option>
+	          </select>
+	        </div>
+	      </div>
+	      <div id="gameBody">
+	        <div id="gachitopStage">
+	          <canvas id="gachitopCanvas" width="160" height="160"></canvas>
+	          <div id="gachitopPad" aria-label="Gachitop controls">
+	            <button class="gchPadBtn" data-gch-btn="a">A</button>
+	            <button class="gchPadBtn" data-gch-btn="b">B</button>
+	            <button class="gchPadBtn" data-gch-btn="c">C</button>
+	          </div>
+	          <div id="gchHint">
+	            Tip: If your pet is tired, turn the lights off so it can sleep. If it’s calling attention, don’t ignore it.
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+
+	  <div id="hud" style="display: none;">
+	    <div><span class="label">FPS</span><span id="fps">-</span></div>
+	    <div><span class="label">GPU</span><span id="gpu">-</span></div>
     <div><span class="label">MEM</span><span id="mem">-</span></div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
@@ -376,9 +543,10 @@ uniform float uTime;uniform float uSize;uniform float uRadius;uniform float uAud
  
 uniform vec3 uLightPos;uniform float uDrawHold;uniform float uCollapsePhase;varying vec3 vColor;varying float vDarken;varying float vSeed;varying vec2 vTrailDir;uniform float uEasterHeart;void main(){vec2 uv=gl_PointCoord-vec2(0.5);float d=length(uv);if(d>0.5) discard;float alpha=smoothstep(0.5,0.,d);float shade=0.5+0.5*dot(normalize(uLightPos),vec3(0.,0.,1.));vec3 base=vColor;if(uDrawHold>0.5){vec3 babyBlue=vec3(0.6,0.85,1.);vec3 navy=vec3(0.05,0.12,0.35);base=mix(navy,babyBlue,vSeed);}vec3 col=base*shade;col*=(1.-clamp(vDarken,0.,0.9));col+=vec3(0.15,0.2,0.25)*(1.-d);if(uCollapsePhase>0.){float glow=pow(1.-d,2.)*uCollapsePhase*1.5;col+=vec3(1.,0.95,0.9)*glow;}if(uEasterHeart>0.001){float pulse=0.6+0.4*sin(uEasterHeart*6.283+vSeed*6.+uEasterHeart*12.);vec3 heartColor=mix(vec3(0.95,0.35,0.65),vec3(1.,0.75,0.9),0.5+0.5*sin(vSeed*12.));col=mix(col,heartColor*(1.2+0.6*pulse),uEasterHeart);}gl_FragColor=vec4(col,alpha);} 
   </script>
-  <script src="./src/ParticleSystem.js"></script>
-  <script src="./src/controls.js"></script>
-  <script src="./src/menu.js"></script>
-  <script src="./src/main.js"></script>
-</body>
-</html>
+	  <script src="./src/ParticleSystem.js"></script>
+	  <script src="./src/controls.js"></script>
+	  <script src="./src/menu.js"></script>
+	  <script src="./src/main.js"></script>
+	  <script type="module" src="./src/gachitop/launcher.js"></script>
+	</body>
+	</html>

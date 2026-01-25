@@ -234,7 +234,7 @@
       openMenu(btn.dataset.menu);
     });
 
-    menuUI.addEventListener('click', (e) => {
+    document.addEventListener('pointerdown', (e) => {
       const t = e.target;
       if (!(t instanceof Node)) return;
       if (bar.contains(t)) return;
@@ -253,6 +253,10 @@
       const action = t.getAttribute('data-action');
       if (action === 'refresh') document.dispatchEvent(new CustomEvent('menu:refresh'));
       if (action === 'quit') document.dispatchEvent(new CustomEvent('menu:exit'));
+      if (action === 'gch-launch') document.dispatchEvent(new CustomEvent('gachitop:launch'));
+      if (action === 'gch-save') document.dispatchEvent(new CustomEvent('gachitop:save'));
+      if (action === 'gch-reset') document.dispatchEvent(new CustomEvent('gachitop:reset'));
+      if (action === 'gch-quit') document.dispatchEvent(new CustomEvent('gachitop:quit'));
     });
 
     if (serversList) renderServers(serversList);

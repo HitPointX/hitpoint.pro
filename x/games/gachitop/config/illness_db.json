@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": 1,
+  "illnesses": [
+    {
+      "illnessId": "common_cold",
+      "displayName": "Cold",
+      "type": "acute",
+      "onset": {
+        "baseMonthlyProbability": 0.01,
+        "ageYearsMin": 0,
+        "ageYearsMax": 100,
+        "careModifiers": {
+          "perCareMistake": 0.002,
+          "perCriticalHour": 0.0005
+        }
+      },
+      "progression": {
+        "severityIncreasePerDayUntreated": 12,
+        "severityDecreasePerDayTreated": 6,
+        "symptomatic": {
+          "startsAtSeverity": 20,
+          "attentionCallReason": "illness"
+        },
+        "terminal": {
+          "startsAtSeverity": 95,
+          "deathAfterDaysAtOrAbove": 2,
+          "warningDaysRange": [2, 4]
+        }
+      },
+      "treatment": {
+        "medicineDoseSeverityDelta": -35,
+        "cooldownSeconds": 30,
+        "successChanceAtLowSeverity": 0.7,
+        "successChanceAtHighSeverity": 0.4
+      }
+    },
+    {
+      "illnessId": "age_heart",
+      "displayName": "Heart Condition",
+      "type": "chronic",
+      "onset": {
+        "baseMonthlyProbability": 0.0,
+        "ageYearsMin": 55,
+        "ageYearsMax": 100,
+        "ageRamp": {
+          "rampStartYears": 60,
+          "rampEndYears": 100,
+          "probabilityAtRampEnd": 0.015
+        },
+        "careModifiers": {
+          "perCareMistake": 0.003,
+          "perCriticalHour": 0.001
+        }
+      },
+      "progression": {
+        "preclinicalMonthsRange": [1, 6],
+        "symptomatic": {
+          "symptomDaysRange": [3, 7],
+          "attentionCallReason": "illness"
+        },
+        "terminal": {
+          "monthlyWorsenProbability": 0.25,
+          "warningDaysRange": [4, 10]
+        }
+      },
+      "treatment": {
+        "medicineDoseSeverityDelta": -20,
+        "cooldownSeconds": 30,
+        "managesButRarelyCures": true
+      }
+    }
+  ]
+}
