@@ -8,10 +8,7 @@
     *, *::before, *::after { box-sizing: border-box; }
 
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
+      margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden;
     }
 
     body {
@@ -21,313 +18,274 @@
       background-position: center center;
       background-attachment: fixed;
       background-color: #0c0c10;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
       color: #f2f2f2;
-      min-height: 100vh;
-      overflow-x: hidden;
     }
 
-    /* Vignette overlay */
+    /* ── Overlays ─────────────────────────────────────────── */
     #vignette {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background: radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%);
-      z-index: 0;
     }
-
-    /* Fog overlay */
     #fog-overlay {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background: repeating-radial-gradient(
-        circle at center,
-        rgba(255,255,255,0.01),
-        rgba(255,255,255,0.015) 2px,
-        transparent 4px
+        circle at center, rgba(255,255,255,0.01),
+        rgba(255,255,255,0.015) 2px, transparent 4px
       );
       animation: fogDrift 60s linear infinite;
-      z-index: 0;
     }
-
     @keyframes fogDrift {
       from { background-position: 0% 0%; }
       to   { background-position: 100% 100%; }
     }
 
-    /* Page layout */
+    /* ── Page shell ───────────────────────────────────────── */
     #page {
-      position: relative;
-      z-index: 2;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px 60px;
+      position: relative; z-index: 2;
+      height: 100vh;
+      display: flex; flex-direction: column;
     }
 
-    /* Back nav */
-    #nav {
-      width: 100%;
-      max-width: 860px;
-      margin-bottom: 32px;
-    }
-
-    #nav a {
-      color: rgba(255,255,255,0.45);
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      transition: color 0.2s ease;
-    }
-
-    #nav a:hover { color: #00afff; }
-
-    /* Header */
-    #header {
-      display: flex;
-      align-items: center;
+    /* ── Top bar ──────────────────────────────────────────── */
+    #top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px; flex-shrink: 0;
+      background: rgba(8,10,16,0.75);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
       gap: 14px;
-      margin-bottom: 28px;
+      backdrop-filter: blur(8px);
     }
-
-    #title {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      background: linear-gradient(90deg, #ccc, #eee, #ccc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: foggyStrobe 8s linear infinite;
+    #nav-back {
+      color: rgba(255,255,255,0.38); text-decoration: none;
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      transition: color 0.2s ease; white-space: nowrap;
     }
+    #nav-back:hover { color: #00afff; }
 
-    @keyframes foggyStrobe {
-      0%   { filter: brightness(1);   background-position: 0% 50%; }
-      50%  { filter: brightness(1.2); background-position: 100% 50%; }
-      100% { filter: brightness(1);   background-position: 0% 50%; }
-    }
+    #header-meta { display: flex; align-items: center; gap: 10px; }
 
-    /* LIVE / OFFLINE badge */
     #status-badge {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 6px 12px;
-      border-radius: 999px;
-      letter-spacing: 2px;
-      border: 1px solid transparent;
-      text-transform: uppercase;
-      user-select: none;
+      font-size: 11px; font-weight: 800; padding: 5px 11px;
+      border-radius: 999px; letter-spacing: 2px; border: 1px solid transparent;
+      text-transform: uppercase; user-select: none;
       transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
     }
-
     #status-badge.live {
-      background: rgba(0, 200, 120, 0.14);
-      color: #2dff9a;
-      border-color: rgba(0, 200, 120, 0.4);
-      box-shadow: 0 0 14px rgba(0, 200, 120, 0.25);
+      background: rgba(0,200,120,0.14); color: #2dff9a;
+      border-color: rgba(0,200,120,0.4); box-shadow: 0 0 14px rgba(0,200,120,0.25);
       animation: livePulse 2.4s ease-in-out infinite;
     }
-
     #status-badge.offline {
-      background: rgba(255, 60, 80, 0.10);
-      color: #ff6070;
-      border-color: rgba(255, 60, 80, 0.25);
+      background: rgba(255,60,80,0.10); color: #ff6070;
+      border-color: rgba(255,60,80,0.25);
     }
-
     #status-badge.checking {
-      background: rgba(180, 180, 200, 0.08);
-      color: rgba(255,255,255,0.35);
+      background: rgba(180,180,200,0.08); color: rgba(255,255,255,0.35);
       border-color: rgba(255,255,255,0.10);
     }
-
     @keyframes livePulse {
-      0%, 100% { box-shadow: 0 0 10px rgba(0,200,120,0.2); }
-      50%       { box-shadow: 0 0 22px rgba(0,200,120,0.5); }
+      0%,100% { box-shadow: 0 0 10px rgba(0,200,120,0.2); }
+      50%      { box-shadow: 0 0 22px rgba(0,200,120,0.5); }
     }
 
-    /* Player container */
+    #viewer-count {
+      font-size: 11px; color: rgba(255,255,255,0.32);
+      letter-spacing: 0.5px; display: none;
+    }
+    #viewer-count.visible { display: inline; }
+
+    /* ── Content area ─────────────────────────────────────── */
+    #content-area {
+      flex: 1; display: flex; min-height: 0; overflow: hidden;
+    }
+
+    /* ── Player column ────────────────────────────────────── */
+    #player-col {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      background: #000;
+    }
+
     #player-wrap {
       width: 100%;
-      max-width: 860px;
-      border-radius: 14px;
-      overflow: hidden;
-      background: rgba(10,14,20,0.75);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 32px 100px rgba(0,0,0,0.55);
-      backdrop-filter: blur(8px) saturate(140%);
+      aspect-ratio: 16 / 9;
+      max-height: 100%;
       position: relative;
+      background: rgba(10,14,20,0.75);
+      border: none;
+      overflow: hidden;
+      flex-shrink: 0;
     }
 
     #stream-video {
-      display: block;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border-radius: 14px 14px 0 0;
-      outline: none;
+      display: block; width: 100%; height: 100%;
+      object-fit: contain; background: #000; outline: none;
     }
-
-    /* Offline overlay (shown over the black video area) */
-    #offline-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      background: rgba(8, 10, 16, 0.92);
-      border-radius: 14px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-      z-index: 10;
-    }
-
-    #offline-overlay.visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    #offline-icon {
-      font-size: 2.5rem;
-      line-height: 1;
-      filter: grayscale(0.3);
-    }
-
-    #offline-title {
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
-    }
-
-    #offline-sub {
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.28);
-    }
-
-    #offline-heart {
-      font-size: 1.4rem;
-      line-height: 1;
-      color: rgba(255,255,255,0.18);
-      transition: opacity 0.15s ease;
-      user-select: none;
-    }
-
-    /* Custom controls */
     #stream-video::-webkit-media-controls { display: none !important; }
 
+    /* ── Offline overlay ──────────────────────────────────── */
+    #offline-overlay {
+      position: absolute; inset: 0; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px;
+      background: rgba(8,10,16,0.92);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    #offline-overlay.visible { opacity: 1; pointer-events: auto; }
+    #offline-icon  { font-size: 2.5rem; line-height: 1; filter: grayscale(0.3); }
+    #offline-title {
+      font-size: 14px; font-weight: 800; letter-spacing: 3px;
+      text-transform: uppercase; color: rgba(255,255,255,0.55);
+    }
+    #offline-sub { font-size: 12px; letter-spacing: 1.5px; color: rgba(255,255,255,0.28); }
+    #offline-heart {
+      font-size: 1.4rem; line-height: 1; color: rgba(255,255,255,0.18);
+      transition: opacity 0.15s ease; user-select: none;
+    }
+
+    /* ── Custom controls ──────────────────────────────────── */
     #controls {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
+      position: absolute; bottom: 0; left: 0; right: 0;
       padding: 32px 14px 11px;
       background: linear-gradient(transparent, rgba(0,0,0,0.78));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      z-index: 5;
-      border-radius: 0 0 14px 14px;
-      opacity: 1;
-      transition: opacity 0.35s ease;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; z-index: 5;
+      opacity: 1; transition: opacity 0.35s ease;
     }
     #controls.hidden { opacity: 0; pointer-events: none; }
-
     #ctrl-left  { display: flex; align-items: center; gap: 10px; }
     #ctrl-right { display: flex; align-items: center; gap: 4px; }
-
     .ctrl-btn {
-      background: none; border: none;
-      color: rgba(255,255,255,0.8);
-      font-size: 13px; cursor: pointer;
+      background: none; border: none; color: rgba(255,255,255,0.8);
       padding: 0; width: 30px; height: 30px;
       display: flex; align-items: center; justify-content: center;
-      border-radius: 4px;
+      border-radius: 4px; cursor: pointer; flex-shrink: 0;
       transition: color 0.15s ease, background 0.15s ease;
-      flex-shrink: 0;
     }
     .ctrl-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
-
     #ctrl-live-btn {
       display: flex; align-items: center; gap: 5px;
-      background: rgba(210,15,15,0.9);
-      border: none; border-radius: 4px;
+      background: rgba(210,15,15,0.9); border: none; border-radius: 4px;
       color: #fff; font-size: 10px; font-weight: 800;
       letter-spacing: 1.5px; text-transform: uppercase;
-      padding: 4px 9px 4px 7px; height: 26px;
-      cursor: default;
+      padding: 4px 9px 4px 7px; height: 26px; cursor: default;
       transition: background 0.2s ease;
     }
-    #ctrl-live-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: #fff; flex-shrink: 0;
-    }
-    #ctrl-live-btn.at-edge #ctrl-live-dot {
-      animation: liveDotBlink 1.8s ease-in-out infinite;
-    }
-    @keyframes liveDotBlink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.25; }
-    }
-    #ctrl-live-btn.behind {
-      background: rgba(90,10,10,0.75);
-      cursor: pointer;
-    }
+    #ctrl-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; flex-shrink: 0; }
+    #ctrl-live-btn.at-edge #ctrl-live-dot { animation: liveDotBlink 1.8s ease-in-out infinite; }
+    @keyframes liveDotBlink { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
+    #ctrl-live-btn.behind { background: rgba(90,10,10,0.75); cursor: pointer; }
     #ctrl-live-btn.behind:hover { background: rgba(210,15,15,0.9); }
-
     #ctrl-offset {
-      display: none;
-      font-size: 11px; font-weight: 600;
-      color: rgba(255,255,255,0.5);
-      letter-spacing: 0.3px;
+      display: none; font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.5); letter-spacing: 0.3px;
       font-variant-numeric: tabular-nums;
     }
 
-    /* Seek bar (shown when paused) */
+    /* ── Seek bar ─────────────────────────────────────────── */
     #seekbar-wrap {
-      position: absolute;
-      bottom: 54px; left: 14px; right: 14px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-      z-index: 6;
+      position: absolute; bottom: 54px; left: 14px; right: 14px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease; z-index: 6;
     }
     #seekbar-wrap.visible { opacity: 1; pointer-events: auto; }
-
     #seekbar {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%; height: 3px;
-      border-radius: 2px;
-      background: rgba(255,255,255,0.2);
-      cursor: pointer; outline: none;
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 3px; border-radius: 2px;
+      background: rgba(255,255,255,0.2); cursor: pointer; outline: none;
     }
     #seekbar::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 13px; height: 13px;
-      border-radius: 50%;
-      background: #fff;
-      cursor: pointer;
+      -webkit-appearance: none; width: 13px; height: 13px;
+      border-radius: 50%; background: #fff; cursor: pointer;
       box-shadow: 0 0 4px rgba(0,0,0,0.5);
     }
     #seekbar::-moz-range-thumb {
-      width: 13px; height: 13px;
-      border-radius: 50%; border: none;
-      background: #fff;
-      cursor: pointer;
+      width: 13px; height: 13px; border-radius: 50%; border: none;
+      background: #fff; cursor: pointer;
     }
 
-    @media (max-width: 600px) {
-      #page { padding: 24px 12px 48px; }
-      #title { font-size: 1.4rem; letter-spacing: 4px; }
+    /* ── Mobile tabs (hidden on desktop) ─────────────────── */
+    #mobile-tabs {
+      display: none; flex-shrink: 0;
+      background: rgba(8,10,16,0.9);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .tab-btn {
+      flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
+      color: rgba(255,255,255,0.38); font-size: 11px; font-weight: 800;
+      letter-spacing: 2px; text-transform: uppercase; padding: 10px 0;
+      cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn.active { color: #fff; border-bottom-color: rgba(200,20,20,0.8); }
+
+    /* ── Chat column ──────────────────────────────────────── */
+    #chat-col {
+      width: 320px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      border-left: 1px solid rgba(255,255,255,0.06);
+      background: rgba(10,12,18,0.7);
+      backdrop-filter: blur(6px);
+    }
+    #chat-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(12,14,22,0.8);
+    }
+    #chat-topbar-label {
+      font-size: 10px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(255,255,255,0.28);
+    }
+    #popout-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.38); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    #popout-btn:hover { color: #fff; border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.05); }
+
+    #chat-area { flex: 1; position: relative; min-height: 0; }
+    #chat-frame {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      border: none; display: block; background: #0c0c10;
+    }
+    #chat-popped-notice {
+      position: absolute; inset: 0;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px;
+      background: rgba(10,12,18,0.85);
+    }
+    #chat-popped-notice.visible { display: flex; }
+    #chat-popped-notice span {
+      font-size: 12px; color: rgba(255,255,255,0.35);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    #show-chat-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+    }
+    #show-chat-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+    /* ── Mobile responsive ────────────────────────────────── */
+    @media (max-width: 860px) {
+      body { overflow-y: auto; }
+      html, body, #page { height: auto; min-height: 100vh; }
+      #content-area { flex-direction: column; overflow: visible; }
+      #player-col { background: transparent; }
+      #player-wrap { aspect-ratio: 16/9; height: auto; max-height: none; }
+      #stream-video { height: auto; }
+      #mobile-tabs { display: flex; }
+      #chat-col {
+        width: 100%; height: 420px;
+        border-left: none; border-top: 1px solid rgba(255,255,255,0.06);
+        display: none;
+      }
+      #chat-col.tab-active { display: flex; }
+      #page { overflow: visible; }
     }
   </style>
 </head>
@@ -336,197 +294,150 @@
   <div id="fog-overlay" aria-hidden="true"></div>
 
   <div id="page">
-    <div id="nav">
-      <a href="/x">&larr; HITPOINT.PRO</a>
+    <!-- Top bar -->
+    <div id="top-bar">
+      <a href="/x" id="nav-back">&larr; HITPOINT.PRO</a>
+      <div id="header-meta">
+        <span id="viewer-count" aria-live="polite"></span>
+        <div id="status-badge" class="checking">CHECKING</div>
+      </div>
     </div>
 
-    <div id="header">
-      <div id="status-badge" class="checking">CHECKING</div>
-    </div>
+    <!-- Content -->
+    <div id="content-area">
 
-    <div id="player-wrap">
-      <video
-        id="stream-video"
-        playsinline
-        autoplay
-        muted
-        preload="none"
-        aria-label="Live stream"
-      ></video>
+      <!-- Player -->
+      <div id="player-col">
+        <div id="player-wrap">
+          <video
+            id="stream-video"
+            playsinline autoplay muted preload="none"
+            aria-label="Live stream"
+          ></video>
 
-      <div id="offline-overlay" class="visible" aria-live="polite">
-        <div id="offline-icon">&#x25A0;</div>
-        <div id="offline-title">Stream Offline</div>
-        <div id="offline-sub">Check back soon</div>
-        <div id="offline-heart">♡</div>
-      </div>
+          <div id="offline-overlay" class="visible" aria-live="polite">
+            <div id="offline-icon">&#x25A0;</div>
+            <div id="offline-title">Stream Offline</div>
+            <div id="offline-sub">Check back soon</div>
+            <div id="offline-heart">♡</div>
+          </div>
 
-      <div id="seekbar-wrap">
-        <input type="range" id="seekbar" min="0" max="120" value="120" step="1" aria-label="Seek">
-      </div>
+          <div id="seekbar-wrap">
+            <input type="range" id="seekbar" min="0" max="120" value="120" step="1" aria-label="Seek">
+          </div>
 
-      <div id="controls">
-        <div id="ctrl-left">
-          <button class="ctrl-btn" id="ctrl-play" aria-label="Play / Pause">
-            <svg width="12" height="14" viewBox="0 0 10 12" fill="currentColor"><polygon points="0,0 10,6 0,12"/></svg>
-          </button>
-          <button id="ctrl-live-btn" class="at-edge" aria-label="Go to live">
-            <span id="ctrl-live-dot"></span>LIVE
-          </button>
-          <span id="ctrl-offset"></span>
+          <div id="controls">
+            <div id="ctrl-left">
+              <button class="ctrl-btn" id="ctrl-play" aria-label="Play / Pause">
+                <svg width="12" height="14" viewBox="0 0 10 12" fill="currentColor"><polygon points="0,0 10,6 0,12"/></svg>
+              </button>
+              <button id="ctrl-live-btn" class="at-edge" aria-label="Go to live">
+                <span id="ctrl-live-dot"></span>LIVE
+              </button>
+              <span id="ctrl-offset"></span>
+            </div>
+            <div id="ctrl-right">
+              <button class="ctrl-btn" id="ctrl-mute" aria-label="Mute / Unmute">
+                <svg id="icon-unmute" width="16" height="14" viewBox="0 0 16 14" fill="currentColor"><path d="M0 4.5v5h3l4 4V.5L3 4.5H0zm13.5 2.5a4 4 0 0 0-2-3.46v6.92A4 4 0 0 0 13.5 7zm-2-6.31v1.55A6 6 0 0 1 15 7a6 6 0 0 1-3.5 5.76v1.55A8 8 0 0 0 16 7a8 8 0 0 0-4.5-7.31z"/></svg>
+                <svg id="icon-mute" width="16" height="14" viewBox="0 0 16 14" fill="currentColor" style="display:none"><path d="M0 4.5v5h3l4 4V.5L3 4.5H0zm12.71-1.21L11.3 4.7A4 4 0 0 1 13 7a4 4 0 0 1-1.7 3.3l1.41 1.41A6 6 0 0 0 15 7a6 6 0 0 0-2.29-4.71zM9 .54v1.55a6 6 0 0 1 0 9.82v1.55a8 8 0 0 0 0-12.92z"/><line x1="1" y1="1" x2="15" y2="13" stroke="currentColor" stroke-width="1.5"/></svg>
+              </button>
+              <button class="ctrl-btn" id="ctrl-fs" aria-label="Fullscreen">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
-        <div id="ctrl-right">
-          <button class="ctrl-btn" id="ctrl-mute" aria-label="Mute / Unmute">
-            <svg id="icon-unmute" width="16" height="14" viewBox="0 0 16 14" fill="currentColor"><path d="M0 4.5v5h3l4 4V.5L3 4.5H0zm13.5 2.5a4 4 0 0 0-2-3.46v6.92A4 4 0 0 0 13.5 7zm-2-6.31v1.55A6 6 0 0 1 15 7a6 6 0 0 1-3.5 5.76v1.55A8 8 0 0 0 16 7a8 8 0 0 0-4.5-7.31z"/></svg>
-            <svg id="icon-mute" width="16" height="14" viewBox="0 0 16 14" fill="currentColor" style="display:none"><path d="M0 4.5v5h3l4 4V.5L3 4.5H0zm12.71-1.21L11.3 4.7A4 4 0 0 1 13 7a4 4 0 0 1-1.7 3.3l1.41 1.41A6 6 0 0 0 15 7a6 6 0 0 0-2.29-4.71zM9 .54v1.55a6 6 0 0 1 0 9.82v1.55a8 8 0 0 0 0-12.92z"/><line x1="1" y1="1" x2="15" y2="13" stroke="currentColor" stroke-width="1.5"/></svg>
-          </button>
-          <button class="ctrl-btn" id="ctrl-fs" aria-label="Fullscreen">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9"/></svg>
-          </button>
+
+        <!-- Mobile tabs -->
+        <div id="mobile-tabs">
+          <button class="tab-btn active" data-tab="watch">WATCH</button>
+          <button class="tab-btn"        data-tab="chat">CHAT</button>
         </div>
       </div>
-    </div>
-  </div>
+
+      <!-- Chat sidebar -->
+      <div id="chat-col">
+        <div id="chat-topbar">
+          <span id="chat-topbar-label">CHAT</span>
+          <button id="popout-btn" title="Pop out chat">POPOUT</button>
+        </div>
+        <div id="chat-area">
+          <iframe id="chat-frame" src="/chat/" allow="autoplay" title="Live chat"></iframe>
+          <div id="chat-popped-notice">
+            <span>Chat popped out</span>
+            <button id="show-chat-btn">Show here</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /page -->
 
   <!-- HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
   <script>
     const _sk = [68,122,78,83,89,98,104,113,169,178,131,139,57,55,112,75,85,133,99,150,108,164,118,176,135,145,52,105,72,76,84,89];
     const STREAM_URL = `https://stream.hitpoint.pro/hls/${_sk.map((c,i)=>String.fromCharCode(c-((i*7+13)%97))).join('')}.m3u8`;
-    const POLL_INTERVAL_OFFLINE = 10000; // 10s when offline
-    const POLL_INTERVAL_LIVE    = 30000; // 30s when live (HLS itself handles continuity)
+    const WS_CHAT    = 'wss://chat.hitpoint.pro/ws';
+    const POLL_OFFLINE = 10000;
+    const POLL_LIVE    = 30000;
 
     const video   = document.getElementById('stream-video');
     const badge   = document.getElementById('status-badge');
     const overlay = document.getElementById('offline-overlay');
 
-    let hls = null;
-    let isLive = false;
-    let pollTimer = null;
+    let hls = null, isLive = false, pollTimer = null;
 
+    /* ── Stream badge ─────────────────────────────────────── */
     function setBadge(state) {
-      badge.className = state;
-      badge.textContent = state === 'live' ? 'LIVE'
-                        : state === 'offline' ? 'OFFLINE'
-                        : 'CHECKING';
+      badge.className  = state;
+      badge.textContent = state === 'live' ? 'LIVE' : state === 'offline' ? 'OFFLINE' : 'CHECKING';
     }
-
-    function showOffline() {
-      overlay.classList.add('visible');
-      video.pause();
-    }
-
-    function showLive() {
-      overlay.classList.remove('visible');
-    }
+    function showOffline() { overlay.classList.add('visible');    video.pause(); }
+    function showLive()    { overlay.classList.remove('visible'); }
 
     function destroyHls() {
-      if (hls) {
-        hls.destroy();
-        hls = null;
-      }
+      if (hls) { hls.destroy(); hls = null; }
       video.src = '';
     }
 
     function attachHls() {
       destroyHls();
-
       if (Hls.isSupported()) {
-        hls = new Hls({
-          // Low-latency friendly defaults
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
-          liveSyncDurationCount: 3,
-          liveMaxLatencyDurationCount: 6,
-        });
-
+        hls = new Hls({ maxBufferLength:30, maxMaxBufferLength:60, liveSyncDurationCount:3, liveMaxLatencyDurationCount:6 });
         hls.loadSource(STREAM_URL);
         hls.attachMedia(video);
-
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          isLive = true;
-          setBadge('live');
-          showLive();
-          video.play().catch(() => {
-            // Autoplay blocked — user will need to click play
-          });
-        });
-
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          if (data.fatal) {
-            isLive = false;
-            setBadge('offline');
-            showOffline();
-            destroyHls();
-            schedulePoll(POLL_INTERVAL_OFFLINE);
-          }
-        });
-
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Safari native HLS
-        video.src = STREAM_URL;
-        video.addEventListener('loadedmetadata', () => {
-          isLive = true;
-          setBadge('live');
-          showLive();
+          isLive = true; setBadge('live'); showLive();
           video.play().catch(() => {});
-        }, { once: true });
-
-        video.addEventListener('error', () => {
-          isLive = false;
-          setBadge('offline');
-          showOffline();
-          video.src = '';
-          schedulePoll(POLL_INTERVAL_OFFLINE);
-        }, { once: true });
+        });
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if (data.fatal) { isLive = false; setBadge('offline'); showOffline(); destroyHls(); schedulePoll(POLL_OFFLINE); }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = STREAM_URL;
+        video.addEventListener('loadedmetadata', () => { isLive = true; setBadge('live'); showLive(); video.play().catch(() => {}); }, { once: true });
+        video.addEventListener('error', () => { isLive = false; setBadge('offline'); showOffline(); video.src = ''; schedulePoll(POLL_OFFLINE); }, { once: true });
       }
     }
 
     async function checkStream() {
-      clearTimeout(pollTimer);
-      setBadge('checking');
-
+      clearTimeout(pollTimer); setBadge('checking');
       try {
-        // Add a cache-busting param so we always get a fresh response
-        const res = await fetch(STREAM_URL + '?_=' + Date.now(), {
-          method: 'HEAD',
-          cache: 'no-store',
-          signal: AbortSignal.timeout(8000),
-        });
-
+        const res = await fetch(STREAM_URL + '?_=' + Date.now(), { method:'HEAD', cache:'no-store', signal: AbortSignal.timeout(8000) });
         if (res.ok) {
-          if (!isLive) {
-            attachHls();
-            // badge + overlay set by HLS events above; schedule next liveness check
-            schedulePoll(POLL_INTERVAL_LIVE);
-          } else {
-            setBadge('live');
-            schedulePoll(POLL_INTERVAL_LIVE);
-          }
-        } else {
-          handleOffline();
-        }
-      } catch {
-        handleOffline();
-      }
+          if (!isLive) { attachHls(); schedulePoll(POLL_LIVE); }
+          else { setBadge('live'); schedulePoll(POLL_LIVE); }
+        } else handleOffline();
+      } catch { handleOffline(); }
     }
-
     function handleOffline() {
-      if (isLive) {
-        isLive = false;
-        destroyHls();
-      }
-      setBadge('offline');
-      showOffline();
-      schedulePoll(POLL_INTERVAL_OFFLINE);
+      if (isLive) { isLive = false; destroyHls(); }
+      setBadge('offline'); showOffline(); schedulePoll(POLL_OFFLINE);
     }
+    function schedulePoll(ms) { clearTimeout(pollTimer); pollTimer = setTimeout(checkStream, ms); }
 
-    function schedulePoll(ms) {
-      clearTimeout(pollTimer);
-      pollTimer = setTimeout(checkStream, ms);
-    }
-
-    // --- Custom controls ---
+    /* ── Custom controls ──────────────────────────────────── */
     const ctrlPlay    = document.getElementById('ctrl-play');
     const ctrlLive    = document.getElementById('ctrl-live-btn');
     const ctrlOffset  = document.getElementById('ctrl-offset');
@@ -538,37 +449,25 @@
     const iconUnmute  = document.getElementById('icon-unmute');
     const seekbar     = document.getElementById('seekbar');
     const seekbarWrap = document.getElementById('seekbar-wrap');
-    const pauseIcon  = `<svg width="11" height="14" viewBox="0 0 10 12" fill="currentColor"><rect x="0" y="0" width="3.5" height="12"/><rect x="6.5" y="0" width="3.5" height="12"/></svg>`;
-    const playIcon   = `<svg width="12" height="14" viewBox="0 0 10 12" fill="currentColor"><polygon points="0,0 10,6 0,12"/></svg>`;
+    const pauseIcon   = `<svg width="11" height="14" viewBox="0 0 10 12" fill="currentColor"><rect x="0" y="0" width="3.5" height="12"/><rect x="6.5" y="0" width="3.5" height="12"/></svg>`;
+    const playIcon    = `<svg width="12" height="14" viewBox="0 0 10 12" fill="currentColor"><polygon points="0,0 10,6 0,12"/></svg>`;
 
-    const LIVE_EDGE_THRESHOLD = 20; // seconds
+    const LIVE_EDGE_THRESHOLD = 20;
     let hideTimer = null;
 
     function showControls() {
-      controls.classList.remove('hidden');
-      clearTimeout(hideTimer);
-      if (!video.paused) {
-        hideTimer = setTimeout(() => controls.classList.add('hidden'), 3000);
-      }
+      controls.classList.remove('hidden'); clearTimeout(hideTimer);
+      if (!video.paused) hideTimer = setTimeout(() => controls.classList.add('hidden'), 3000);
     }
-
     playerWrap.addEventListener('mousemove',  showControls);
     playerWrap.addEventListener('mouseenter', showControls);
-    playerWrap.addEventListener('mouseleave', () => {
-      clearTimeout(hideTimer);
-      if (!video.paused) controls.classList.add('hidden');
-    });
+    playerWrap.addEventListener('mouseleave', () => { clearTimeout(hideTimer); if (!video.paused) controls.classList.add('hidden'); });
     playerWrap.addEventListener('touchstart', showControls, { passive: true });
 
-    // Play / pause
-    ctrlPlay.addEventListener('click', () => {
-      if (video.paused) video.play().catch(() => {});
-      else video.pause();
-    });
+    ctrlPlay.addEventListener('click', () => { if (video.paused) video.play().catch(()=>{}); else video.pause(); });
     video.addEventListener('play',  () => { ctrlPlay.innerHTML = pauseIcon; showControls(); updateLiveEdge(); });
     video.addEventListener('pause', () => { ctrlPlay.innerHTML = playIcon;  showControls(); updateLiveEdge(); });
 
-    // Mute
     function updateMute() {
       iconMute.style.display   = video.muted ? 'block' : 'none';
       iconUnmute.style.display = video.muted ? 'none'  : 'block';
@@ -576,101 +475,129 @@
     ctrlMute.addEventListener('click', () => { video.muted = !video.muted; updateMute(); });
     updateMute();
 
-    // Fullscreen
     ctrlFs.addEventListener('click', () => {
-      if (!document.fullscreenElement) playerWrap.requestFullscreen().catch(() => {});
+      if (!document.fullscreenElement) playerWrap.requestFullscreen().catch(()=>{});
       else document.exitFullscreen();
     });
 
-    // LIVE badge, offset, and seek bar
     function updateSeekbarFill() {
       const pct = (seekbar.value / seekbar.max) * 100;
-      seekbar.style.background =
-        `linear-gradient(to right, rgba(200,20,20,0.9) ${pct}%, rgba(255,255,255,0.2) ${pct}%)`;
+      seekbar.style.background = `linear-gradient(to right, rgba(200,20,20,0.9) ${pct}%, rgba(255,255,255,0.2) ${pct}%)`;
     }
 
     function updateLiveEdge() {
       if (!isLive) return;
-      const dist    = video.duration - video.currentTime;
-      const paused  = video.paused;
-      const atEdge  = !isFinite(dist) || dist < LIVE_EDGE_THRESHOLD;
-
-      // Badge: show dimmed + clickable when paused or seeked behind
+      const dist = video.duration - video.currentTime;
+      const paused = video.paused;
+      const atEdge = !isFinite(dist) || dist < LIVE_EDGE_THRESHOLD;
       ctrlLive.classList.toggle('at-edge', atEdge && !paused);
       ctrlLive.classList.toggle('behind',  !atEdge || paused);
-
-      // Offset: show when paused (any position) or when behind live while playing
       if (atEdge && !paused) {
         ctrlOffset.style.display = 'none';
       } else {
         ctrlOffset.style.display = 'inline';
         const s = isFinite(dist) ? Math.round(dist) : 0;
-        ctrlOffset.textContent = `-${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+        ctrlOffset.textContent = `-${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
       }
-
-      // Seek bar: only visible when paused
       seekbarWrap.classList.toggle('visible', paused);
-      if (paused && isFinite(dist)) {
-        seekbar.value = Math.round(120 - Math.min(120, Math.max(0, dist)));
-        updateSeekbarFill();
-      }
+      if (paused && isFinite(dist)) { seekbar.value = Math.round(120 - Math.min(120, Math.max(0, dist))); updateSeekbarFill(); }
     }
     video.addEventListener('timeupdate', updateLiveEdge);
     video.addEventListener('seeking',    updateLiveEdge);
 
-    // Scrubbing the seek bar
     seekbar.addEventListener('input', () => {
       const dist = 120 - Number(seekbar.value);
-      if (isFinite(video.duration)) {
-        video.currentTime = Math.max(0, video.duration - dist);
-      }
-      updateSeekbarFill();
-      updateLiveEdge();
+      if (isFinite(video.duration)) video.currentTime = Math.max(0, video.duration - dist);
+      updateSeekbarFill(); updateLiveEdge();
     });
     updateSeekbarFill();
 
-    // Click LIVE badge to jump to live edge
     ctrlLive.addEventListener('click', () => {
       if (!ctrlLive.classList.contains('behind')) return;
-      if (hls && hls.liveSyncPosition != null) {
-        video.currentTime = hls.liveSyncPosition;
-      } else if (isFinite(video.duration)) {
-        video.currentTime = video.duration;
-      }
-      video.play().catch(() => {});
+      if (hls && hls.liveSyncPosition != null) video.currentTime = hls.liveSyncPosition;
+      else if (isFinite(video.duration)) video.currentTime = video.duration;
+      video.play().catch(()=>{});
     });
 
-    // Offline heart blink
+    /* ── Offline heart blink ──────────────────────────────── */
     const offlineHeart = document.getElementById('offline-heart');
     const hearts = [
-      // unicode / classic
       '♡','♥','❤','❤️','❣','❥','❦','❧',
-      // emoji solid
       '💗','💓','💕','💞','💖','💘','💝','💟',
-      // coloured hearts
       '🖤','🤍','🤎','💙','💚','💛','🧡','💜',
-      // special / combo
       '❤‍🔥','❤‍🩹','💔','🫀','🫶','💌',
-      // decorated combos
       '·♡·','»♡«','~♡~','*♡*','∞♡','♡∞',
       '。♡','♡。','♡‿♡','(♥)','(´♡`)','<3',
-      // flora + symbol combos
       '✿♡','♡✿','❋♡','♡❋','ꕤ','✦♡✦',
       '⁺♡','♡⁺','≋♡≋','⊹♡⊹',
     ];
     let heartIdx = 0;
     function nextHeart() {
       offlineHeart.style.opacity = '0';
-      setTimeout(() => {
-        heartIdx = (heartIdx + 1) % hearts.length;
-        offlineHeart.textContent = hearts[heartIdx];
-        offlineHeart.style.opacity = '1';
-      }, 150);
+      setTimeout(() => { heartIdx = (heartIdx + 1) % hearts.length; offlineHeart.textContent = hearts[heartIdx]; offlineHeart.style.opacity = '1'; }, 150);
       setTimeout(nextHeart, 500 + Math.random() * 2000);
     }
     setTimeout(nextHeart, 800 + Math.random() * 1200);
 
-    // Kick off
+    /* ── Viewer count WebSocket ───────────────────────────── */
+    // Connects without auth just to receive viewer count updates.
+    // Note: your WS server must allow unauthenticated connections
+    // (even if sending is restricted to logged-in users).
+    const viewerCountEl = document.getElementById('viewer-count');
+    let countWs = null, countReconnect = null;
+
+    function connectCountWs() {
+      clearTimeout(countReconnect);
+      try {
+        countWs = new WebSocket(WS_CHAT);
+        countWs.addEventListener('message', (e) => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'users') {
+              const n = msg.count || 0;
+              viewerCountEl.textContent = n === 1 ? '1 viewer' : `${n} viewers`;
+              viewerCountEl.classList.add('visible');
+            }
+          } catch {}
+        });
+        countWs.addEventListener('close', () => {
+          countWs = null;
+          countReconnect = setTimeout(connectCountWs, 8000);
+        });
+        countWs.addEventListener('error', () => {});
+      } catch {}
+    }
+    connectCountWs();
+
+    /* ── Chat popout ──────────────────────────────────────── */
+    const chatFrame  = document.getElementById('chat-frame');
+    const poppedNote = document.getElementById('chat-popped-notice');
+    let chatWindow   = null;
+
+    document.getElementById('popout-btn').addEventListener('click', () => {
+      chatWindow = window.open('/chat/', 'hp-chat', 'width=400,height=700,resizable=yes');
+      chatFrame.style.display = 'none';
+      poppedNote.classList.add('visible');
+    });
+
+    document.getElementById('show-chat-btn').addEventListener('click', () => {
+      if (chatWindow && !chatWindow.closed) chatWindow.close();
+      chatFrame.style.display = '';
+      poppedNote.classList.remove('visible');
+    });
+
+    /* ── Mobile tabs ──────────────────────────────────────── */
+    const chatCol = document.getElementById('chat-col');
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.tab === 'chat') chatCol.classList.add('tab-active');
+        else chatCol.classList.remove('tab-active');
+      });
+    });
+
+    /* ── Boot ─────────────────────────────────────────────── */
     checkStream();
   </script>
 </body>
