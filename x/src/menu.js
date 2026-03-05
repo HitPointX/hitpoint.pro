@@ -326,7 +326,6 @@
     const streamDock = document.getElementById('streamDock');
     const streamFrame = document.getElementById('streamFrame');
     const streamClose = document.getElementById('streamCloseBtn');
-    const streamLabel = document.getElementById('streamStatusLabel');
     let streamPollTimer = null;
     let streamLoaded = false;
 
@@ -336,12 +335,6 @@
         d.classList.remove('hpLiveDot--live', 'hpLiveDot--offline', 'hpLiveDot--checking');
         d.classList.add(`hpLiveDot--${state}`);
       });
-      if (streamLabel) {
-        const isLive = state === 'live';
-        streamLabel.textContent = isLive ? 'LIVE' : state === 'offline' ? 'OFFLINE' : 'CHECKING';
-        streamLabel.style.color   = isLive ? '#2dff9a' : '';
-        streamLabel.style.opacity = isLive ? '0.9' : '0.45';
-      }
     };
 
     const openStream = () => {
