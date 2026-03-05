@@ -418,7 +418,8 @@
     const whyBtn = document.querySelector('.hpMenuBtn[data-menu="why"]');
     let whyCanvas = null, whyCtx = null, whyRaf = null;
     let whyDrops = [], whySpawning = false, whyFrame = 0;
-    const DRIP_BELOW = 45;
+    const DRIP_BELOW = 22;   // canvas extends only 22px below button
+    const DRIP_MAX   = 8;    // max simultaneous drops
 
     const startWhyDrip = () => {
       if (!whyBtn) return;
@@ -450,49 +451,44 @@
       const btnH = H - DRIP_BELOW;
       whyCtx.clearRect(0, 0, W, H);
 
-      whyFrame = (whyFrame + 1) % 4;
-      if (whySpawning && whyFrame === 0) {
-        const n = Math.random() < 0.5 ? 1 : 2;
-        for (let i = 0; i < n; i++) {
-          whyDrops.push({
-            x: 2 + Math.random() * (W - 4),
-            y: Math.random() * btnH,          // anywhere within letter area
-            vy: 0.08 + Math.random() * 0.35,
-            vx: (Math.random() - 0.5) * 0.3,
-            sz: 1 + Math.floor(Math.random() * 3),  // pixel size 1–3
-            life: 1.0,
-            decay: 0.008 + Math.random() * 0.010,
-            trail: [],
-          });
-        }
+      // spawn one drop every ~20 frames if under cap
+      whyFrame = (whyFrame + 1) % 20;
+      if (whySpawning && whyFrame === 0 && whyDrops.length < DRIP_MAX) {
+        whyDrops.push({
+          x:    4 + Math.random() * (W - 8),
+          y:    2 + Math.random() * (btnH - 4),  // within button area
+          vy:   0.02 + Math.random() * 0.06,      // very slow
+          vx:   (Math.random() - 0.5) * 0.15,
+          sz:   1 + Math.floor(Math.random() * 2),  // pixel size 1–2
+          life: 1.0,
+          decay: 0.012 + Math.random() * 0.010,
+          trail: [],
+        });
       }
 
       for (const d of whyDrops) {
-        d.vy = Math.min(d.vy + 0.018, 1.5);
+        d.vy = Math.min(d.vy + 0.004, 0.35);   // very low gravity, low cap
         d.x  = Math.max(0, Math.min(W - d.sz, d.x + d.vx));
         d.y += d.vy;
         d.life -= d.decay;
         d.trail.push({ x: Math.round(d.x), y: Math.round(d.y) });
-        if (d.trail.length > 8) d.trail.shift();
+        if (d.trail.length > 5) d.trail.shift();
 
-        // trail — darkening pixels
+        // trail fades from transparent at tail to semi-visible at head
         for (let i = 0; i < d.trail.length; i++) {
-          const t = d.trail[i];
-          const a = (i / d.trail.length) * d.life * 0.72;
-          const sz = Math.max(1, Math.round(d.sz * (0.4 + 0.6 * i / d.trail.length)));
-          whyCtx.fillStyle = `rgba(140,0,0,${a.toFixed(2)})`;
-          whyCtx.fillRect(t.x, t.y, sz, sz);
+          const t   = d.trail[i];
+          const pct = i / (d.trail.length - 1 || 1);
+          const a   = pct * d.life * 0.35;   // very transparent
+          whyCtx.fillStyle = `rgba(180,0,0,${a.toFixed(2)})`;
+          whyCtx.fillRect(t.x, t.y, d.sz, d.sz);
         }
-        // head drop — bright pixel blob
-        const a = d.life * 0.95;
-        whyCtx.fillStyle = `rgba(215,8,8,${a.toFixed(2)})`;
-        whyCtx.fillRect(Math.round(d.x), Math.round(d.y), d.sz + 1, d.sz + 1);
-        // specular highlight pixel
-        whyCtx.fillStyle = `rgba(255,90,90,${(a * 0.55).toFixed(2)})`;
-        whyCtx.fillRect(Math.round(d.x), Math.round(d.y), Math.max(1, d.sz - 1), Math.max(1, d.sz - 1));
+        // head — subtle red dot
+        const a = d.life * 0.55;
+        whyCtx.fillStyle = `rgba(210,10,10,${a.toFixed(2)})`;
+        whyCtx.fillRect(Math.round(d.x), Math.round(d.y), d.sz, d.sz);
       }
 
-      whyDrops = whyDrops.filter(d => d.life > 0.03 && d.y < btnH + 45);
+      whyDrops = whyDrops.filter(d => d.life > 0.03 && d.y < btnH + DRIP_BELOW);
 
       if (whySpawning || whyDrops.length > 0) {
         whyRaf = requestAnimationFrame(whyLoop);
