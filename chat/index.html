@@ -848,38 +848,5 @@
   checkAuth();
 </script>
 
-<!--
-  ════════════════════════════════════════════════════════════════
-  VPS: add to /opt/hitpoint-chat/server.js (auth routes section)
-  ════════════════════════════════════════════════════════════════
-
-  This endpoint reads the httpOnly JWT cookie and returns the raw
-  token so the browser can use it for WebSocket connections
-  (WebSocket API does not send cookies cross-origin).
-
-  Also ensure your CORS config allows credentials from hitpoint.pro:
-    app.use(cors({
-      origin: ['https://hitpoint.pro', 'https://chat.hitpoint.pro'],
-      credentials: true,
-    }));
-
-  ────────────────────────────────────────────────────────────────
-  // GET /api/auth/token — return raw JWT for WebSocket auth
-  router.get('/token', requireAuth, (req, res) => {
-    // requireAuth already verified the cookie; just return it
-    const token = req.cookies.token; // match your cookie name
-    if (!token) return res.status(401).json({ error: 'Not authenticated' });
-    res.json({ token });
-  });
-  ────────────────────────────────────────────────────────────────
-
-  Deployment:
-    1. SSH into VPS
-    2. nano /opt/hitpoint-chat/server.js  (or wherever auth routes live)
-    3. Add the route above inside your auth router
-    4. pm2 restart hitpoint-chat          (or: systemctl restart hitpoint-chat)
-
-  ════════════════════════════════════════════════════════════════
--->
 </body>
 </html>
