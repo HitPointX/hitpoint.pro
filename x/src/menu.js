@@ -417,8 +417,8 @@
     // --- WHY? blood pixel drip effect ---
     const whyBtn = document.querySelector('.hpMenuBtn[data-menu="why"]');
     let whyCanvas = null, whyCtx = null, whyRaf = null;
-    let whyDrops = [], whySpawning = false;
-    const DRIP_BELOW = 220;
+    let whyDrops = [], whySpawning = false, whyFrame = 0;
+    const DRIP_BELOW = 45;
 
     const startWhyDrip = () => {
       if (!whyBtn) return;
@@ -450,29 +450,30 @@
       const btnH = H - DRIP_BELOW;
       whyCtx.clearRect(0, 0, W, H);
 
-      if (whySpawning) {
-        const n = Math.random() < 0.65 ? 2 : 3;
+      whyFrame = (whyFrame + 1) % 4;
+      if (whySpawning && whyFrame === 0) {
+        const n = Math.random() < 0.5 ? 1 : 2;
         for (let i = 0; i < n; i++) {
           whyDrops.push({
             x: 2 + Math.random() * (W - 4),
             y: Math.random() * btnH,          // anywhere within letter area
-            vy: 0.3 + Math.random() * 1.4,
-            vx: (Math.random() - 0.5) * 0.5,
+            vy: 0.08 + Math.random() * 0.35,
+            vx: (Math.random() - 0.5) * 0.3,
             sz: 1 + Math.floor(Math.random() * 3),  // pixel size 1–3
             life: 1.0,
-            decay: 0.0035 + Math.random() * 0.006,
+            decay: 0.008 + Math.random() * 0.010,
             trail: [],
           });
         }
       }
 
       for (const d of whyDrops) {
-        d.vy = Math.min(d.vy + 0.065, 6);
+        d.vy = Math.min(d.vy + 0.018, 1.5);
         d.x  = Math.max(0, Math.min(W - d.sz, d.x + d.vx));
         d.y += d.vy;
         d.life -= d.decay;
         d.trail.push({ x: Math.round(d.x), y: Math.round(d.y) });
-        if (d.trail.length > 14) d.trail.shift();
+        if (d.trail.length > 8) d.trail.shift();
 
         // trail — darkening pixels
         for (let i = 0; i < d.trail.length; i++) {
@@ -491,7 +492,7 @@
         whyCtx.fillRect(Math.round(d.x), Math.round(d.y), Math.max(1, d.sz - 1), Math.max(1, d.sz - 1));
       }
 
-      whyDrops = whyDrops.filter(d => d.life > 0.03 && d.y < H + 4);
+      whyDrops = whyDrops.filter(d => d.life > 0.03 && d.y < btnH + 45);
 
       if (whySpawning || whyDrops.length > 0) {
         whyRaf = requestAnimationFrame(whyLoop);
