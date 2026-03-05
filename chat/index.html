@@ -70,6 +70,14 @@
     #slow-banner.visible { display: flex; }
     #slow-banner-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,180,50,0.7); flex-shrink: 0; }
 
+    #emote-banner {
+      display: none; align-items: center; gap: 6px;
+      padding: 5px 12px; flex-shrink: 0;
+      background: rgba(80,40,160,0.12); border-bottom: 1px solid rgba(120,80,220,0.2);
+      font-size: 11px; color: rgba(180,140,255,0.8); letter-spacing: 0.3px;
+    }
+    #emote-banner.visible { display: flex; }
+
     /* ── Messages ───────────────────────────────────────────── */
     #messages {
       flex: 1 1 0; overflow-y: auto; padding: 4px 0 2px;
@@ -320,6 +328,12 @@
     <span id="slow-banner-text">Slow mode — 5s between messages</span>
   </div>
 
+  <!-- Emote mode banner -->
+  <div id="emote-banner">
+    <span>&#x2728;</span>
+    <span>Emote mode — only emotes and emoji allowed</span>
+  </div>
+
   <!-- Messages -->
   <div id="messages" role="log" aria-live="polite" aria-atomic="false"></div>
 
@@ -435,6 +449,7 @@
   let autoScroll   = true;
   let slowActive   = false;
   let slowSecs     = 0;
+  let emoteMode    = false;
   let lastSendTime = 0;
   let ctxTarget    = null;      // {username, messageId}
 
@@ -568,6 +583,13 @@
       case 'slowmode':
         setSlowMode(msg.enabled, msg.seconds);
         break;
+      case 'clear':
+        el('messages').innerHTML = '';
+        localSystem('Chat was cleared.');
+        break;
+      case 'emotemode':
+        setEmoteMode(msg.enabled);
+        break;
     }
   }
 
@@ -614,6 +636,12 @@
     el('messages').appendChild(div);
   }
 
+  // Local-only system message (feedback for commands, not broadcast)
+  function localSystem(text) {
+    appendSystem(text);
+    if (autoScroll) scrollBottom();
+  }
+
   function markDeleted(messageId) {
     const el = document.querySelector(`.msg[data-id="${messageId}"]`);
     if (!el) return;
@@ -654,7 +682,13 @@
   function sendMessage() {
     const inp = el('msg-input');
     const content = inp.value.trim();
-    if (!content || !ws || ws.readyState !== WebSocket.OPEN) return;
+    if (!content) return;
+
+    inp.value = ''; inp.style.height = '36px';
+
+    if (content.startsWith('/')) { handleCommand(content); return; }
+
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
 
     if (slowActive && currentUser?.role === 'viewer') {
       const wait = slowSecs - (Date.now() - lastSendTime) / 1000;
@@ -662,8 +696,103 @@
     }
 
     ws.send(JSON.stringify({ type: 'message', content }));
-    inp.value = ''; inp.style.height = '36px';
     lastSendTime = Date.now();
+  }
+
+  /* ── Chat commands ───────────────────────────────────────── */
+  const COMMANDS_HELP = [
+    '/clear                  — clear all chat messages',
+    '/slowmode <secs|off>    — enable/disable slow mode',
+    '/emotemode [off]        — toggle emote-only mode',
+    '/ban <user>             — permanently ban a user',
+    '/unban <user>           — remove a ban',
+    '/kick <user>            — remove user for 10 minutes',
+    '/timeout <user> <mins>  — timeout for N minutes',
+    '/mute <user> [mins]     — mute user (default 10m)',
+    '/unmute <user>          — remove a mute',
+    '/help                   — show this list',
+  ];
+
+  function handleCommand(raw) {
+    if (!isMod()) { localSystem('Commands are only available to mods and admins.'); return; }
+
+    const parts  = raw.slice(1).trim().split(/\s+/);
+    const cmd    = parts[0]?.toLowerCase();
+    const arg1   = parts[1] || '';
+    const arg2   = parts[2] || '';
+    const wsSend = (obj) => ws && ws.readyState === WebSocket.OPEN && ws.send(JSON.stringify(obj));
+
+    switch (cmd) {
+      case 'help':
+        COMMANDS_HELP.forEach(localSystem);
+        break;
+
+      case 'clear':
+        wsSend({ type: 'clear' });
+        break;
+
+      case 'slowmode':
+        if (!arg1 || arg1 === 'off') {
+          wsSend({ type: 'slowmode', enabled: false, seconds: 0 });
+          localSystem('Slow mode disabled.');
+        } else {
+          const secs = parseInt(arg1, 10);
+          if (isNaN(secs) || secs < 1) { localSystem('Usage: /slowmode <seconds|off>'); break; }
+          wsSend({ type: 'slowmode', enabled: true, seconds: secs });
+          localSystem(`Slow mode set to ${secs}s.`);
+        }
+        break;
+
+      case 'emotemode':
+        if (arg1 === 'off') {
+          wsSend({ type: 'emotemode', enabled: false });
+          localSystem('Emote mode disabled.');
+        } else {
+          wsSend({ type: 'emotemode', enabled: true });
+          localSystem('Emote mode enabled.');
+        }
+        break;
+
+      case 'ban':
+        if (!arg1) { localSystem('Usage: /ban <username>'); break; }
+        modPost('ban', { username: arg1 }).then(() => localSystem(`Banned ${arg1}.`));
+        break;
+
+      case 'unban':
+        if (!arg1) { localSystem('Usage: /unban <username>'); break; }
+        modPost('unban', { username: arg1 }).then(() => localSystem(`Unbanned ${arg1}.`));
+        break;
+
+      case 'kick':
+        if (!arg1) { localSystem('Usage: /kick <username>'); break; }
+        modPost('ban', { username: arg1, duration: 10 * 60 * 1000 })
+          .then(() => localSystem(`Kicked ${arg1} (10 minutes).`));
+        break;
+
+      case 'timeout': {
+        const mins = parseInt(arg2, 10);
+        if (!arg1 || isNaN(mins) || mins < 1) { localSystem('Usage: /timeout <username> <minutes>'); break; }
+        modPost('ban', { username: arg1, duration: mins * 60 * 1000 })
+          .then(() => localSystem(`Timed out ${arg1} for ${mins} minute(s).`));
+        break;
+      }
+
+      case 'mute': {
+        const mins = parseInt(arg2, 10) || 10;
+        if (!arg1) { localSystem('Usage: /mute <username> [minutes]'); break; }
+        modPost('mute', { username: arg1, duration: mins * 60 * 1000 })
+          .then(() => localSystem(`Muted ${arg1} for ${mins} minute(s).`));
+        break;
+      }
+
+      case 'unmute':
+        if (!arg1) { localSystem('Usage: /unmute <username>'); break; }
+        modPost('unmute', { username: arg1 }).then(() => localSystem(`Unmuted ${arg1}.`));
+        break;
+
+      default:
+        localSystem(`Unknown command: /${cmd}  — type /help for a list.`);
+    }
   }
 
   let slowNoticeTimer;
@@ -678,9 +807,14 @@
   /* ── Slow mode ───────────────────────────────────────────── */
   function setSlowMode(enabled, secs) {
     slowActive = enabled; slowSecs = secs || 0;
-    const banner = el('slow-banner');
-    banner.classList.toggle('visible', enabled);
+    el('slow-banner').classList.toggle('visible', enabled);
     if (enabled) el('slow-banner-text').textContent = `Slow mode — ${secs}s between messages`;
+  }
+
+  function setEmoteMode(enabled) {
+    emoteMode = enabled;
+    el('emote-banner').classList.toggle('visible', enabled);
+    el('msg-input').placeholder = enabled ? 'Emote mode — use :emoteName: or emoji' : 'Send a message…';
   }
 
   el('slow-mode-btn').addEventListener('click', (e) => {
