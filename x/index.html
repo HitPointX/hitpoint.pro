@@ -124,6 +124,190 @@
     @media (max-width: 600px) { #passphraseInput { font-size: 16px; letter-spacing: 2px; } }
 
     #info { transition: opacity 1.3s ease; }
+
+    /* --- Live stream dot indicator & cinema window --- */
+    .hpMenuLive { display: inline-flex !important; align-items: center; }
+    .hpLiveDot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-right: 7px;
+      flex-shrink: 0;
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+    .hpLiveDot--live    { background: #2dff9a; animation: liveDotPulse 1.8s ease-in-out infinite; }
+    .hpLiveDot--offline { background: #ff4060; box-shadow: none; }
+    .hpLiveDot--checking { background: rgba(180,180,200,0.22); box-shadow: none; }
+    @keyframes liveDotPulse {
+      0%, 100% { box-shadow: 0 0 4px rgba(0,200,120,0.55); }
+      50%       { box-shadow: 0 0 16px rgba(0,200,120,1.0); }
+    }
+    /* Cinema dim — deliberately covers the menu bar so all focus goes to the stream */
+    #streamDim {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0);
+      z-index: 2006;
+      pointer-events: none;
+      transition: background 0.65s ease;
+      cursor: pointer;
+    }
+    body.hp-stream-open #streamDim { background: rgba(0,0,0,0.82); pointer-events: auto; }
+    /* Stream dock */
+    #streamDock {
+      position: fixed; inset: 0;
+      z-index: 2007;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 18px;
+      pointer-events: none;
+    }
+    body.hp-stream-open #streamDock { display: flex; pointer-events: auto; }
+    #streamWindow {
+      width: min(940px, calc(100vw - 36px));
+      height: min(630px, calc(100vh - 36px));
+      background: rgba(8,10,16,0.97);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 18px;
+      box-shadow: 0 40px 120px rgba(0,0,0,0.75), 0 0 80px rgba(0,200,120,0.04);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transform: scale(0.96); opacity: 0;
+      transition: transform 0.38s cubic-bezier(.22,.68,0,1.25), opacity 0.3s ease;
+    }
+    body.hp-stream-open #streamWindow { transform: scale(1); opacity: 1; }
+    #streamTitleBar {
+      height: 46px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 14px 0 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(12,14,20,0.98);
+      user-select: none; flex-shrink: 0;
+    }
+    #streamWindowTitle {
+      font-weight: 800; letter-spacing: 3px; font-size: 12px;
+      color: #d0d0e0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    #streamTitleRight { display: flex; align-items: center; gap: 10px; }
+    #streamStatusLabel {
+      font-size: 11px; font-weight: 800;
+      letter-spacing: 1.5px; color: #c0c0d0; opacity: 0.45;
+      transition: color 0.4s ease, opacity 0.4s ease;
+    }
+    #streamBody { flex: 1 1 auto; position: relative; overflow: hidden; }
+    #streamFrame {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: none; display: block; background: #000;
+    }
+
+    /* --- LIVE glitch effect --- */
+    #liveMenuText { display: inline-block; }
+    #liveMenuBtn.glitching #liveMenuText {
+      animation: liveChromatic 65ms steps(1) infinite;
+    }
+    @keyframes liveChromatic {
+      0%   { text-shadow: -2px 0 rgba(255,30,30,0.9),   2px 0 rgba(0,230,255,0.9); }
+      16%  { text-shadow:  2px 1px rgba(255,0,110,0.85),-1px 0 rgba(0,255,160,0.85); filter: blur(0.5px) hue-rotate(30deg); color: #ff5de8; }
+      33%  { text-shadow: -1px -1px rgba(50,0,255,0.8),  2px 1px rgba(255,200,0,0.85);                                        color: #b06cff; }
+      50%  { text-shadow:  2px 0 rgba(255,0,0,0.9),    -2px 0 rgba(0,200,255,0.9);   filter: blur(0.4px); }
+      66%  { text-shadow:  0 2px rgba(180,0,255,0.8),   1px -1px rgba(0,255,90,0.8); filter: hue-rotate(-25deg); color: #4dffd4; }
+      83%  { text-shadow: -2px 1px rgba(255,60,0,0.9),  1px -1px rgba(0,220,255,0.9); filter: blur(0.3px); }
+      100% { text-shadow: -2px 0 rgba(255,30,30,0.9),   2px 0 rgba(0,230,255,0.9); }
+    }
+
+    /* --- Dark mode (default) --- */
+    body.hp-dark-mode #menuBar {
+      background: rgba(14,16,22,0.96);
+      border-bottom-color: rgba(255,255,255,0.07);
+      color: #d8d8e8;
+    }
+    body.hp-dark-mode .hpMenuBtn { color: inherit; }
+    body.hp-dark-mode .hpMenuBtn[aria-expanded="true"] { background: rgba(255,255,255,0.09); }
+    body.hp-dark-mode .hpMenuEnd {
+      background: rgba(255,60,80,0.12);
+      border-color: rgba(255,60,80,0.28);
+      color: #ff8090;
+    }
+    body.hp-dark-mode .hpMenuEnd:hover { background: rgba(255,60,80,0.20); }
+    body.hp-dark-mode .hpDropdown {
+      background: rgba(16,18,26,0.99);
+      border-color: rgba(255,255,255,0.10);
+      box-shadow: 0 26px 80px rgba(0,0,0,0.65);
+    }
+    body.hp-dark-mode .hpDropTitle { border-bottom-color: rgba(255,255,255,0.07); }
+    body.hp-dark-mode .hpDropTitle .name { color: #e8e8f0; }
+    body.hp-dark-mode .hpDropTitle .sub { color: rgba(255,255,255,0.40); opacity: 1; }
+    body.hp-dark-mode .hpRow,
+    body.hp-dark-mode .hpLinkRow {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.07);
+      color: #d0d0e0;
+    }
+    body.hp-dark-mode .hpLinkRow:hover,
+    body.hp-dark-mode .hpRow:hover { background: rgba(255,255,255,0.08); }
+    body.hp-dark-mode .hpMain .t { color: #e2e2f0; }
+    body.hp-dark-mode .hpMain .d { color: rgba(255,255,255,0.42); opacity: 1; }
+    body.hp-dark-mode .hpBadge {
+      color: rgba(255,255,255,0.58);
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.12);
+    }
+    body.hp-dark-mode .hpBadge.on  { background: rgba(0,200,120,0.15); color: #2dff9a; border-color: rgba(0,200,120,0.35); }
+    body.hp-dark-mode .hpBadge.off { background: rgba(255,60,80,0.12); color: #ff7080; border-color: rgba(255,60,80,0.30); }
+    body.hp-dark-mode .hpBtnMini {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.15);
+      color: #d0d0e0;
+    }
+    body.hp-dark-mode .hpBtnMini:hover { background: rgba(255,255,255,0.15); }
+    body.hp-dark-mode .hpNote { color: rgba(255,255,255,0.52); opacity: 1; }
+    body.hp-dark-mode .hpNote a { color: #6cbfff; }
+    body.hp-dark-mode .hpScroll { scrollbar-color: rgba(255,255,255,0.15) transparent; }
+
+    /* Theme toggle button */
+    .hpThemeToggle {
+      font-size: 15px;
+      padding: 7px 9px;
+      letter-spacing: 0;
+      line-height: 1;
+      opacity: 0.45;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      position: relative;
+    }
+    .hpThemeToggle:hover { opacity: 1; transform: scale(1.15); }
+    body.hp-dark-mode .hpThemeToggle { opacity: 0.38; }
+    body.hp-dark-mode .hpThemeToggle:hover { opacity: 0.90; }
+    /* Tooltip */
+    .hpThemeToggle::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      white-space: nowrap;
+      background: rgba(20,22,30,0.96);
+      color: #d8d8e8;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      padding: 5px 9px;
+      border-radius: 7px;
+      border: 1px solid rgba(255,255,255,0.10);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    body.hp-light-mode .hpThemeToggle::after {
+      background: rgba(255,255,255,0.97);
+      color: #0c0c10;
+      border-color: rgba(0,0,0,0.12);
+    }
+    .hpThemeToggle:hover::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     body.hp-menu-transitioning #quoteOverlay,
     body.hp-menu-transitioning #quoteCanvas,
     body.hp-menu-transitioning #smokeCanvas,
@@ -427,7 +611,9 @@
 	      <button class="hpMenuBtn" data-menu="music" aria-expanded="false">MUSIC</button>
 	      <button class="hpMenuBtn" data-menu="games" aria-expanded="false">GAMES</button>
 	      <button class="hpMenuBtn" data-menu="why" aria-expanded="false">WHY?</button>
+	      <button class="hpMenuBtn hpMenuLive" data-action="live-launch" id="liveMenuBtn" aria-label="Live stream"><span id="liveMenuDot" class="hpLiveDot hpLiveDot--checking"></span><span id="liveMenuText">LIVE</span></button>
 	      <span class="hpMenuSpacer" aria-hidden="true"></span>
+	      <button class="hpMenuBtn hpThemeToggle" id="themeToggleBtn" data-tooltip="SWITCH TO LIGHT MODE" aria-label="Switch to light mode">💡</button>
 	      <button class="hpMenuBtn hpMenuEnd" data-action="end-transmission">END TRANSMISSION</button>
 	    </div>
     <div id="menuDropdownRoot" aria-hidden="false">
@@ -523,6 +709,25 @@
 	            Tip: If your pet is tired, turn the lights off so it can sleep. If it’s calling attention, don’t ignore it.
 	          </div>
 	        </div>
+	      </div>
+	    </div>
+	  </div>
+
+	  <!-- Cinema dim + live stream window -->
+	  <div id="streamDim" aria-hidden="true"></div>
+	  <div id="streamDock" aria-hidden="true">
+	    <div id="streamWindow" role="region" aria-label="Live stream">
+	      <div id="streamTitleBar">
+	        <div id="streamWindowTitle">
+	          <span id="streamTitleDot" class="hpLiveDot hpLiveDot--checking"></span>LIVE
+	        </div>
+	        <div id="streamTitleRight">
+	          <span id="streamStatusLabel">CHECKING</span>
+	          <button class="hpBtnMini" id="streamCloseBtn">CLOSE</button>
+	        </div>
+	      </div>
+	      <div id="streamBody">
+	        <iframe id="streamFrame" src="" allow="autoplay; fullscreen" allowfullscreen title="Live stream"></iframe>
 	      </div>
 	    </div>
 	  </div>
