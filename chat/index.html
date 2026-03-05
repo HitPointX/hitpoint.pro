@@ -294,7 +294,7 @@
     #profile-card {
       position: fixed; z-index: 300; display: none;
       background: rgba(13,15,23,0.99); border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 10px; padding: 14px; width: 215px;
+      border-radius: 10px; padding: 14px; width: 255px;
       box-shadow: 0 12px 40px rgba(0,0,0,0.65);
     }
     #profile-card.visible { display: block; }
@@ -313,6 +313,36 @@
       color: rgba(255,255,255,0.25);
     }
     .pstat-val { font-size: 11px; color: rgba(255,255,255,0.5); }
+    #profile-msgcount.clickable {
+      cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+      text-decoration-color: rgba(255,255,255,0.2); transition: color 0.15s;
+    }
+    #profile-msgcount.clickable:hover { color: rgba(255,255,255,0.85); }
+
+    /* ── Profile history panel ──────────────────────────────── */
+    #profile-history { display: none; }
+    #profile-history.visible { display: block; }
+    .phist-back {
+      background: none; border: none; color: rgba(255,255,255,0.3);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+      cursor: pointer; padding: 0; margin-bottom: 10px; transition: color 0.15s;
+    }
+    .phist-back:hover { color: rgba(255,255,255,0.7); }
+    #phist-list {
+      max-height: 230px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    #phist-list::-webkit-scrollbar { width: 2px; }
+    #phist-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 1px; }
+    .phist-msg { font-size: 11px; line-height: 1.45; }
+    .phist-msg-content { color: rgba(255,255,255,0.6); word-break: break-word; }
+    .phist-msg-content.cleared { color: rgba(255,255,255,0.22); font-style: italic; }
+    .phist-cleared-label { font-size: 9px; color: rgba(255,255,255,0.18); }
+    .phist-msg-time { font-size: 9px; color: rgba(255,255,255,0.2); margin-top: 1px; }
+    #phist-empty, #phist-error {
+      font-size: 11px; color: rgba(255,255,255,0.25); font-style: italic;
+      text-align: center; padding: 16px 0;
+    }
     #profile-ignore-btn {
       width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
       color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 700; letter-spacing: 1px;
@@ -400,6 +430,12 @@
     <div class="pstat-row"><span class="pstat-label">Watchtime</span><span class="pstat-val" id="profile-watchtime">—</span></div>
   </div>
   <button id="profile-ignore-btn">Ignore</button>
+  <div id="profile-history">
+    <button class="phist-back" id="phist-back-btn">← Back</button>
+    <div id="phist-list"></div>
+    <div id="phist-empty" class="hidden">No message history found.</div>
+    <div id="phist-error" class="hidden">Could not load history.</div>
+  </div>
 </div>
 
 <!-- Context menu (mod only) -->
@@ -499,7 +535,8 @@
   let emoteMode    = false;
   let lastSendTime = 0;
   let ctxTarget    = null;      // {username, messageId}
-  let profileTarget = null;     // username shown in profile card
+  let profileTarget     = null;  // username shown in profile card
+  let profileTargetRole = null;  // role of user shown in profile card
 
   /* ── Ignore list (localStorage, client-side only) ────────── */
   const ignoreList = new Set(JSON.parse(localStorage.getItem('hp_ignore') || '[]'));
@@ -954,8 +991,12 @@
 
   /* ── Profile card ────────────────────────────────────────── */
   function openProfileCard(e, username, role) {
-    profileTarget = username;
+    profileTarget     = username;
+    profileTargetRole = role;
     el('profile-card-username').textContent = username;
+    // Always reset to stats view
+    el('profile-stats').style.display = '';
+    el('profile-history').classList.remove('visible');
     const roleBadge = el('profile-card-role');
     if (role === 'admin' || role === 'mod') {
       roleBadge.textContent = role;
@@ -968,6 +1009,7 @@
     const isSelf       = currentUser && currentUser.username === username;
     el('profile-ignore-btn').style.display = (isPrivileged || isSelf) ? 'none' : '';
     updateProfileIgnoreBtn();
+    el('profile-msgcount').classList.toggle('clickable', isMod());
 
     el('profile-joined').textContent    = '—';
     el('profile-msgcount').textContent  = '—';
@@ -1005,7 +1047,49 @@
     btn.classList.toggle('unignore', ignored);
   }
 
-  function closeProfileCard() { el('profile-card').classList.remove('visible'); profileTarget = null; }
+  function closeProfileCard() {
+    el('profile-card').classList.remove('visible');
+    profileTarget = profileTargetRole = null;
+  }
+
+  async function openProfileHistory(username) {
+    el('profile-stats').style.display    = 'none';
+    el('profile-ignore-btn').style.display = 'none';
+    el('profile-history').classList.add('visible');
+    const list  = el('phist-list');
+    const empty = el('phist-empty');
+    const error = el('phist-error');
+    list.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);text-align:center;padding:12px 0">Loading…</div>';
+    empty.classList.add('hidden');
+    error.classList.add('hidden');
+    try {
+      const res = await fetch(`${API}/users/${encodeURIComponent(username)}/messages`, { credentials: 'include' });
+      list.innerHTML = '';
+      if (!res.ok) { error.classList.remove('hidden'); return; }
+      const msgs = await res.json();
+      if (!msgs.length) { empty.classList.remove('hidden'); return; }
+      for (const m of msgs) {
+        const cleared = m.cleared == 1 || m.cleared === true;
+        const div = document.createElement('div');
+        div.className = 'phist-msg';
+        div.innerHTML = `<div class="phist-msg-content${cleared ? ' cleared' : ''}">${esc(m.content)}${cleared ? ' <span class="phist-cleared-label">[cleared]</span>' : ''}</div><div class="phist-msg-time">${new Date(m.timestamp).toLocaleString()}</div>`;
+        list.appendChild(div);
+      }
+    } catch { list.innerHTML = ''; error.classList.remove('hidden'); }
+  }
+
+  el('phist-back-btn').addEventListener('click', () => {
+    el('profile-history').classList.remove('visible');
+    el('profile-stats').style.display = '';
+    const isPrivileged = profileTargetRole === 'admin' || profileTargetRole === 'mod';
+    const isSelf = currentUser && currentUser.username === profileTarget;
+    el('profile-ignore-btn').style.display = (isPrivileged || isSelf) ? 'none' : '';
+  });
+
+  el('profile-msgcount').addEventListener('click', () => {
+    if (!profileTarget || !el('profile-msgcount').classList.contains('clickable')) return;
+    openProfileHistory(profileTarget);
+  });
 
   el('profile-ignore-btn').addEventListener('click', () => {
     if (!profileTarget) return;
