@@ -290,6 +290,39 @@
     }
     .slow-off-btn:hover { color: #fff; border-color: rgba(255,255,255,0.28); }
 
+    /* ── Profile card ───────────────────────────────────────── */
+    #profile-card {
+      position: fixed; z-index: 300; display: none;
+      background: rgba(13,15,23,0.99); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 10px; padding: 14px; width: 215px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.65);
+    }
+    #profile-card.visible { display: block; }
+    #profile-card-header {
+      display: flex; align-items: center; gap: 7px; margin-bottom: 12px;
+      overflow: hidden;
+    }
+    #profile-card-username {
+      font-size: 13px; font-weight: 800; color: #e0e0f0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+    }
+    #profile-stats { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .pstat-row { display: flex; justify-content: space-between; align-items: center; }
+    .pstat-label {
+      font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+    .pstat-val { font-size: 11px; color: rgba(255,255,255,0.5); }
+    #profile-ignore-btn {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: 7px 0; border-radius: 5px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    #profile-ignore-btn:hover { background: rgba(255,60,80,0.12); border-color: rgba(255,60,80,0.3); color: #ff6070; }
+    #profile-ignore-btn.unignore { background: rgba(255,60,80,0.09); border-color: rgba(255,60,80,0.2); color: rgba(255,100,100,0.75); }
+    #profile-ignore-btn.unignore:hover { background: rgba(255,60,80,0.18); color: #ff6070; }
+
     /* ── Misc ───────────────────────────────────────────────── */
     .hidden { display: none !important; }
   </style>
@@ -353,6 +386,20 @@
       <button type="submit" id="send-btn">SEND</button>
     </form>
   </div>
+</div>
+
+<!-- Profile card -->
+<div id="profile-card">
+  <div id="profile-card-header">
+    <span id="profile-card-username"></span>
+    <span id="profile-card-role"></span>
+  </div>
+  <div id="profile-stats">
+    <div class="pstat-row"><span class="pstat-label">Joined</span><span class="pstat-val" id="profile-joined">—</span></div>
+    <div class="pstat-row"><span class="pstat-label">Messages</span><span class="pstat-val" id="profile-msgcount">—</span></div>
+    <div class="pstat-row"><span class="pstat-label">Watchtime</span><span class="pstat-val" id="profile-watchtime">—</span></div>
+  </div>
+  <button id="profile-ignore-btn">Ignore</button>
 </div>
 
 <!-- Context menu (mod only) -->
@@ -452,6 +499,11 @@
   let emoteMode    = false;
   let lastSendTime = 0;
   let ctxTarget    = null;      // {username, messageId}
+  let profileTarget = null;     // username shown in profile card
+
+  /* ── Ignore list (localStorage, client-side only) ────────── */
+  const ignoreList = new Set(JSON.parse(localStorage.getItem('hp_ignore') || '[]'));
+  function saveIgnore() { localStorage.setItem('hp_ignore', JSON.stringify([...ignoreList])); }
 
   /* ── 7TV Emotes ──────────────────────────────────────────── */
   async function fetchEmotes() {
@@ -595,6 +647,8 @@
 
   /* ── Message rendering ───────────────────────────────────── */
   function appendMessage(msg) {
+    if (ignoreList.has(msg.username)) return;
+
     const role    = msg.role || 'viewer';
     const time    = msg.timestamp ? fmtTime(msg.timestamp) : '';
     const safeU   = esc(msg.username || '');
@@ -618,6 +672,10 @@
     `;
 
     const userEl = div.querySelector('.msg-user');
+
+    // Profile card — any user can click a username
+    userEl.addEventListener('click', (e) => { openProfileCard(e, msg.username, role); });
+
     if (isMod()) {
       userEl.addEventListener('contextmenu', (e) => { e.preventDefault(); openCtxMenu(e, msg.username, msg.id); });
       let lpt;
@@ -701,6 +759,9 @@
 
   /* ── Chat commands ───────────────────────────────────────── */
   const COMMANDS_HELP = [
+    '/ignore <user>          — hide/unhide a user\'s messages (local only)',
+    '/help                   — show this list',
+    '— Mod/admin only —',
     '/clear                  — clear all chat messages',
     '/slowmode <secs|off>    — enable/disable slow mode',
     '/emotemode [off]        — toggle emote-only mode',
@@ -711,23 +772,27 @@
     '/mute <user> [mins]     — mute user (default 10m)',
     '/unmute <user>          — remove a mute',
     '/link <user>            — toggle link posting permission',
-    '/help                   — show this list',
   ];
 
   function handleCommand(raw) {
-    if (!isMod()) { localSystem('Commands are only available to mods and admins.'); return; }
-
     const parts  = raw.slice(1).trim().split(/\s+/);
     const cmd    = parts[0]?.toLowerCase();
     const arg1   = parts[1] || '';
     const arg2   = parts[2] || '';
     const wsSend = (obj) => ws && ws.readyState === WebSocket.OPEN && ws.send(JSON.stringify(obj));
 
-    switch (cmd) {
-      case 'help':
-        COMMANDS_HELP.forEach(localSystem);
-        break;
+    // Commands available to all logged-in users
+    if (cmd === 'help') { COMMANDS_HELP.forEach(localSystem); return; }
+    if (cmd === 'ignore') {
+      if (!arg1) { localSystem('Usage: /ignore <username>'); return; }
+      if (ignoreList.has(arg1)) { ignoreList.delete(arg1); saveIgnore(); localSystem(`${arg1} removed from ignore list.`); }
+      else { ignoreList.add(arg1); saveIgnore(); localSystem(`${arg1} added to ignore list. Their messages will be hidden.`); }
+      return;
+    }
 
+    if (!isMod()) { localSystem('Commands are only available to mods and admins.'); return; }
+
+    switch (cmd) {
       case 'clear':
         wsSend({ type: 'clear' });
         break;
@@ -885,7 +950,75 @@
   document.addEventListener('click', (e) => {
     if (!e.target.closest('#ctx-menu') && !e.target.closest('.msg-user')) closeCtxMenu();
   });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCtxMenu(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeCtxMenu(); closeProfileCard(); } });
+
+  /* ── Profile card ────────────────────────────────────────── */
+  function openProfileCard(e, username, role) {
+    profileTarget = username;
+    el('profile-card-username').textContent = username;
+    const roleBadge = el('profile-card-role');
+    if (role === 'admin' || role === 'mod') {
+      roleBadge.textContent = role;
+      roleBadge.className   = `role-badge ${role}`;
+      roleBadge.style.display = '';
+    } else {
+      roleBadge.style.display = 'none';
+    }
+    const isPrivileged = role === 'admin' || role === 'mod';
+    const isSelf       = currentUser && currentUser.username === username;
+    el('profile-ignore-btn').style.display = (isPrivileged || isSelf) ? 'none' : '';
+    updateProfileIgnoreBtn();
+
+    el('profile-joined').textContent    = '—';
+    el('profile-msgcount').textContent  = '—';
+    el('profile-watchtime').textContent = '—';
+
+    const card = el('profile-card');
+    card.classList.add('visible');
+    const cw = 215, ch = 155;
+    let x = e.clientX + 10, y = e.clientY + 10;
+    if (x + cw > window.innerWidth  - 8) x = e.clientX - cw - 6;
+    if (y + ch > window.innerHeight - 8) y = e.clientY - ch - 6;
+    card.style.left = Math.max(8, x) + 'px';
+    card.style.top  = Math.max(8, y) + 'px';
+
+    fetch(`${API}/users/${encodeURIComponent(username)}`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d || profileTarget !== username) return;
+        if (d.registeredAt)   el('profile-joined').textContent    = new Date(d.registeredAt).toLocaleDateString();
+        if (d.messageCount != null) el('profile-msgcount').textContent  = d.messageCount.toLocaleString();
+        if (d.watchtime != null)    el('profile-watchtime').textContent = fmtWatchtime(d.watchtime);
+      })
+      .catch(() => {});
+  }
+
+  function fmtWatchtime(ms) {
+    const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+
+  function updateProfileIgnoreBtn() {
+    const btn = el('profile-ignore-btn');
+    const ignored = ignoreList.has(profileTarget);
+    btn.textContent = ignored ? 'Unignore' : 'Ignore';
+    btn.classList.toggle('unignore', ignored);
+  }
+
+  function closeProfileCard() { el('profile-card').classList.remove('visible'); profileTarget = null; }
+
+  el('profile-ignore-btn').addEventListener('click', () => {
+    if (!profileTarget) return;
+    if (ignoreList.has(profileTarget)) ignoreList.delete(profileTarget);
+    else ignoreList.add(profileTarget);
+    saveIgnore();
+    updateProfileIgnoreBtn();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#profile-card') && !e.target.closest('.msg-user')) closeProfileCard();
+  });
+  el('messages').addEventListener('scroll', closeProfileCard);
 
   async function modPost(endpoint, body) {
     try {
