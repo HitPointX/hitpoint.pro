@@ -134,7 +134,18 @@
       transition: opacity 0.5s ease;
     }
     #offline-overlay.visible { opacity: 1; pointer-events: auto; }
-    #offline-icon  { font-size: 2.5rem; line-height: 1; filter: grayscale(0.3); }
+    @keyframes ledPulse {
+      0%, 100% { color: #111; text-shadow: none; }
+      10%      { color: #666; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+      20%      { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.95), 0 0 28px rgba(255,255,255,0.45), 0 0 52px rgba(255,255,255,0.15); }
+      30%      { color: #555; text-shadow: 0 0 4px rgba(255,255,255,0.1); }
+      40%      { color: #111; text-shadow: none; }
+      50%      { color: #666; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+      60%      { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.95), 0 0 28px rgba(255,255,255,0.45), 0 0 52px rgba(255,255,255,0.15); }
+      72%      { color: #555; text-shadow: 0 0 4px rgba(255,255,255,0.1); }
+      80%      { color: #111; text-shadow: none; }
+    }
+    #offline-icon  { font-size: 2.5rem; line-height: 1; animation: ledPulse 6s ease-in-out infinite; }
     #offline-title {
       font-size: 14px; font-weight: 800; letter-spacing: 3px;
       text-transform: uppercase; color: rgba(255,255,255,0.55);
