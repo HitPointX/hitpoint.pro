@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LIVE — hitpoint.pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      background-image: url('https://hitpoint.pro/hitpoint-bg.png?v=8');
+      background-size: 110% auto;
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
+      background-color: #0c0c10;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: #f2f2f2;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Vignette overlay */
+    #vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%);
+      z-index: 0;
+    }
+
+    /* Fog overlay */
+    #fog-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-radial-gradient(
+        circle at center,
+        rgba(255,255,255,0.01),
+        rgba(255,255,255,0.015) 2px,
+        transparent 4px
+      );
+      animation: fogDrift 60s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes fogDrift {
+      from { background-position: 0% 0%; }
+      to   { background-position: 100% 100%; }
+    }
+
+    /* Page layout */
+    #page {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+    }
+
+    /* Back nav */
+    #nav {
+      width: 100%;
+      max-width: 860px;
+      margin-bottom: 32px;
+    }
+
+    #nav a {
+      color: rgba(255,255,255,0.45);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: color 0.2s ease;
+    }
+
+    #nav a:hover { color: #00afff; }
+
+    /* Header */
+    #header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    #title {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ccc, #eee, #ccc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: foggyStrobe 8s linear infinite;
+    }
+
+    @keyframes foggyStrobe {
+      0%   { filter: brightness(1);   background-position: 0% 50%; }
+      50%  { filter: brightness(1.2); background-position: 100% 50%; }
+      100% { filter: brightness(1);   background-position: 0% 50%; }
+    }
+
+    /* LIVE / OFFLINE badge */
+    #status-badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 999px;
+      letter-spacing: 2px;
+      border: 1px solid transparent;
+      text-transform: uppercase;
+      user-select: none;
+      transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+    }
+
+    #status-badge.live {
+      background: rgba(0, 200, 120, 0.14);
+      color: #2dff9a;
+      border-color: rgba(0, 200, 120, 0.4);
+      box-shadow: 0 0 14px rgba(0, 200, 120, 0.25);
+      animation: livePulse 2.4s ease-in-out infinite;
+    }
+
+    #status-badge.offline {
+      background: rgba(255, 60, 80, 0.10);
+      color: #ff6070;
+      border-color: rgba(255, 60, 80, 0.25);
+    }
+
+    #status-badge.checking {
+      background: rgba(180, 180, 200, 0.08);
+      color: rgba(255,255,255,0.35);
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    @keyframes livePulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(0,200,120,0.2); }
+      50%       { box-shadow: 0 0 22px rgba(0,200,120,0.5); }
+    }
+
+    /* Player container */
+    #player-wrap {
+      width: 100%;
+      max-width: 860px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(10,14,20,0.75);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 32px 100px rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px) saturate(140%);
+      position: relative;
+    }
+
+    #stream-video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 14px 14px 0 0;
+      outline: none;
+    }
+
+    /* Offline overlay (shown over the black video area) */
+    #offline-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(8, 10, 16, 0.92);
+      border-radius: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 10;
+    }
+
+    #offline-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #offline-icon {
+      font-size: 2.5rem;
+      line-height: 1;
+      filter: grayscale(0.3);
+    }
+
+    #offline-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+
+    #offline-sub {
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.28);
+    }
+
+    /* Player footer bar */
+    #player-footer {
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 1.2px;
+    }
+
+    #footer-label {
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    #footer-hint {
+      opacity: 0.6;
+    }
+
+    @media (max-width: 600px) {
+      #page { padding: 24px 12px 48px; }
+      #title { font-size: 1.4rem; letter-spacing: 4px; }
+      #player-footer { flex-direction: column; align-items: flex-start; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="vignette" aria-hidden="true"></div>
+  <div id="fog-overlay" aria-hidden="true"></div>
+
+  <div id="page">
+    <div id="nav">
+      <a href="/x">&larr; HITPOINT.PRO</a>
+    </div>
+
+    <div id="header">
+      <div id="title">LIVE</div>
+      <div id="status-badge" class="checking">CHECKING</div>
+    </div>
+
+    <div id="player-wrap">
+      <video
+        id="stream-video"
+        controls
+        playsinline
+        autoplay
+        muted
+        preload="none"
+        aria-label="Live stream"
+      ></video>
+
+      <div id="offline-overlay" class="visible" aria-live="polite">
+        <div id="offline-icon">&#x25A0;</div>
+        <div id="offline-title">Stream Offline</div>
+        <div id="offline-sub">Check back soon</div>
+      </div>
+
+      <div id="player-footer">
+        <span id="footer-label">hitpoint.pro/live</span>
+        <span id="footer-hint" id="footer-hint">HLS &mdash; stream.hitpoint.pro</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HLS.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+  <script>
+    const _sk = [68,122,78,83,89,98,104,113,169,178,131,139,57,55,112,75,85,133,99,150,108,164,118,176,135,145,52,105,72,76,84,89];
+    const STREAM_URL = `https://stream.hitpoint.pro/hls/${_sk.map((c,i)=>String.fromCharCode(c-((i*7+13)%97))).join('')}.m3u8`;
+    const POLL_INTERVAL_OFFLINE = 10000; // 10s when offline
+    const POLL_INTERVAL_LIVE    = 30000; // 30s when live (HLS itself handles continuity)
+
+    const video   = document.getElementById('stream-video');
+    const badge   = document.getElementById('status-badge');
+    const overlay = document.getElementById('offline-overlay');
+
+    let hls = null;
+    let isLive = false;
+    let pollTimer = null;
+
+    function setBadge(state) {
+      badge.className = state;
+      badge.textContent = state === 'live' ? 'LIVE'
+                        : state === 'offline' ? 'OFFLINE'
+                        : 'CHECKING';
+    }
+
+    function showOffline() {
+      overlay.classList.add('visible');
+      video.pause();
+    }
+
+    function showLive() {
+      overlay.classList.remove('visible');
+    }
+
+    function destroyHls() {
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+      video.src = '';
+    }
+
+    function attachHls() {
+      destroyHls();
+
+      if (Hls.isSupported()) {
+        hls = new Hls({
+          // Low-latency friendly defaults
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+          liveSyncDurationCount: 3,
+          liveMaxLatencyDurationCount: 6,
+        });
+
+        hls.loadSource(STREAM_URL);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          isLive = true;
+          setBadge('live');
+          showLive();
+          video.play().catch(() => {
+            // Autoplay blocked — user will need to click play
+          });
+        });
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            isLive = false;
+            setBadge('offline');
+            showOffline();
+            destroyHls();
+            schedulePoll(POLL_INTERVAL_OFFLINE);
+          }
+        });
+
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari native HLS
+        video.src = STREAM_URL;
+        video.addEventListener('loadedmetadata', () => {
+          isLive = true;
+          setBadge('live');
+          showLive();
+          video.play().catch(() => {});
+        }, { once: true });
+
+        video.addEventListener('error', () => {
+          isLive = false;
+          setBadge('offline');
+          showOffline();
+          video.src = '';
+          schedulePoll(POLL_INTERVAL_OFFLINE);
+        }, { once: true });
+      }
+    }
+
+    async function checkStream() {
+      clearTimeout(pollTimer);
+      setBadge('checking');
+
+      try {
+        // Add a cache-busting param so we always get a fresh response
+        const res = await fetch(STREAM_URL + '?_=' + Date.now(), {
+          method: 'HEAD',
+          cache: 'no-store',
+          signal: AbortSignal.timeout(8000),
+        });
+
+        if (res.ok) {
+          if (!isLive) {
+            attachHls();
+            // badge + overlay set by HLS events above; schedule next liveness check
+            schedulePoll(POLL_INTERVAL_LIVE);
+          } else {
+            setBadge('live');
+            schedulePoll(POLL_INTERVAL_LIVE);
+          }
+        } else {
+          handleOffline();
+        }
+      } catch {
+        handleOffline();
+      }
+    }
+
+    function handleOffline() {
+      if (isLive) {
+        isLive = false;
+        destroyHls();
+      }
+      setBadge('offline');
+      showOffline();
+      schedulePoll(POLL_INTERVAL_OFFLINE);
+    }
+
+    function schedulePoll(ms) {
+      clearTimeout(pollTimer);
+      pollTimer = setTimeout(checkStream, ms);
+    }
+
+    // Kick off
+    checkStream();
+  </script>
+</body>
+</html>
