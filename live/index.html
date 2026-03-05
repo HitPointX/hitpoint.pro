@@ -229,14 +229,10 @@
       backdrop-filter: blur(6px);
     }
     #chat-topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding: 6px 10px; flex-shrink: 0;
       border-bottom: 1px solid rgba(255,255,255,0.05);
       background: rgba(12,14,22,0.8);
-    }
-    #chat-topbar-label {
-      font-size: 10px; font-weight: 800; letter-spacing: 2px;
-      text-transform: uppercase; color: rgba(255,255,255,0.28);
     }
     #popout-btn {
       background: none; border: 1px solid rgba(255,255,255,0.10);
@@ -358,7 +354,6 @@
       <!-- Chat sidebar -->
       <div id="chat-col">
         <div id="chat-topbar">
-          <span id="chat-topbar-label">CHAT</span>
           <button id="popout-btn" title="Pop out chat">POPOUT</button>
         </div>
         <div id="chat-area">
