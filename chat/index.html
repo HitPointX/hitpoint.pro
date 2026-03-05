@@ -87,7 +87,7 @@
     #messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
 
     .msg {
-      display: flex; align-items: baseline; flex-wrap: wrap;
+      display: flex; align-items: flex-start; flex-wrap: wrap;
       padding: 2px 12px; gap: 4px; line-height: 1.5;
       position: relative; font-size: 13px;
     }
@@ -98,7 +98,7 @@
     }
     .msg-badge {
       font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
-      padding: 1px 4px; border-radius: 2px; align-self: center; flex-shrink: 0;
+      padding: 1px 4px; border-radius: 2px; align-self: flex-start; flex-shrink: 0; margin-top: 2px;
     }
     .msg-badge.admin { background: rgba(200,20,20,0.28); color: #ff6070; }
     .msg-badge.mod   { background: rgba(20,160,80,0.22);  color: #3ddd88; }
