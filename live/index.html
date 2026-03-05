@@ -397,7 +397,7 @@
     /* ── Stream badge ─────────────────────────────────────── */
     function setBadge(state) {
       badge.className  = state;
-      badge.textContent = state === 'live' ? 'LIVE' : state === 'offline' ? 'OFFLINE' : 'CHECKING';
+      badge.textContent = state === 'live' ? 'LIVE' : 'OFFLINE';
     }
     function showOffline() { overlay.classList.add('visible');    video.pause(); }
     function showLive()    { overlay.classList.remove('visible'); }
@@ -428,7 +428,7 @@
     }
 
     async function checkStream() {
-      clearTimeout(pollTimer); setBadge('checking');
+      clearTimeout(pollTimer);
       try {
         const res = await fetch(STREAM_URL + '?_=' + Date.now(), { method:'HEAD', cache:'no-store', signal: AbortSignal.timeout(8000) });
         if (res.ok) {
