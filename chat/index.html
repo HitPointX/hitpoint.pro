@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat — hitpoint.pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%; background: #0c0c10;
+      color: #e0e0f0;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 14px; overflow: hidden;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    #chat-wrap {
+      display: flex; flex-direction: column;
+      height: 100vh; position: relative;
+      background: rgba(10,12,18,0.98);
+    }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    #chat-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; min-height: 40px; flex-shrink: 0;
+      background: rgba(12,14,22,0.99);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      gap: 8px;
+    }
+    #header-left {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); overflow: hidden; min-width: 0;
+    }
+    #header-label { color: rgba(255,255,255,0.22); flex-shrink: 0; }
+    #header-username {
+      color: #c8c8dc; font-weight: 800;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .role-badge {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
+      padding: 2px 5px; border-radius: 3px; flex-shrink: 0;
+    }
+    .role-badge.admin { background: rgba(200,20,20,0.25); color: #ff6070; border: 1px solid rgba(200,20,20,0.35); }
+    .role-badge.mod   { background: rgba(20,160,80,0.2);  color: #3ddd88; border: 1px solid rgba(20,160,80,0.3); }
+
+    #header-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+
+    .hdr-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 4px; cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .hdr-btn:hover { color: #fff; border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.05); }
+
+    #slow-mode-wrap { position: relative; }
+
+    /* ── Slow-mode banner ───────────────────────────────────── */
+    #slow-banner {
+      display: none; align-items: center; gap: 6px;
+      padding: 5px 12px; flex-shrink: 0;
+      background: rgba(160,100,0,0.12); border-bottom: 1px solid rgba(160,100,0,0.2);
+      font-size: 11px; color: rgba(255,180,50,0.75); letter-spacing: 0.3px;
+    }
+    #slow-banner.visible { display: flex; }
+    #slow-banner-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,180,50,0.7); flex-shrink: 0; }
+
+    /* ── Messages ───────────────────────────────────────────── */
+    #messages {
+      flex: 1 1 0; overflow-y: auto; padding: 4px 0 2px;
+    }
+    #messages::-webkit-scrollbar { width: 3px; }
+    #messages::-webkit-scrollbar-track { background: transparent; }
+    #messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+    .msg {
+      display: flex; align-items: baseline; flex-wrap: wrap;
+      padding: 2px 12px; gap: 4px; line-height: 1.5;
+      position: relative; font-size: 13px;
+    }
+    .msg:hover { background: rgba(255,255,255,0.025); }
+    .msg.system {
+      display: block; padding: 3px 12px;
+      font-size: 11px; font-style: italic; color: rgba(255,255,255,0.25);
+    }
+    .msg-badge {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
+      padding: 1px 4px; border-radius: 2px; align-self: center; flex-shrink: 0;
+    }
+    .msg-badge.admin { background: rgba(200,20,20,0.28); color: #ff6070; }
+    .msg-badge.mod   { background: rgba(20,160,80,0.22);  color: #3ddd88; }
+    .msg-user {
+      font-weight: 700; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s;
+    }
+    .msg-user:hover { opacity: 0.75; }
+    .msg-user.admin { color: #ff6070; }
+    .msg-user.mod   { color: #3ddd88; }
+    .msg-user.viewer { color: #90a8c8; }
+    .msg-colon { color: rgba(255,255,255,0.2); flex-shrink: 0; }
+    .msg-content { color: #d0d0e0; word-break: break-word; flex: 1; min-width: 0; }
+    .msg-content img.emote {
+      height: 28px; width: auto; vertical-align: middle; display: inline; margin: 0 1px;
+    }
+    .msg-time {
+      font-size: 10px; color: rgba(255,255,255,0.18); flex-shrink: 0;
+      opacity: 0; transition: opacity 0.15s; margin-left: 2px;
+    }
+    .msg:hover .msg-time { opacity: 1; }
+    .msg.deleted .msg-content { color: rgba(255,255,255,0.2); font-style: italic; }
+
+    /* ── Scroll-to-bottom pill ──────────────────────────────── */
+    #scroll-pill {
+      display: none; position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%);
+      background: rgba(20,22,34,0.96); border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 20px; padding: 4px 14px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+      color: rgba(255,255,255,0.55); cursor: pointer; z-index: 10;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    #scroll-pill:hover { color: #fff; border-color: rgba(255,255,255,0.25); }
+    #scroll-pill.visible { display: block; }
+
+    /* ── Input area ─────────────────────────────────────────── */
+    #input-area {
+      flex-shrink: 0; background: rgba(12,14,22,0.98);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    #auth-banner {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 12px;
+      font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.3px;
+    }
+    .ab-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.55); font-size: 10px; font-weight: 800;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+    }
+    .ab-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+    .ab-btn.primary { background: rgba(200,20,20,0.8); border-color: transparent; color: #fff; }
+    .ab-btn.primary:hover { background: rgba(220,30,30,0.95); }
+
+    #input-form { display: none; padding: 7px 10px 8px; gap: 7px; align-items: flex-end; }
+    #input-form.visible { display: flex; }
+
+    #msg-input {
+      flex: 1; resize: none; height: 36px; max-height: 90px;
+      background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 6px; color: #e0e0f0; font-family: inherit; font-size: 13px;
+      padding: 8px 10px; outline: none; line-height: 1.4; overflow-y: hidden;
+      transition: border-color 0.15s;
+    }
+    #msg-input:focus { border-color: rgba(255,255,255,0.2); }
+    #msg-input::placeholder { color: rgba(255,255,255,0.22); }
+
+    #send-btn {
+      background: rgba(200,20,20,0.8); border: none; color: #fff;
+      font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 0 14px; height: 36px; border-radius: 6px; cursor: pointer;
+      flex-shrink: 0; transition: background 0.15s;
+    }
+    #send-btn:hover { background: rgba(225,30,30,0.95); }
+    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #slow-notice {
+      display: none; text-align: center; padding: 2px 12px 6px;
+      font-size: 10px; color: rgba(255,180,50,0.6); letter-spacing: 0.3px;
+    }
+
+    /* ── Modals ─────────────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.72); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-backdrop.visible { display: flex; }
+
+    .modal {
+      background: rgba(13,15,23,0.99); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 12px; padding: 22px 20px 18px; width: 100%; max-width: 340px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.65);
+    }
+    .modal-title {
+      font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+      color: #d0d0e0; margin-bottom: 16px;
+    }
+    .modal-field { margin-bottom: 10px; }
+    .modal-field label {
+      display: block; font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 4px;
+    }
+    .modal-field input {
+      width: 100%; background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 6px; color: #e0e0f0; font-family: inherit; font-size: 13px;
+      padding: 8px 10px; outline: none; transition: border-color 0.15s;
+    }
+    .modal-field input:focus { border-color: rgba(255,255,255,0.22); }
+    .modal-err { font-size: 11px; color: #ff6070; min-height: 14px; margin-bottom: 8px; }
+    .modal-ok  { font-size: 11px; color: #3ddd88; min-height: 14px; margin-bottom: 8px; }
+    .modal-actions { display: flex; gap: 7px; align-items: center; margin-top: 14px; }
+
+    .btn-primary {
+      background: rgba(200,20,20,0.85); border: none; color: #fff;
+      font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 9px 16px; border-radius: 6px; cursor: pointer; flex: 1;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: rgba(220,30,30,0.95); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-ghost {
+      background: none; border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.45);
+      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      padding: 9px 14px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.28); }
+
+    .modal-link {
+      background: none; border: none; color: rgba(255,255,255,0.3); font-size: 11px;
+      cursor: pointer; text-decoration: underline; padding: 0; margin-top: 10px;
+      display: block; text-align: center;
+    }
+    .modal-link:hover { color: rgba(255,255,255,0.6); }
+
+    /* ── Context menu ───────────────────────────────────────── */
+    #ctx-menu {
+      position: fixed; z-index: 200; display: none;
+      background: rgba(13,15,23,0.99); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px; padding: 4px 0; min-width: 155px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+    }
+    #ctx-menu.visible { display: block; }
+    .ctx-label {
+      padding: 4px 13px 2px; font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.2);
+    }
+    .ctx-sep { height: 1px; background: rgba(255,255,255,0.06); margin: 3px 0; }
+    .ctx-item {
+      display: block; width: 100%; background: none; border: none;
+      text-align: left; padding: 6px 13px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.2px;
+      color: rgba(255,255,255,0.6); cursor: pointer; transition: background 0.1s, color 0.1s;
+    }
+    .ctx-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .ctx-item.danger { color: rgba(255,90,80,0.7); }
+    .ctx-item.danger:hover { background: rgba(200,20,20,0.1); color: #ff6070; }
+
+    /* ── Slow mode panel ────────────────────────────────────── */
+    #slow-panel {
+      position: absolute; top: calc(100% + 4px); right: 0;
+      background: rgba(13,15,23,0.99); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px; padding: 12px; min-width: 185px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45); display: none; z-index: 50;
+    }
+    #slow-panel.visible { display: block; }
+    .slow-panel-title {
+      font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); margin-bottom: 9px;
+    }
+    .slow-panel-row { display: flex; align-items: center; gap: 7px; margin-top: 7px; }
+    #slow-secs {
+      width: 56px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+      color: #e0e0f0; font-size: 13px; padding: 5px 8px; outline: none; text-align: center;
+    }
+    .slow-apply-btn {
+      background: rgba(200,20,20,0.75); border: none; color: #fff;
+      font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      padding: 5px 10px; border-radius: 4px; cursor: pointer; transition: background 0.15s; flex: 1;
+    }
+    .slow-apply-btn:hover { background: rgba(220,30,30,0.9); }
+    .slow-off-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 5px 10px; border-radius: 4px; cursor: pointer; transition: all 0.15s; flex: 1;
+    }
+    .slow-off-btn:hover { color: #fff; border-color: rgba(255,255,255,0.28); }
+
+    /* ── Misc ───────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div id="chat-wrap">
+
+  <!-- Header -->
+  <div id="chat-header">
+    <div id="header-left">
+      <span id="header-label">CHAT</span>
+      <span id="header-username" class="hidden"></span>
+      <span id="header-role-badge" class="role-badge hidden"></span>
+    </div>
+    <div id="header-right">
+      <div id="slow-mode-wrap" class="hidden">
+        <button class="hdr-btn" id="slow-mode-btn" title="Slow mode">SLOW MODE</button>
+        <div id="slow-panel">
+          <div class="slow-panel-title">Slow Mode</div>
+          <div class="slow-panel-row">
+            <input type="number" id="slow-secs" min="1" max="600" value="5" placeholder="sec">
+            <button class="slow-apply-btn" id="slow-apply-btn">ENABLE</button>
+          </div>
+          <div class="slow-panel-row">
+            <button class="slow-off-btn" id="slow-off-btn">DISABLE</button>
+          </div>
+        </div>
+      </div>
+      <button class="hdr-btn hidden" id="logout-btn">LOGOUT</button>
+    </div>
+  </div>
+
+  <!-- Slow mode banner -->
+  <div id="slow-banner">
+    <span id="slow-banner-dot"></span>
+    <span id="slow-banner-text">Slow mode — 5s between messages</span>
+  </div>
+
+  <!-- Messages -->
+  <div id="messages" role="log" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- Scroll-to-bottom -->
+  <button id="scroll-pill" aria-label="Scroll to latest messages">↓ new messages</button>
+
+  <!-- Input area -->
+  <div id="input-area">
+    <div id="slow-notice"></div>
+    <div id="auth-banner">
+      <span>Login to chat</span>
+      <button class="ab-btn primary" id="open-login-btn">Login</button>
+      <button class="ab-btn" id="open-register-btn">Register</button>
+    </div>
+    <form id="input-form" autocomplete="off">
+      <textarea id="msg-input" placeholder="Send a message…" rows="1" maxlength="500"></textarea>
+      <button type="submit" id="send-btn">SEND</button>
+    </form>
+  </div>
+</div>
+
+<!-- Context menu (mod only) -->
+<div id="ctx-menu" role="menu">
+  <div class="ctx-label" id="ctx-username-label"></div>
+  <div class="ctx-sep"></div>
+  <button class="ctx-item danger" data-action="ban">Ban (permanent)</button>
+  <div class="ctx-label">TIMEOUT</div>
+  <button class="ctx-item" data-action="timeout-5">5 minutes</button>
+  <button class="ctx-item" data-action="timeout-10">10 minutes</button>
+  <button class="ctx-item" data-action="timeout-30">30 minutes</button>
+  <button class="ctx-item" data-action="timeout-60">1 hour</button>
+  <div class="ctx-label">MUTE</div>
+  <button class="ctx-item" data-action="mute-5">5 minutes</button>
+  <button class="ctx-item" data-action="mute-10">10 minutes</button>
+  <button class="ctx-item" data-action="mute-30">30 minutes</button>
+  <div id="ctx-delete-sep" class="ctx-sep hidden"></div>
+  <button class="ctx-item danger hidden" id="ctx-delete-btn" data-action="delete">Delete message</button>
+</div>
+
+<!-- Login modal -->
+<div class="modal-backdrop" id="login-backdrop">
+  <div class="modal">
+    <div class="modal-title">Login</div>
+    <div class="modal-field">
+      <label>Username</label>
+      <input type="text" id="login-username" autocomplete="username">
+    </div>
+    <div class="modal-field">
+      <label>Password</label>
+      <input type="password" id="login-password" autocomplete="current-password">
+    </div>
+    <div class="modal-err" id="login-err"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="login-cancel-btn">Cancel</button>
+      <button class="btn-primary" id="login-submit-btn">Login</button>
+    </div>
+    <button class="modal-link" id="forgot-link-btn">Forgot password?</button>
+    <button class="modal-link" id="goto-register-btn">Don't have an account? Register</button>
+  </div>
+</div>
+
+<!-- Register modal -->
+<div class="modal-backdrop" id="register-backdrop">
+  <div class="modal">
+    <div class="modal-title">Create Account</div>
+    <div class="modal-field">
+      <label>Username</label>
+      <input type="text" id="reg-username" autocomplete="username">
+    </div>
+    <div class="modal-field">
+      <label>Email</label>
+      <input type="email" id="reg-email" autocomplete="email">
+    </div>
+    <div class="modal-field">
+      <label>Password</label>
+      <input type="password" id="reg-password" autocomplete="new-password">
+    </div>
+    <div class="modal-err" id="reg-err"></div>
+    <div class="modal-ok"  id="reg-ok"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="reg-cancel-btn">Cancel</button>
+      <button class="btn-primary" id="reg-submit-btn">Register</button>
+    </div>
+    <button class="modal-link" id="goto-login-btn">Already have an account? Login</button>
+  </div>
+</div>
+
+<!-- Forgot password modal -->
+<div class="modal-backdrop" id="forgot-backdrop">
+  <div class="modal">
+    <div class="modal-title">Reset Password</div>
+    <div class="modal-field">
+      <label>Email address</label>
+      <input type="email" id="forgot-email" autocomplete="email">
+    </div>
+    <div class="modal-err" id="forgot-err"></div>
+    <div class="modal-ok"  id="forgot-ok"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="forgot-cancel-btn">Cancel</button>
+      <button class="btn-primary" id="forgot-submit-btn">Send Reset Link</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API    = 'https://chat.hitpoint.pro/api';
+  const WS_URL = 'wss://chat.hitpoint.pro/ws';
+
+  let currentUser  = null;
+  let ws           = null;
+  let wsReconnect  = null;
+  let emotes       = {};        // name → CDN URL
+  let autoScroll   = true;
+  let slowActive   = false;
+  let slowSecs     = 0;
+  let lastSendTime = 0;
+  let ctxTarget    = null;      // {username, messageId}
+
+  /* ── 7TV Emotes ──────────────────────────────────────────── */
+  async function fetchEmotes() {
+    try {
+      const res = await fetch('https://7tv.io/v3/emote-sets/global');
+      if (!res.ok) return;
+      const data = await res.json();
+      for (const e of (data.emotes || [])) {
+        const file = e.data?.host?.files?.find(f => f.name === '1x.webp') || e.data?.host?.files?.[0];
+        if (file) emotes[e.name] = `https:${e.data.host.url}/${file.name}`;
+      }
+    } catch {}
+  }
+
+  function parseEmotes(html) {
+    return html.replace(/:([A-Za-z0-9_]+):/g, (match, name) => {
+      if (emotes[name]) return `<img class="emote" src="${emotes[name]}" alt=":${name}:" title=":${name}:">`;
+      return match;
+    });
+  }
+
+  /* ── Auth ────────────────────────────────────────────────── */
+  async function checkAuth() {
+    try {
+      const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
+      if (res.ok) { currentUser = await res.json(); onLoggedIn(); }
+      else onLoggedOut();
+    } catch { onLoggedOut(); }
+  }
+
+  function onLoggedIn() {
+    el('header-username').textContent  = currentUser.username;
+    el('header-username').classList.remove('hidden');
+    const badge = el('header-role-badge');
+    if (currentUser.role !== 'viewer') {
+      badge.textContent = currentUser.role;
+      badge.className   = `role-badge ${currentUser.role}`;
+      badge.classList.remove('hidden');
+    }
+    if (isMod()) el('slow-mode-wrap').classList.remove('hidden');
+    el('logout-btn').classList.remove('hidden');
+    el('auth-banner').style.display  = 'none';
+    el('input-form').classList.add('visible');
+    connectWs();
+  }
+
+  function onLoggedOut() {
+    currentUser = null;
+    disconnectWs();
+    el('header-username').classList.add('hidden');
+    el('header-role-badge').classList.add('hidden');
+    el('slow-mode-wrap').classList.add('hidden');
+    el('logout-btn').classList.add('hidden');
+    el('auth-banner').style.display  = '';
+    el('input-form').classList.remove('visible');
+  }
+
+  async function doLogin(username, password) {
+    const res = await fetch(`${API}/auth/login`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Login failed');
+    currentUser = data.user || data;
+  }
+
+  async function doRegister(username, email, password) {
+    const res = await fetch(`${API}/auth/register`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Registration failed');
+  }
+
+  async function doLogout() {
+    await fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' });
+    onLoggedOut();
+  }
+
+  /* ── WebSocket ───────────────────────────────────────────── */
+  async function connectWs() {
+    clearTimeout(wsReconnect);
+    try {
+      const tr = await fetch(`${API}/auth/token`, { credentials: 'include' });
+      if (!tr.ok) return;
+      const { token } = await tr.json();
+      ws = new WebSocket(`${WS_URL}?token=${encodeURIComponent(token)}`);
+      ws.addEventListener('message', onWsMessage);
+      ws.addEventListener('close',   () => {
+        ws = null;
+        if (currentUser) wsReconnect = setTimeout(connectWs, 4000);
+      });
+      ws.addEventListener('error', () => {});
+    } catch {}
+  }
+
+  function disconnectWs() {
+    clearTimeout(wsReconnect);
+    if (ws) { ws.close(); ws = null; }
+  }
+
+  function onWsMessage(e) {
+    let msg;
+    try { msg = JSON.parse(e.data); } catch { return; }
+    switch (msg.type) {
+      case 'history':
+        el('messages').innerHTML = '';
+        for (const m of (msg.messages || [])) appendMessage(m);
+        scrollBottom();
+        break;
+      case 'message':
+        appendMessage(msg);
+        if (autoScroll) scrollBottom(); else el('scroll-pill').classList.add('visible');
+        break;
+      case 'system':
+        appendSystem(msg.content);
+        if (autoScroll) scrollBottom();
+        break;
+      case 'delete':
+        markDeleted(msg.messageId);
+        break;
+      case 'users':
+        // viewer count available if needed
+        break;
+      case 'slowmode':
+        setSlowMode(msg.enabled, msg.seconds);
+        break;
+    }
+  }
+
+  /* ── Message rendering ───────────────────────────────────── */
+  function appendMessage(msg) {
+    const role    = msg.role || 'viewer';
+    const time    = msg.timestamp ? fmtTime(msg.timestamp) : '';
+    const safeU   = esc(msg.username || '');
+    const safeC   = parseEmotes(esc(msg.content || ''));
+
+    const div = document.createElement('div');
+    div.className    = 'msg';
+    div.dataset.id   = msg.id || '';
+    div.dataset.user = msg.username || '';
+
+    let badge = '';
+    if (role === 'admin') badge = `<span class="msg-badge admin">ADMIN</span>`;
+    else if (role === 'mod') badge = `<span class="msg-badge mod">MOD</span>`;
+
+    div.innerHTML = `
+      ${badge}
+      <span class="msg-user ${role}" tabindex="0">${safeU}</span>
+      <span class="msg-colon">:</span>
+      <span class="msg-content">${safeC}</span>
+      <span class="msg-time">${time}</span>
+    `;
+
+    const userEl = div.querySelector('.msg-user');
+    if (isMod()) {
+      userEl.addEventListener('contextmenu', (e) => { e.preventDefault(); openCtxMenu(e, msg.username, msg.id); });
+      let lpt;
+      userEl.addEventListener('touchstart',  () => { lpt = setTimeout(() => openCtxMenu({clientX:50,clientY:window.innerHeight*0.6}, msg.username, msg.id), 500); }, { passive: true });
+      userEl.addEventListener('touchend',    () => clearTimeout(lpt));
+      userEl.addEventListener('touchmove',   () => clearTimeout(lpt), { passive: true });
+    }
+
+    el('messages').appendChild(div);
+  }
+
+  function appendSystem(content) {
+    const div = document.createElement('div');
+    div.className   = 'msg system';
+    div.textContent = content;
+    el('messages').appendChild(div);
+  }
+
+  function markDeleted(messageId) {
+    const el = document.querySelector(`.msg[data-id="${messageId}"]`);
+    if (!el) return;
+    el.classList.add('deleted');
+    const c = el.querySelector('.msg-content');
+    if (c) { c.innerHTML = '[message deleted]'; }
+  }
+
+  /* ── Auto-scroll ─────────────────────────────────────────── */
+  const msgArea = el('messages');
+  msgArea.addEventListener('scroll', () => {
+    const gap = msgArea.scrollHeight - msgArea.scrollTop - msgArea.clientHeight;
+    autoScroll = gap < 80;
+    el('scroll-pill').classList.toggle('visible', !autoScroll);
+  });
+
+  function scrollBottom() {
+    msgArea.scrollTop = msgArea.scrollHeight;
+    el('scroll-pill').classList.remove('visible');
+  }
+
+  el('scroll-pill').addEventListener('click', () => {
+    autoScroll = true;
+    scrollBottom();
+  });
+
+  /* ── Send ────────────────────────────────────────────────── */
+  el('input-form').addEventListener('submit', (e) => { e.preventDefault(); sendMessage(); });
+  el('msg-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  el('msg-input').addEventListener('input', () => {
+    const t = el('msg-input');
+    t.style.height = 'auto';
+    t.style.height = Math.min(t.scrollHeight, 90) + 'px';
+  });
+
+  function sendMessage() {
+    const inp = el('msg-input');
+    const content = inp.value.trim();
+    if (!content || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+    if (slowActive && currentUser?.role === 'viewer') {
+      const wait = slowSecs - (Date.now() - lastSendTime) / 1000;
+      if (wait > 0) { showSlowNotice(Math.ceil(wait)); return; }
+    }
+
+    ws.send(JSON.stringify({ type: 'message', content }));
+    inp.value = ''; inp.style.height = '36px';
+    lastSendTime = Date.now();
+  }
+
+  let slowNoticeTimer;
+  function showSlowNotice(secs) {
+    const n = el('slow-notice');
+    n.textContent = `Slow mode: wait ${secs}s`;
+    n.style.display = 'block';
+    clearTimeout(slowNoticeTimer);
+    slowNoticeTimer = setTimeout(() => { n.style.display = 'none'; }, secs * 1000);
+  }
+
+  /* ── Slow mode ───────────────────────────────────────────── */
+  function setSlowMode(enabled, secs) {
+    slowActive = enabled; slowSecs = secs || 0;
+    const banner = el('slow-banner');
+    banner.classList.toggle('visible', enabled);
+    if (enabled) el('slow-banner-text').textContent = `Slow mode — ${secs}s between messages`;
+  }
+
+  el('slow-mode-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    el('slow-panel').classList.toggle('visible');
+  });
+  el('slow-apply-btn').addEventListener('click', () => {
+    const secs = parseInt(el('slow-secs').value, 10) || 5;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'slowmode', enabled: true, seconds: secs }));
+    }
+    el('slow-panel').classList.remove('visible');
+  });
+  el('slow-off-btn').addEventListener('click', () => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'slowmode', enabled: false, seconds: 0 }));
+    }
+    el('slow-panel').classList.remove('visible');
+  });
+
+  /* ── Context menu ────────────────────────────────────────── */
+  function openCtxMenu(e, username, messageId) {
+    ctxTarget = { username, messageId };
+    const menu = el('ctx-menu');
+    el('ctx-username-label').textContent = username;
+    const hasMsg = !!messageId;
+    el('ctx-delete-sep').classList.toggle('hidden', !hasMsg);
+    el('ctx-delete-btn').classList.toggle('hidden', !hasMsg);
+    menu.classList.add('visible');
+    const x = Math.min((e.clientX || 50), window.innerWidth  - 165);
+    const y = Math.min((e.clientY || 100), window.innerHeight - 220);
+    menu.style.left = x + 'px';
+    menu.style.top  = y + 'px';
+  }
+
+  el('ctx-menu').addEventListener('click', async (e) => {
+    const btn = e.target.closest('.ctx-item');
+    if (!btn || !ctxTarget) return;
+    const action = btn.dataset.action;
+    const { username, messageId } = ctxTarget;
+    closeCtxMenu();
+
+    if (action === 'ban') {
+      await modPost('ban', { username });
+    } else if (action?.startsWith('timeout-')) {
+      const mins = parseInt(action.split('-')[1], 10);
+      await modPost('ban', { username, duration: mins * 60 * 1000 });
+    } else if (action?.startsWith('mute-')) {
+      const mins = parseInt(action.split('-')[1], 10);
+      await modPost('mute', { username, duration: mins * 60 * 1000 });
+    } else if (action === 'delete' && messageId) {
+      await modPost('delete-message', { messageId });
+    }
+  });
+
+  function closeCtxMenu() { el('ctx-menu').classList.remove('visible'); ctxTarget = null; }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#ctx-menu') && !e.target.closest('.msg-user')) closeCtxMenu();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCtxMenu(); });
+
+  async function modPost(endpoint, body) {
+    try {
+      await fetch(`${API}/mod/${endpoint}`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } catch {}
+  }
+
+  /* ── Modal helpers ───────────────────────────────────────── */
+  function openModal(id)  { el(id).classList.add('visible'); }
+  function closeModal(id) { el(id).classList.remove('visible'); }
+
+  // Login
+  el('open-login-btn').addEventListener('click', () => openModal('login-backdrop'));
+  el('login-cancel-btn').addEventListener('click', () => closeModal('login-backdrop'));
+  el('login-backdrop').addEventListener('click', (e) => { if (e.target === el('login-backdrop')) closeModal('login-backdrop'); });
+  el('goto-register-btn').addEventListener('click', () => { closeModal('login-backdrop'); openModal('register-backdrop'); });
+  el('forgot-link-btn').addEventListener('click', () => { closeModal('login-backdrop'); openModal('forgot-backdrop'); });
+
+  el('login-submit-btn').addEventListener('click', async () => {
+    const username = el('login-username').value.trim();
+    const password = el('login-password').value;
+    el('login-err').textContent = '';
+    if (!username || !password) { el('login-err').textContent = 'Fill in all fields.'; return; }
+    el('login-submit-btn').disabled = true;
+    try {
+      await doLogin(username, password);
+      closeModal('login-backdrop');
+      el('login-username').value = ''; el('login-password').value = '';
+      onLoggedIn();
+    } catch (err) {
+      el('login-err').textContent = err.message;
+    } finally { el('login-submit-btn').disabled = false; }
+  });
+  el('login-password').addEventListener('keydown', (e) => { if (e.key === 'Enter') el('login-submit-btn').click(); });
+
+  // Register
+  el('open-register-btn').addEventListener('click', () => openModal('register-backdrop'));
+  el('reg-cancel-btn').addEventListener('click', () => closeModal('register-backdrop'));
+  el('register-backdrop').addEventListener('click', (e) => { if (e.target === el('register-backdrop')) closeModal('register-backdrop'); });
+  el('goto-login-btn').addEventListener('click', () => { closeModal('register-backdrop'); openModal('login-backdrop'); });
+
+  el('reg-submit-btn').addEventListener('click', async () => {
+    const username = el('reg-username').value.trim();
+    const email    = el('reg-email').value.trim();
+    const password = el('reg-password').value;
+    el('reg-err').textContent = ''; el('reg-ok').textContent = '';
+    if (!username || !email || !password) { el('reg-err').textContent = 'Fill in all fields.'; return; }
+    el('reg-submit-btn').disabled = true;
+    try {
+      await doRegister(username, email, password);
+      el('reg-ok').textContent = 'Account created! Check your email, then login.';
+    } catch (err) {
+      el('reg-err').textContent = err.message;
+    } finally { el('reg-submit-btn').disabled = false; }
+  });
+
+  // Forgot password
+  el('forgot-cancel-btn').addEventListener('click', () => closeModal('forgot-backdrop'));
+  el('forgot-backdrop').addEventListener('click', (e) => { if (e.target === el('forgot-backdrop')) closeModal('forgot-backdrop'); });
+
+  el('forgot-submit-btn').addEventListener('click', async () => {
+    const email = el('forgot-email').value.trim();
+    el('forgot-err').textContent = ''; el('forgot-ok').textContent = '';
+    if (!email) { el('forgot-err').textContent = 'Enter your email.'; return; }
+    el('forgot-submit-btn').disabled = true;
+    try {
+      const res = await fetch(`${API}/auth/forgot-password`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
+      el('forgot-ok').textContent = 'Check your email for a reset link.';
+      el('forgot-email').value = '';
+    } catch (err) {
+      el('forgot-err').textContent = err.message;
+    } finally { el('forgot-submit-btn').disabled = false; }
+  });
+
+  // Logout
+  el('logout-btn').addEventListener('click', doLogout);
+
+  // Close slow panel on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#slow-mode-wrap')) el('slow-panel').classList.remove('visible');
+  });
+
+  /* ── Utilities ───────────────────────────────────────────── */
+  function el(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function fmtTime(ts) {
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  function isMod() { return currentUser && ['mod','admin'].includes(currentUser.role); }
+
+  /* ── Init ────────────────────────────────────────────────── */
+  fetchEmotes();
+  checkAuth();
+</script>
+
+<!--
+  ════════════════════════════════════════════════════════════════
+  VPS: add to /opt/hitpoint-chat/server.js (auth routes section)
+  ════════════════════════════════════════════════════════════════
+
+  This endpoint reads the httpOnly JWT cookie and returns the raw
+  token so the browser can use it for WebSocket connections
+  (WebSocket API does not send cookies cross-origin).
+
+  Also ensure your CORS config allows credentials from hitpoint.pro:
+    app.use(cors({
+      origin: ['https://hitpoint.pro', 'https://chat.hitpoint.pro'],
+      credentials: true,
+    }));
+
+  ────────────────────────────────────────────────────────────────
+  // GET /api/auth/token — return raw JWT for WebSocket auth
+  router.get('/token', requireAuth, (req, res) => {
+    // requireAuth already verified the cookie; just return it
+    const token = req.cookies.token; // match your cookie name
+    if (!token) return res.status(401).json({ error: 'Not authenticated' });
+    res.json({ token });
+  });
+  ────────────────────────────────────────────────────────────────
+
+  Deployment:
+    1. SSH into VPS
+    2. nano /opt/hitpoint-chat/server.js  (or wherever auth routes live)
+    3. Add the route above inside your auth router
+    4. pm2 restart hitpoint-chat          (or: systemctl restart hitpoint-chat)
+
+  ════════════════════════════════════════════════════════════════
+-->
+</body>
+</html>
