@@ -710,6 +710,7 @@
     '/timeout <user> <mins>  — timeout for N minutes',
     '/mute <user> [mins]     — mute user (default 10m)',
     '/unmute <user>          — remove a mute',
+    '/link <user>            — toggle link posting permission',
     '/help                   — show this list',
   ];
 
@@ -788,6 +789,16 @@
       case 'unmute':
         if (!arg1) { localSystem('Usage: /unmute <username>'); break; }
         modPost('unmute', { username: arg1 }).then(() => localSystem(`Unmuted ${arg1}.`));
+        break;
+
+      case 'link':
+        if (!arg1) { localSystem('Usage: /link <username>'); break; }
+        modPost('toggle-link', { username: arg1 }).then(async (res) => {
+          const data = await res?.json?.().catch(() => ({}));
+          localSystem(data?.granted
+            ? `${arg1} can now post links.`
+            : `${arg1} can no longer post links.`);
+        });
         break;
 
       default:
@@ -878,7 +889,7 @@
 
   async function modPost(endpoint, body) {
     try {
-      await fetch(`${API}/mod/${endpoint}`, {
+      return await fetch(`${API}/mod/${endpoint}`, {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
