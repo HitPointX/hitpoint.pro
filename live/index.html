@@ -214,6 +214,14 @@
       color: rgba(255,255,255,0.28);
     }
 
+    #offline-heart {
+      font-size: 1.4rem;
+      line-height: 1;
+      color: rgba(255,255,255,0.18);
+      transition: opacity 0.15s ease;
+      user-select: none;
+    }
+
     /* Custom controls */
     #stream-video::-webkit-media-controls { display: none !important; }
 
@@ -351,6 +359,7 @@
         <div id="offline-icon">&#x25A0;</div>
         <div id="offline-title">Stream Offline</div>
         <div id="offline-sub">Check back soon</div>
+        <div id="offline-heart">♡</div>
       </div>
 
       <div id="seekbar-wrap">
@@ -631,6 +640,21 @@
       }
       video.play().catch(() => {});
     });
+
+    // Offline heart blink
+    const offlineHeart = document.getElementById('offline-heart');
+    const hearts = ['♡','♥','❤','💗','♡','❤️','💓','♥','💕','♡'];
+    let heartIdx = 0;
+    function nextHeart() {
+      offlineHeart.style.opacity = '0';
+      setTimeout(() => {
+        heartIdx = (heartIdx + 1) % hearts.length;
+        offlineHeart.textContent = hearts[heartIdx];
+        offlineHeart.style.opacity = '1';
+      }, 150);
+      setTimeout(nextHeart, 500 + Math.random() * 2000);
+    }
+    setTimeout(nextHeart, 800 + Math.random() * 1200);
 
     // Kick off
     checkStream();
