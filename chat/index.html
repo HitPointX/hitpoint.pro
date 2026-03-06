@@ -855,7 +855,6 @@
           <button class="theme-btn active" data-glow="none">None</button>
           <button class="theme-btn" data-glow="soft">Soft</button>
           <button class="theme-btn" data-glow="strong">Strong</button>
-          <button class="theme-btn" data-glow="neon">Neon</button>
         </div>
       </div>
 
@@ -1841,11 +1840,9 @@
     if (theme.gradient) {
       if (theme.glow === 'soft')   spanEl.style.filter = `drop-shadow(0 0 5px ${gc}55)`;
       if (theme.glow === 'strong') spanEl.style.filter = `drop-shadow(0 0 8px ${gc}88) drop-shadow(0 0 3px ${gc})`;
-      if (theme.glow === 'neon')   spanEl.style.filter = `drop-shadow(0 0 3px #fffa) drop-shadow(0 0 8px ${gc}) drop-shadow(0 0 18px ${gc}aa)`;
     } else {
       if (theme.glow === 'soft')   spanEl.style.textShadow = `0 0 8px ${gc}55`;
       if (theme.glow === 'strong') spanEl.style.textShadow = `0 0 12px ${gc}99, 0 0 4px ${gc}`;
-      if (theme.glow === 'neon')   spanEl.style.textShadow = `0 0 4px #fff8, 0 0 10px ${gc}, 0 0 22px ${gc}cc`;
     }
 
     if (theme.font === 'mono')      spanEl.style.fontFamily = 'monospace';
