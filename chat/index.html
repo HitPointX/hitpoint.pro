@@ -111,8 +111,18 @@
     .msg-user.viewer { color: #90a8c8; }
     .msg-colon { color: rgba(255,255,255,0.2); flex-shrink: 0; }
     .msg-content { color: #d0d0e0; word-break: break-word; flex: 1; min-width: 0; }
+    .emote-shell {
+      display: inline-flex; position: relative;
+      align-items: center; justify-content: center;
+      vertical-align: middle; margin: 0 1px;
+    }
+    .emote-shell::after {
+      content: ''; position: absolute; inset: 0;
+      background: transparent;
+    }
     .msg-content img.emote {
-      height: 28px; width: auto; vertical-align: middle; display: inline; margin: 0 1px;
+      height: 28px; width: auto; display: block;
+      pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
     }
     .msg-time {
       font-size: 10px; color: rgba(255,255,255,0.18); flex-shrink: 0;
@@ -226,7 +236,10 @@
       transition: background 0.1s;
     }
     .epick-emote:hover { background: rgba(255,255,255,0.1); }
-    .epick-emote img { max-width: 32px; max-height: 32px; object-fit: contain; }
+    .epick-emote img {
+      max-width: 32px; max-height: 32px; object-fit: contain;
+      pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
+    }
     #epick-loading { font-size: 11px; color: rgba(255,255,255,0.2); text-align: center; padding: 30px; }
 
     /* ── Emote autocomplete ──────────────────────────────────── */
@@ -243,7 +256,10 @@
       transition: background 0.1s;
     }
     .eac-item:hover, .eac-item.selected { background: rgba(255,255,255,0.07); color: #fff; }
-    .eac-item img { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+    .eac-item img {
+      width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;
+      pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
+    }
 
     /* ── Modals ─────────────────────────────────────────────── */
     .modal-backdrop {
@@ -641,7 +657,9 @@
 
   function parseEmotes(html) {
     return html.replace(/:([A-Za-z0-9_]+):/g, (match, name) => {
-      if (emotes[name]) return `<img class="emote" src="${emotes[name]}" alt=":${name}:" title=":${name}:" loading="lazy">`;
+      if (emotes[name]) {
+        return `<span class="emote-shell emote-protected" data-code=":${name}:" title=":${name}:"><img class="emote emote-protected" src="${emotes[name]}" alt=":${name}:" loading="lazy" draggable="false"></span>`;
+      }
       return match;
     });
   }
@@ -807,6 +825,18 @@
 
     el('messages').appendChild(div);
   }
+
+  const PROTECTED_EMOTE_SELECTOR = '.emote-protected, .epick-emote, #emote-autocomplete .eac-item';
+
+  document.addEventListener('contextmenu', (e) => {
+    if (!(e.target instanceof Element)) return;
+    if (e.target.closest(PROTECTED_EMOTE_SELECTOR)) e.preventDefault();
+  });
+
+  document.addEventListener('dragstart', (e) => {
+    if (!(e.target instanceof Element)) return;
+    if (e.target.closest(PROTECTED_EMOTE_SELECTOR)) e.preventDefault();
+  });
 
   function appendSystem(content) {
     const div = document.createElement('div');
@@ -1236,7 +1266,7 @@
       const div = document.createElement('div');
       div.className = 'epick-emote'; div.title = e.code;
       const img = document.createElement('img');
-      img.loading = 'lazy'; img.alt = e.code;
+      img.loading = 'lazy'; img.alt = e.code; img.draggable = false;
       img.src = `${API}/emotes/file/${e.file}`;
       div.appendChild(img);
       div.addEventListener('click', () => insertEmote(e.code));
@@ -1288,7 +1318,7 @@
       const div  = document.createElement('div');
       div.className = 'eac-item';
       const img  = document.createElement('img');
-      img.src = `${API}/emotes/file/${e.file}`; img.alt = ''; img.loading = 'lazy';
+      img.src = `${API}/emotes/file/${e.file}`; img.alt = ''; img.loading = 'lazy'; img.draggable = false;
       const span = document.createElement('span');
       span.textContent = `:${e.code}:`;
       div.appendChild(img); div.appendChild(span);
