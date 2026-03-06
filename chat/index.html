@@ -614,7 +614,7 @@
   function saveIgnore() { localStorage.setItem('hp_ignore', JSON.stringify([...ignoreList])); }
 
   /* ── Emotes ──────────────────────────────────────────────── */
-  const EMOTE_CACHE_KEY = 'emotes_manifest';
+  const EMOTE_CACHE_KEY = 'emotes_manifest_v2';
   const EMOTE_CACHE_TTL = 24 * 60 * 60 * 1000;
 
   async function fetchEmotes() {
@@ -636,7 +636,7 @@
 
   function buildEmoteMap() {
     emotes = {};
-    for (const e of emoteManifest) emotes[e.name] = `${API}/emotes/file/${e.type}/${e.filename}`;
+    for (const e of emoteManifest) emotes[e.code] = `${API}/emotes/file/${e.file}`;
   }
 
   function parseEmotes(html) {
@@ -1234,12 +1234,12 @@
     loading.style.display = 'none';
     for (const e of emoteManifest) {
       const div = document.createElement('div');
-      div.className = 'epick-emote'; div.title = e.name;
+      div.className = 'epick-emote'; div.title = e.code;
       const img = document.createElement('img');
-      img.loading = 'lazy'; img.alt = e.name;
-      img.src = `${API}/emotes/file/${e.type}/${e.filename}`;
+      img.loading = 'lazy'; img.alt = e.code;
+      img.src = `${API}/emotes/file/${e.file}`;
       div.appendChild(img);
-      div.addEventListener('click', () => insertEmote(e.name));
+      div.addEventListener('click', () => insertEmote(e.code));
       (e.type === 'animated' ? animGrid : staticGrid).appendChild(div);
     }
     pickerPopulated = true;
@@ -1288,11 +1288,11 @@
       const div  = document.createElement('div');
       div.className = 'eac-item';
       const img  = document.createElement('img');
-      img.src = `${API}/emotes/file/${e.type}/${e.filename}`; img.alt = ''; img.loading = 'lazy';
+      img.src = `${API}/emotes/file/${e.file}`; img.alt = ''; img.loading = 'lazy';
       const span = document.createElement('span');
-      span.textContent = `:${e.name}:`;
+      span.textContent = `:${e.code}:`;
       div.appendChild(img); div.appendChild(span);
-      div.addEventListener('mousedown', ev => { ev.preventDefault(); completeEmote(e.name, colonStart); });
+      div.addEventListener('mousedown', ev => { ev.preventDefault(); completeEmote(e.code, colonStart); });
       ac.appendChild(div);
     });
     const rect = el('msg-input').getBoundingClientRect();
@@ -1317,7 +1317,7 @@
     const q = getEmoteQuery();
     if (!q || !emoteManifest.length) { hideAutocomplete(); return; }
     const lower   = q.query.toLowerCase();
-    const matches = emoteManifest.filter(e => e.name.toLowerCase().startsWith(lower));
+    const matches = emoteManifest.filter(e => e.code.toLowerCase().startsWith(lower));
     if (matches.length) showAutocomplete(matches, q.colonStart); else hideAutocomplete();
   });
 
