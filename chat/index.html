@@ -434,6 +434,162 @@
     #profile-ignore-btn.unignore { background: rgba(255,60,80,0.09); border-color: rgba(255,60,80,0.2); color: rgba(255,100,100,0.75); }
     #profile-ignore-btn.unignore:hover { background: rgba(255,60,80,0.18); color: #ff6070; }
 
+    /* ── Settings button ────────────────────────────────────── */
+    #settings-btn {
+      background: none; border: none; color: rgba(255,255,255,0.28); cursor: pointer;
+      padding: 3px 4px; border-radius: 4px;
+      display: none; align-items: center; justify-content: center;
+      transition: color 0.15s, background 0.15s; flex-shrink: 0;
+    }
+    #settings-btn:hover { color: rgba(255,255,255,0.72); background: rgba(255,255,255,0.06); }
+    #settings-btn.visible { display: flex; }
+
+    /* ── Settings overlay + panel ───────────────────────────── */
+    #settings-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 200;
+    }
+    #settings-overlay.visible { display: block; }
+    #settings-panel {
+      display: none; position: fixed;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 288px; z-index: 201;
+      background: #0d0f14; border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 10px 36px rgba(0,0,0,0.65);
+    }
+    #settings-panel.visible { display: block; }
+    .settings-header {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 12px 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+    }
+    .settings-title {
+      flex: 1; font-size: 10px; font-weight: 800;
+      letter-spacing: 2px; color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+    }
+    .settings-back {
+      background: none; border: none; color: rgba(255,255,255,0.35);
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      padding: 0 6px 0 0; transition: color 0.15s;
+    }
+    .settings-back:hover { color: rgba(255,255,255,0.75); }
+    .settings-close {
+      background: none; border: none; color: rgba(255,255,255,0.22);
+      font-size: 14px; cursor: pointer; padding: 0; line-height: 1;
+      transition: color 0.15s;
+    }
+    .settings-close:hover { color: rgba(255,255,255,0.6); }
+    .settings-list { padding: 6px 0; }
+    .settings-item {
+      display: flex; align-items: center; width: 100%;
+      background: none; border: none; color: rgba(255,255,255,0.6);
+      font-size: 12px; padding: 11px 14px; cursor: pointer;
+      transition: background 0.12s, color 0.12s; text-align: left;
+    }
+    .settings-item:hover { background: rgba(255,255,255,0.04); color: #fff; }
+    .settings-chevron { margin-left: auto; opacity: 0.3; font-size: 18px; line-height: 1; }
+    .settings-toggle-row { cursor: default; }
+    .settings-toggle-row:hover { background: none; color: rgba(255,255,255,0.6); }
+    .toggle-switch { margin-left: auto; position: relative; display: inline-block; width: 32px; height: 18px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0; cursor: pointer;
+      background: rgba(255,255,255,0.1); border-radius: 18px; transition: background 0.2s;
+    }
+    .toggle-track::before {
+      content: ''; position: absolute; height: 12px; width: 12px;
+      left: 3px; bottom: 3px; background: rgba(255,255,255,0.35);
+      border-radius: 50%; transition: transform 0.2s, background 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-track { background: rgba(200,20,20,0.5); }
+    .toggle-switch input:checked + .toggle-track::before { transform: translateX(14px); background: #ff6070; }
+
+    /* ── Theme editor ────────────────────────────────────────── */
+    #settings-theme-content {
+      padding: 12px 14px 14px; max-height: 72vh; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 13px;
+    }
+    #settings-theme-content::-webkit-scrollbar { width: 2px; }
+    #settings-theme-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+    .theme-section { display: flex; flex-direction: column; gap: 7px; }
+    .theme-label {
+      font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.28); text-transform: uppercase;
+    }
+    .theme-label-sm {
+      font-size: 9px; font-weight: 700; letter-spacing: 1px;
+      color: rgba(255,255,255,0.28); text-transform: uppercase; white-space: nowrap;
+    }
+    #theme-preview-wrap {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 6px; padding: 10px 14px; min-height: 36px;
+      display: flex; align-items: center;
+    }
+    #theme-preview-name { font-size: 13px; font-weight: 700; }
+    .theme-btn-group { display: flex; gap: 5px; flex-wrap: wrap; }
+    .theme-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+      color: rgba(255,255,255,0.38); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.5px; padding: 5px 10px; border-radius: 5px;
+      cursor: pointer; transition: all 0.12s; text-transform: uppercase; white-space: nowrap;
+    }
+    .theme-btn:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.2); }
+    .theme-btn.active {
+      background: rgba(200,20,20,0.18); border-color: rgba(200,20,20,0.4); color: #ff8090;
+    }
+    .theme-color-row { display: flex; flex-direction: column; gap: 8px; }
+    .gradient-pickers { display: flex; align-items: center; gap: 8px; }
+    .gradient-pick-group { display: flex; align-items: center; gap: 6px; flex: 1; }
+    .gradient-arrow { color: rgba(255,255,255,0.18); font-size: 14px; }
+    input[type="color"] {
+      width: 32px; height: 28px; padding: 2px;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 5px;
+      background: rgba(255,255,255,0.05); cursor: pointer;
+      -webkit-appearance: none; appearance: none; flex-shrink: 0;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
+    .color-hex-label {
+      font-size: 10px; color: rgba(255,255,255,0.28); font-family: monospace;
+      letter-spacing: 0.5px; flex-shrink: 0;
+    }
+    .gradient-angle-row { display: flex; align-items: center; gap: 8px; }
+    .gradient-angle-row input[type="range"] {
+      flex: 1; -webkit-appearance: none; appearance: none; height: 3px;
+      background: rgba(255,255,255,0.12); border-radius: 2px;
+      outline: none; border: none; cursor: pointer;
+    }
+    .gradient-angle-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 11px; height: 11px;
+      border-radius: 50%; background: #ff8090; cursor: pointer;
+    }
+    #gradient-angle-label {
+      font-size: 10px; color: rgba(255,255,255,0.28);
+      font-family: monospace; min-width: 30px; text-align: right;
+    }
+    .theme-actions { display: flex; gap: 7px; margin-top: 2px; }
+    #theme-save-btn {
+      flex: 1; background: rgba(200,20,20,0.22); border: 1px solid rgba(200,20,20,0.38);
+      color: #ff8090; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+      padding: 8px 0; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    #theme-save-btn:hover { background: rgba(200,20,20,0.38); color: #ffaab8; }
+    #theme-save-btn:disabled { opacity: 0.5; cursor: default; }
+    #theme-reset-btn {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.28); font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      padding: 8px 14px; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    #theme-reset-btn:hover { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.15); }
+    #theme-save-status {
+      font-size: 10px; text-align: center; color: rgba(255,255,255,0.32); min-height: 14px;
+    }
+
     /* ── Misc ───────────────────────────────────────────────── */
     .hidden { display: none !important; }
   </style>
@@ -447,6 +603,12 @@
       <span id="header-label">CHAT</span>
       <span id="header-username" class="hidden"></span>
       <span id="header-role-badge" class="role-badge hidden"></span>
+      <button id="settings-btn" title="Settings" aria-label="Settings">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
     </div>
     <div id="header-right">
       <div id="slow-mode-wrap" class="hidden">
@@ -684,6 +846,8 @@
     }
     if (isMod()) el('slow-mode-wrap').classList.remove('hidden');
     el('logout-btn').classList.remove('hidden');
+    el('settings-btn').classList.add('visible');
+    if (currentUser.nameTheme) applyNameTheme(el('header-username'), currentUser.nameTheme);
     el('auth-banner').style.display  = 'none';
     el('input-form').classList.add('visible');
     connectWs();
@@ -696,6 +860,8 @@
     el('header-role-badge').classList.add('hidden');
     el('slow-mode-wrap').classList.add('hidden');
     el('logout-btn').classList.add('hidden');
+    el('settings-btn').classList.remove('visible');
+    el('header-username').style.cssText = '';
     el('auth-banner').style.display  = '';
     el('input-form').classList.remove('visible');
   }
@@ -811,6 +977,12 @@
     `;
 
     const userEl = div.querySelector('.msg-user');
+
+    // Apply sender's name theme if present
+    if (msg.nameTheme) {
+      const t = typeof msg.nameTheme === 'string' ? JSON.parse(msg.nameTheme) : msg.nameTheme;
+      applyNameTheme(userEl, t);
+    }
 
     // Profile card — any user can click a username
     userEl.addEventListener('click', (e) => { openProfileCard(e, msg.username, role); });
@@ -1459,6 +1631,182 @@
     if (!e.target.closest('#slow-mode-wrap')) el('slow-panel').classList.remove('visible');
   });
 
+  /* ── Name theme application ──────────────────────────────── */
+  function applyNameTheme(spanEl, theme) {
+    spanEl.style.cssText = '';
+    if (!theme) return;
+    if (localStorage.getItem('hp_disable_themes') === '1') return;
+
+    const baseColor = theme.gradient ? theme.gradient.from : (theme.color || null);
+
+    if (theme.gradient) {
+      const { from, to, angle } = theme.gradient;
+      spanEl.style.background = `linear-gradient(${angle}deg, ${from}, ${to})`;
+      spanEl.style.webkitBackgroundClip = 'text';
+      spanEl.style.webkitTextFillColor = 'transparent';
+      spanEl.style.backgroundClip = 'text';
+      spanEl.style.display = 'inline-block';
+    } else if (theme.color) {
+      spanEl.style.color = theme.color;
+    }
+
+    const gc = baseColor || '#ffffff';
+    if (theme.gradient) {
+      if (theme.glow === 'soft')   spanEl.style.filter = `drop-shadow(0 0 5px ${gc}55)`;
+      if (theme.glow === 'strong') spanEl.style.filter = `drop-shadow(0 0 8px ${gc}88) drop-shadow(0 0 3px ${gc})`;
+      if (theme.glow === 'neon')   spanEl.style.filter = `drop-shadow(0 0 3px #fffa) drop-shadow(0 0 8px ${gc}) drop-shadow(0 0 18px ${gc}aa)`;
+    } else {
+      if (theme.glow === 'soft')   spanEl.style.textShadow = `0 0 8px ${gc}55`;
+      if (theme.glow === 'strong') spanEl.style.textShadow = `0 0 12px ${gc}99, 0 0 4px ${gc}`;
+      if (theme.glow === 'neon')   spanEl.style.textShadow = `0 0 4px #fff8, 0 0 10px ${gc}, 0 0 22px ${gc}cc`;
+    }
+
+    if (theme.font === 'mono')      spanEl.style.fontFamily = 'monospace';
+    else if (theme.font === 'smallcaps') spanEl.style.fontVariant = 'small-caps';
+    else if (theme.font === 'wide') spanEl.style.letterSpacing = '2.5px';
+    else if (theme.font === 'italic') spanEl.style.fontStyle = 'italic';
+  }
+
+  /* ── Settings modal ──────────────────────────────────────── */
+  function openSettings() {
+    el('settings-overlay').classList.add('visible');
+    el('settings-panel').classList.add('visible');
+    el('settings-main').classList.remove('hidden');
+    el('settings-theme').classList.add('hidden');
+    el('settings-disable-themes').checked = localStorage.getItem('hp_disable_themes') === '1';
+  }
+
+  function closeSettings() {
+    el('settings-overlay').classList.remove('visible');
+    el('settings-panel').classList.remove('visible');
+  }
+
+  function openThemePage() {
+    el('settings-main').classList.add('hidden');
+    el('settings-theme').classList.remove('hidden');
+    el('theme-preview-name').textContent = currentUser ? currentUser.username : 'username';
+    const raw = currentUser && currentUser.nameTheme ? currentUser.nameTheme : null;
+    const t = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw)
+                  : { color: '#e05252', gradient: null, glow: 'none', font: 'default' };
+    populateThemeEditor(t);
+    updateThemePreview();
+  }
+
+  function setColorMode(mode) {
+    const solid = mode === 'solid';
+    el('color-mode-solid').classList.toggle('active', solid);
+    el('color-mode-gradient').classList.toggle('active', !solid);
+    el('color-solid-row').classList.toggle('hidden', !solid);
+    el('color-gradient-row').classList.toggle('hidden', solid);
+  }
+
+  function populateThemeEditor(t) {
+    if (t.gradient) {
+      setColorMode('gradient');
+      el('color-grad-from').value = t.gradient.from || '#e05252';
+      el('color-grad-to').value   = t.gradient.to   || '#5280e0';
+      el('gradient-angle').value  = t.gradient.angle ?? 135;
+      el('color-grad-from-hex').textContent = t.gradient.from || '#e05252';
+      el('color-grad-to-hex').textContent   = t.gradient.to   || '#5280e0';
+      el('gradient-angle-label').textContent = (t.gradient.angle ?? 135) + '°';
+    } else {
+      setColorMode('solid');
+      const c = t.color || '#e05252';
+      el('color-solid-pick').value = c;
+      el('color-solid-hex').textContent = c;
+    }
+    el('glow-group').querySelectorAll('.theme-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.glow === (t.glow || 'none')));
+    el('font-group').querySelectorAll('.theme-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.font === (t.font || 'default')));
+  }
+
+  function buildThemeFromEditor() {
+    const solidActive = el('color-mode-solid').classList.contains('active');
+    const glow = el('glow-group').querySelector('.theme-btn.active')?.dataset.glow || 'none';
+    const font = el('font-group').querySelector('.theme-btn.active')?.dataset.font || 'default';
+    if (solidActive) {
+      return { color: el('color-solid-pick').value, gradient: null, glow, font };
+    }
+    return {
+      color: null,
+      gradient: {
+        from:  el('color-grad-from').value,
+        to:    el('color-grad-to').value,
+        angle: parseInt(el('gradient-angle').value, 10),
+      },
+      glow, font,
+    };
+  }
+
+  function updateThemePreview() {
+    const prev = el('theme-preview-name');
+    applyNameTheme(prev, buildThemeFromEditor());
+  }
+
+  el('settings-btn').addEventListener('click', openSettings);
+  el('settings-overlay').addEventListener('click', closeSettings);
+  el('settings-close').addEventListener('click', closeSettings);
+  el('settings-theme-close').addEventListener('click', closeSettings);
+  el('settings-theme-back').addEventListener('click', () => {
+    el('settings-main').classList.remove('hidden');
+    el('settings-theme').classList.add('hidden');
+  });
+  el('settings-goto-theme').addEventListener('click', openThemePage);
+
+  el('settings-disable-themes').addEventListener('change', (e) => {
+    localStorage.setItem('hp_disable_themes', e.target.checked ? '1' : '0');
+    const headerU = el('header-username');
+    headerU.style.cssText = '';
+    if (!e.target.checked && currentUser && currentUser.nameTheme) {
+      applyNameTheme(headerU, currentUser.nameTheme);
+    }
+  });
+
+  el('color-mode-solid').addEventListener('click', () => { setColorMode('solid'); updateThemePreview(); });
+  el('color-mode-gradient').addEventListener('click', () => { setColorMode('gradient'); updateThemePreview(); });
+  el('color-solid-pick').addEventListener('input', (e) => { el('color-solid-hex').textContent = e.target.value; updateThemePreview(); });
+  el('color-grad-from').addEventListener('input', (e) => { el('color-grad-from-hex').textContent = e.target.value; updateThemePreview(); });
+  el('color-grad-to').addEventListener('input', (e) => { el('color-grad-to-hex').textContent = e.target.value; updateThemePreview(); });
+  el('gradient-angle').addEventListener('input', (e) => { el('gradient-angle-label').textContent = e.target.value + '°'; updateThemePreview(); });
+
+  el('glow-group').querySelectorAll('.theme-btn').forEach(b => b.addEventListener('click', () => {
+    el('glow-group').querySelectorAll('.theme-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active'); updateThemePreview();
+  }));
+  el('font-group').querySelectorAll('.theme-btn').forEach(b => b.addEventListener('click', () => {
+    el('font-group').querySelectorAll('.theme-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active'); updateThemePreview();
+  }));
+
+  el('theme-reset-btn').addEventListener('click', () => {
+    populateThemeEditor({ color: '#e05252', gradient: null, glow: 'none', font: 'default' });
+    updateThemePreview();
+  });
+
+  el('theme-save-btn').addEventListener('click', async () => {
+    const theme = buildThemeFromEditor();
+    el('theme-save-btn').disabled = true;
+    el('theme-save-status').textContent = '';
+    try {
+      const res = await fetch(`${API}/users/me/theme`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(theme),
+      });
+      if (!res.ok) throw new Error('Failed');
+      if (currentUser) currentUser.nameTheme = theme;
+      applyNameTheme(el('header-username'), theme);
+      el('theme-save-status').textContent = 'Saved!';
+      setTimeout(() => { el('theme-save-status').textContent = ''; }, 2000);
+    } catch {
+      el('theme-save-status').textContent = 'Error saving theme.';
+    } finally {
+      el('theme-save-btn').disabled = false;
+    }
+  });
+
   /* ── Utilities ───────────────────────────────────────────── */
   function el(id) { return document.getElementById(id); }
   function esc(s) {
@@ -1475,6 +1823,120 @@
   fetchEmotes();
   checkAuth();
 </script>
+
+<!-- Settings modal -->
+<div id="settings-overlay"></div>
+<div id="settings-panel">
+
+  <!-- Main settings page -->
+  <div id="settings-main">
+    <div class="settings-header">
+      <span class="settings-title">Settings</span>
+      <button class="settings-close" id="settings-close">✕</button>
+    </div>
+    <div class="settings-list">
+      <button class="settings-item" id="settings-goto-theme">
+        <span>Username Theme</span>
+        <span class="settings-chevron">›</span>
+      </button>
+      <div class="settings-item settings-toggle-row">
+        <span>Disable Name Effects</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settings-disable-themes">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme editor page -->
+  <div id="settings-theme" class="hidden">
+    <div class="settings-header">
+      <button class="settings-back" id="settings-theme-back">‹ Back</button>
+      <span class="settings-title">Username Theme</span>
+      <button class="settings-close" id="settings-theme-close">✕</button>
+    </div>
+    <div id="settings-theme-content">
+
+      <!-- Preview -->
+      <div class="theme-section">
+        <div class="theme-label">Preview</div>
+        <div id="theme-preview-wrap">
+          <span id="theme-preview-name">username</span>
+        </div>
+      </div>
+
+      <!-- Color mode -->
+      <div class="theme-section">
+        <div class="theme-label">Color</div>
+        <div class="theme-btn-group">
+          <button class="theme-btn active" id="color-mode-solid">Solid</button>
+          <button class="theme-btn" id="color-mode-gradient">Gradient</button>
+        </div>
+      </div>
+
+      <!-- Solid color picker -->
+      <div id="color-solid-row" class="theme-color-row">
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="color" id="color-solid-pick" value="#e05252">
+          <span class="color-hex-label" id="color-solid-hex">#e05252</span>
+        </div>
+      </div>
+
+      <!-- Gradient pickers -->
+      <div id="color-gradient-row" class="theme-color-row hidden">
+        <div class="gradient-pickers">
+          <div class="gradient-pick-group">
+            <input type="color" id="color-grad-from" value="#e05252">
+            <span class="color-hex-label" id="color-grad-from-hex">#e05252</span>
+          </div>
+          <span class="gradient-arrow">→</span>
+          <div class="gradient-pick-group">
+            <input type="color" id="color-grad-to" value="#5280e0">
+            <span class="color-hex-label" id="color-grad-to-hex">#5280e0</span>
+          </div>
+        </div>
+        <div class="gradient-angle-row">
+          <span class="theme-label-sm">Angle</span>
+          <input type="range" id="gradient-angle" min="0" max="360" value="135" step="15">
+          <span id="gradient-angle-label">135°</span>
+        </div>
+      </div>
+
+      <!-- Glow -->
+      <div class="theme-section">
+        <div class="theme-label">Glow</div>
+        <div class="theme-btn-group" id="glow-group">
+          <button class="theme-btn active" data-glow="none">None</button>
+          <button class="theme-btn" data-glow="soft">Soft</button>
+          <button class="theme-btn" data-glow="strong">Strong</button>
+          <button class="theme-btn" data-glow="neon">Neon</button>
+        </div>
+      </div>
+
+      <!-- Font style -->
+      <div class="theme-section">
+        <div class="theme-label">Font Style</div>
+        <div class="theme-btn-group" id="font-group">
+          <button class="theme-btn active" data-font="default">Default</button>
+          <button class="theme-btn" data-font="mono">Mono</button>
+          <button class="theme-btn" data-font="smallcaps">Small Caps</button>
+          <button class="theme-btn" data-font="wide">Wide</button>
+          <button class="theme-btn" data-font="italic">Italic</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="theme-actions">
+        <button id="theme-save-btn">Save Theme</button>
+        <button id="theme-reset-btn">Reset</button>
+      </div>
+      <div id="theme-save-status"></div>
+
+    </div>
+  </div>
+
+</div>
 
 <!-- Emote picker panel -->
 <div id="emote-picker">
