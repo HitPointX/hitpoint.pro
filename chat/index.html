@@ -156,15 +156,38 @@
     #input-form { display: none; padding: 7px 10px 8px; gap: 7px; align-items: flex-end; }
     #input-form.visible { display: flex; }
 
+    #input-wrap { flex: 1; position: relative; min-width: 0; }
+
     #msg-input {
-      flex: 1; resize: none; height: 36px; max-height: 90px;
+      width: 100%; resize: none; height: 36px; max-height: 90px;
       background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.09);
       border-radius: 6px; color: #e0e0f0; font-family: inherit; font-size: 13px;
-      padding: 8px 10px; outline: none; line-height: 1.4; overflow-y: hidden;
+      padding: 8px 34px 8px 10px; outline: none; line-height: 1.4; overflow-y: hidden;
       transition: border-color 0.15s;
     }
     #msg-input:focus { border-color: rgba(255,255,255,0.2); }
     #msg-input::placeholder { color: rgba(255,255,255,0.22); }
+
+    #emote-btn {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 2px;
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.22); opacity: 0; pointer-events: none;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    #emote-btn.visible { opacity: 1; pointer-events: auto; }
+    #emote-btn:hover { color: rgba(255,255,255,0.65); }
+    #emote-btn-icon { display: inline-flex; }
+    #emote-btn:hover #emote-btn-icon { animation: emoteGlitch 200ms steps(1) infinite; }
+    @keyframes emoteGlitch {
+      0%   { filter: drop-shadow(-2px 0 rgba(255,30,30,0.85))  drop-shadow(2px 0 rgba(0,220,255,0.85)); }
+      16%  { filter: drop-shadow(2px 1px rgba(255,0,110,0.8))  drop-shadow(-1px 0 rgba(0,255,160,0.8)); color: #ff5de8; }
+      33%  { filter: drop-shadow(-1px -1px rgba(50,0,255,0.75)) drop-shadow(2px 1px rgba(255,200,0,0.8)); color: #b06cff; }
+      50%  { filter: blur(0.4px) drop-shadow(2px 0 rgba(255,0,0,0.85)) drop-shadow(-2px 0 rgba(0,200,255,0.85)); }
+      66%  { filter: hue-rotate(-25deg) drop-shadow(0 2px rgba(180,0,255,0.75)) drop-shadow(1px -1px rgba(0,255,90,0.75)); color: #4dffd4; }
+      83%  { filter: drop-shadow(-2px 1px rgba(255,60,0,0.85)) drop-shadow(1px -1px rgba(0,220,255,0.85)); }
+      100% { filter: drop-shadow(-2px 0 rgba(255,30,30,0.85))  drop-shadow(2px 0 rgba(0,220,255,0.85)); }
+    }
 
     #send-btn {
       background: rgba(200,20,20,0.8); border: none; color: #fff;
@@ -179,6 +202,48 @@
       display: none; text-align: center; padding: 2px 12px 6px;
       font-size: 10px; color: rgba(255,180,50,0.6); letter-spacing: 0.3px;
     }
+
+    /* ── Emote picker ───────────────────────────────────────── */
+    #emote-picker {
+      position: fixed; z-index: 400; display: none;
+      width: 320px; height: 400px; background: #0a0a0a;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+      overflow: hidden; box-shadow: 0 -8px 40px rgba(0,0,0,0.75);
+    }
+    #emote-picker.visible { display: block; }
+    #emote-picker-inner { height: 100%; overflow-y: auto; padding: 10px 10px 14px; }
+    #emote-picker-inner::-webkit-scrollbar { width: 3px; }
+    #emote-picker-inner::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .epick-section-title {
+      font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,0.22); padding: 4px 2px 8px;
+    }
+    .epick-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 0 12px; }
+    .epick-grid { display: flex; flex-wrap: wrap; gap: 3px; }
+    .epick-emote {
+      width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+      border-radius: 5px; cursor: pointer; background: rgba(255,255,255,0.02);
+      transition: background 0.1s;
+    }
+    .epick-emote:hover { background: rgba(255,255,255,0.1); }
+    .epick-emote img { max-width: 32px; max-height: 32px; object-fit: contain; }
+    #epick-loading { font-size: 11px; color: rgba(255,255,255,0.2); text-align: center; padding: 30px; }
+
+    /* ── Emote autocomplete ──────────────────────────────────── */
+    #emote-autocomplete {
+      position: fixed; z-index: 401; display: none;
+      background: rgba(13,15,23,0.99); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 7px; overflow: hidden; box-shadow: 0 -4px 20px rgba(0,0,0,0.55);
+      min-width: 180px; max-width: 260px;
+    }
+    #emote-autocomplete.visible { display: block; }
+    .eac-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 10px; cursor: pointer; font-size: 12px; color: rgba(255,255,255,0.5);
+      transition: background 0.1s;
+    }
+    .eac-item:hover, .eac-item.selected { background: rgba(255,255,255,0.07); color: #fff; }
+    .eac-item img { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
 
     /* ── Modals ─────────────────────────────────────────────── */
     .modal-backdrop {
@@ -412,7 +477,12 @@
       <button class="ab-btn" id="open-register-btn">Register</button>
     </div>
     <form id="input-form" autocomplete="off">
-      <textarea id="msg-input" placeholder="Send a message…" rows="1" maxlength="500"></textarea>
+      <div id="input-wrap">
+        <textarea id="msg-input" placeholder="Send a message…" rows="1" maxlength="500"></textarea>
+        <button type="button" id="emote-btn" title="Emotes">
+          <span id="emote-btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><circle cx="5.8" cy="6.5" r="0.85" fill="currentColor"/><circle cx="10.2" cy="6.5" r="0.85" fill="currentColor"/><path d="M5.5 10c.7 1 4.3 1 5 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+        </button>
+      </div>
       <button type="submit" id="send-btn">SEND</button>
     </form>
   </div>
@@ -528,7 +598,8 @@
   let currentUser  = null;
   let ws           = null;
   let wsReconnect  = null;
-  let emotes       = {};        // name → CDN URL
+  let emotes       = {};        // name → image URL (built from manifest)
+  let emoteManifest = [];       // [{name, type, filename}]
   let autoScroll   = true;
   let slowActive   = false;
   let slowSecs     = 0;
@@ -542,22 +613,35 @@
   const ignoreList = new Set(JSON.parse(localStorage.getItem('hp_ignore') || '[]'));
   function saveIgnore() { localStorage.setItem('hp_ignore', JSON.stringify([...ignoreList])); }
 
-  /* ── 7TV Emotes ──────────────────────────────────────────── */
+  /* ── Emotes ──────────────────────────────────────────────── */
+  const EMOTE_CACHE_KEY = 'emotes_manifest';
+  const EMOTE_CACHE_TTL = 24 * 60 * 60 * 1000;
+
   async function fetchEmotes() {
     try {
-      const res = await fetch('https://7tv.io/v3/emote-sets/global');
-      if (!res.ok) return;
-      const data = await res.json();
-      for (const e of (data.emotes || [])) {
-        const file = e.data?.host?.files?.find(f => f.name === '1x.webp') || e.data?.host?.files?.[0];
-        if (file) emotes[e.name] = `https:${e.data.host.url}/${file.name}`;
+      const cached = JSON.parse(localStorage.getItem(EMOTE_CACHE_KEY) || 'null');
+      if (cached && Date.now() - cached.ts < EMOTE_CACHE_TTL) {
+        emoteManifest = cached.data; buildEmoteMap(); return;
       }
     } catch {}
+    try {
+      const res = await fetch(`${API}/emotes`);
+      if (!res.ok) return;
+      emoteManifest = await res.json();
+      localStorage.setItem(EMOTE_CACHE_KEY, JSON.stringify({ data: emoteManifest, ts: Date.now() }));
+      buildEmoteMap();
+      if (pickerPopulated) { pickerPopulated = false; populatePicker(); }
+    } catch {}
+  }
+
+  function buildEmoteMap() {
+    emotes = {};
+    for (const e of emoteManifest) emotes[e.name] = `${API}/emotes/file/${e.type}/${e.filename}`;
   }
 
   function parseEmotes(html) {
     return html.replace(/:([A-Za-z0-9_]+):/g, (match, name) => {
-      if (emotes[name]) return `<img class="emote" src="${emotes[name]}" alt=":${name}:" title=":${name}:">`;
+      if (emotes[name]) return `<img class="emote" src="${emotes[name]}" alt=":${name}:" title=":${name}:" loading="lazy">`;
       return match;
     });
   }
@@ -766,7 +850,11 @@
   /* ── Send ────────────────────────────────────────────────── */
   el('input-form').addEventListener('submit', (e) => { e.preventDefault(); sendMessage(); });
   el('msg-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      if (el('emote-autocomplete').classList.contains('visible') && acIndex >= 0) return;
+      hideAutocomplete();
+      e.preventDefault(); sendMessage();
+    }
   });
   el('msg-input').addEventListener('input', () => {
     const t = el('msg-input');
@@ -1114,6 +1202,154 @@
     } catch {}
   }
 
+  /* ── Emote picker ────────────────────────────────────────── */
+  let pickerOpen      = false;
+  let pickerPopulated = false;
+
+  function positionPicker() {
+    const picker   = el('emote-picker');
+    const inputRect = el('input-area').getBoundingClientRect();
+    picker.style.bottom = (window.innerHeight - inputRect.top + 6) + 'px';
+    picker.style.right  = '10px';
+    picker.style.left   = 'auto';
+  }
+
+  function openPicker() {
+    positionPicker();
+    el('emote-picker').classList.add('visible');
+    pickerOpen = true;
+    if (!pickerPopulated && emoteManifest.length) populatePicker();
+  }
+
+  function closePicker() {
+    el('emote-picker').classList.remove('visible');
+    pickerOpen = false;
+  }
+
+  function populatePicker() {
+    const staticGrid = el('epick-static');
+    const animGrid   = el('epick-animated');
+    const loading    = el('epick-loading');
+    staticGrid.innerHTML = ''; animGrid.innerHTML = '';
+    loading.style.display = 'none';
+    for (const e of emoteManifest) {
+      const div = document.createElement('div');
+      div.className = 'epick-emote'; div.title = e.name;
+      const img = document.createElement('img');
+      img.loading = 'lazy'; img.alt = e.name;
+      img.src = `${API}/emotes/file/${e.type}/${e.filename}`;
+      div.appendChild(img);
+      div.addEventListener('click', () => insertEmote(e.name));
+      (e.type === 'animated' ? animGrid : staticGrid).appendChild(div);
+    }
+    pickerPopulated = true;
+  }
+
+  function insertEmote(name) {
+    const inp   = el('msg-input');
+    const start = inp.selectionStart, end = inp.selectionEnd;
+    const ins   = `:${name}: `;
+    inp.value   = inp.value.slice(0, start) + ins + inp.value.slice(end);
+    const pos   = start + ins.length;
+    inp.setSelectionRange(pos, pos);
+    inp.focus();
+    inp.dispatchEvent(new Event('input'));
+  }
+
+  el('emote-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    pickerOpen ? closePicker() : openPicker();
+  });
+
+  el('msg-input').addEventListener('focus', () => el('emote-btn').classList.add('visible'));
+  el('msg-input').addEventListener('blur', () => {
+    setTimeout(() => { if (!pickerOpen) el('emote-btn').classList.remove('visible'); }, 150);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#emote-picker') && !e.target.closest('#emote-btn')) closePicker();
+  });
+
+  /* ── Emote autocomplete ───────────────────────────────────── */
+  let acIndex = -1;
+
+  function getEmoteQuery() {
+    const inp    = el('msg-input');
+    const before = inp.value.slice(0, inp.selectionStart);
+    const match  = before.match(/:([A-Za-z0-9_]{2,})$/);
+    return match ? { query: match[1], colonStart: inp.selectionStart - match[0].length } : null;
+  }
+
+  function showAutocomplete(items, colonStart) {
+    const ac = el('emote-autocomplete');
+    ac.innerHTML = ''; acIndex = -1;
+    if (!items.length) { ac.classList.remove('visible'); return; }
+    items.slice(0, 8).forEach(e => {
+      const div  = document.createElement('div');
+      div.className = 'eac-item';
+      const img  = document.createElement('img');
+      img.src = `${API}/emotes/file/${e.type}/${e.filename}`; img.alt = ''; img.loading = 'lazy';
+      const span = document.createElement('span');
+      span.textContent = `:${e.name}:`;
+      div.appendChild(img); div.appendChild(span);
+      div.addEventListener('mousedown', ev => { ev.preventDefault(); completeEmote(e.name, colonStart); });
+      ac.appendChild(div);
+    });
+    const rect = el('msg-input').getBoundingClientRect();
+    ac.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+    ac.style.left   = rect.left + 'px';
+    ac.classList.add('visible');
+  }
+
+  function hideAutocomplete() { el('emote-autocomplete').classList.remove('visible'); acIndex = -1; }
+
+  function completeEmote(name, colonStart) {
+    const inp    = el('msg-input');
+    const ins    = `:${name}: `;
+    inp.value    = inp.value.slice(0, colonStart) + ins + inp.value.slice(inp.selectionStart);
+    const pos    = colonStart + ins.length;
+    inp.setSelectionRange(pos, pos);
+    inp.focus(); hideAutocomplete();
+    inp.dispatchEvent(new Event('input'));
+  }
+
+  el('msg-input').addEventListener('input', () => {
+    const q = getEmoteQuery();
+    if (!q || !emoteManifest.length) { hideAutocomplete(); return; }
+    const lower   = q.query.toLowerCase();
+    const matches = emoteManifest.filter(e => e.name.toLowerCase().startsWith(lower));
+    if (matches.length) showAutocomplete(matches, q.colonStart); else hideAutocomplete();
+  });
+
+  el('msg-input').addEventListener('keydown', (e) => {
+    const ac    = el('emote-autocomplete');
+    if (!ac.classList.contains('visible')) return;
+    const items = ac.querySelectorAll('.eac-item');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      acIndex = Math.min(acIndex + 1, items.length - 1);
+      items.forEach((it, i) => it.classList.toggle('selected', i === acIndex));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      acIndex = Math.max(acIndex - 1, 0);
+      items.forEach((it, i) => it.classList.toggle('selected', i === acIndex));
+    } else if (e.key === 'Tab' || (e.key === 'Enter' && acIndex >= 0)) {
+      e.preventDefault();
+      const q = getEmoteQuery();
+      if (q) {
+        const item = items[Math.max(acIndex, 0)];
+        const name = item?.querySelector('span')?.textContent?.slice(1, -1);
+        if (name) completeEmote(name, q.colonStart);
+      }
+    } else if (e.key === 'Escape') {
+      hideAutocomplete();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#emote-autocomplete') && !e.target.closest('#msg-input')) hideAutocomplete();
+  });
+
   /* ── Modal helpers ───────────────────────────────────────── */
   function openModal(id)  { el(id).classList.add('visible'); }
   function closeModal(id) { el(id).classList.remove('visible'); }
@@ -1209,6 +1445,21 @@
   fetchEmotes();
   checkAuth();
 </script>
+
+<!-- Emote picker panel -->
+<div id="emote-picker">
+  <div id="emote-picker-inner">
+    <div class="epick-section-title">Emotes</div>
+    <div id="epick-static" class="epick-grid"></div>
+    <div class="epick-divider"></div>
+    <div class="epick-section-title">Animated</div>
+    <div id="epick-animated" class="epick-grid"></div>
+    <div id="epick-loading">Loading emotes…</div>
+  </div>
+</div>
+
+<!-- Emote autocomplete -->
+<div id="emote-autocomplete"></div>
 
 </body>
 </html>
