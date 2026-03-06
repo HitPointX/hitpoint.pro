@@ -289,20 +289,20 @@
     @media (max-width: 860px) {
       body { overflow-y: auto; }
       html, body, #page { height: auto; min-height: 100vh; }
-      #content-area { flex-direction: column; overflow: visible; }
-      #player-col { background: transparent; align-items: stretch; }
+      #content-area { flex-direction: column; overflow: visible; flex: 1; min-height: 0; }
+      #player-col { background: transparent; align-items: stretch; flex: 0 0 auto; justify-content: flex-start; }
       #mobile-tabs { width: 100%; }
       #player-wrap { aspect-ratio: 16/9; height: auto; max-height: none; }
       #stream-video { height: auto; }
       #mobile-tabs { display: flex; }
       #chat-col {
-        width: 100% !important; height: 420px;
+        width: 100% !important; flex: 1; height: auto; min-height: 260px;
         border-left: none; border-top: 1px solid rgba(255,255,255,0.06);
         display: none;
       }
       #chat-col.tab-active { display: flex; }
       #chat-resize-handle { display: none; pointer-events: none; }
-      #page { overflow: visible; }
+      #page { overflow: visible; display: flex; flex-direction: column; min-height: 100vh; }
     }
   </style>
 </head>
