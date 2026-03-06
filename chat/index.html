@@ -2506,6 +2506,7 @@
   function openSecurityPage() {
     el('settings-main').classList.add('hidden');
     el('settings-security').classList.remove('hidden');
+    el('settings-security-content').scrollTop = 0;
     resetSecurityForms();
     const enabled = currentUser && currentUser.totp_enabled;
     showSecState(enabled ? 'sec-enabled' : 'sec-disabled');
