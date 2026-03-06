@@ -1631,6 +1631,54 @@
     if (!e.target.closest('#slow-mode-wrap')) el('slow-panel').classList.remove('visible');
   });
 
+  /* ── Color readability helpers ───────────────────────────── */
+  // Minimum contrast ratio against the dark chat background (~#0d0f14, lum≈0.003)
+  const _BG_LUM = 0.003;
+  const _MIN_CONTRAST = 4.0;
+
+  function _srgbLin(c) { return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+  function _hexLum(hex) {
+    const r = _srgbLin(parseInt(hex.slice(1,3),16)/255);
+    const g = _srgbLin(parseInt(hex.slice(3,5),16)/255);
+    const b = _srgbLin(parseInt(hex.slice(5,7),16)/255);
+    return 0.2126*r + 0.7152*g + 0.0722*b;
+  }
+  function _contrast(lum) { return (Math.max(lum,_BG_LUM)+0.05) / (Math.min(lum,_BG_LUM)+0.05); }
+  function _hexToHsl(hex) {
+    let r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, b=parseInt(hex.slice(5,7),16)/255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b); let h=0,s,l=(mx+mn)/2;
+    if (mx===mn) { s=0; } else {
+      const d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn);
+      if (mx===r) h=((g-b)/d+(g<b?6:0))/6;
+      else if (mx===g) h=((b-r)/d+2)/6;
+      else h=((r-g)/d+4)/6;
+    }
+    return [h*360, s*100, l*100];
+  }
+  function _hslToHex(h,s,l) {
+    h/=360; s/=100; l/=100;
+    const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
+    const hue=(t)=>{ if(t<0)t+=1; if(t>1)t-=1; if(t<1/6)return p+(q-p)*6*t; if(t<1/2)return q; if(t<2/3)return p+(q-p)*(2/3-t)*6; return p; };
+    return '#'+[hue(h+1/3),hue(h),hue(h-1/3)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');
+  }
+  // Returns the same hue/saturation but with lightness bumped just enough to pass contrast
+  function enforceReadable(hex) {
+    if (_contrast(_hexLum(hex)) >= _MIN_CONTRAST) return hex;
+    const [h,s,l] = _hexToHsl(hex);
+    for (let nl=Math.max(l,30); nl<=96; nl++) {
+      const c = _hslToHex(h, s, nl);
+      if (_contrast(_hexLum(c)) >= _MIN_CONTRAST) return c;
+    }
+    return '#e0e0e0';
+  }
+  // Sets a color input + hex label, enforcing readability; returns the safe hex
+  function setColorInput(inputId, hexLabelId, hex) {
+    const safe = enforceReadable(hex);
+    el(inputId).value = safe;
+    el(hexLabelId).textContent = safe;
+    return safe;
+  }
+
   /* ── Name theme application ──────────────────────────────── */
   function applyNameTheme(spanEl, theme) {
     spanEl.style.cssText = '';
@@ -1703,17 +1751,13 @@
   function populateThemeEditor(t) {
     if (t.gradient) {
       setColorMode('gradient');
-      el('color-grad-from').value = t.gradient.from || '#e05252';
-      el('color-grad-to').value   = t.gradient.to   || '#5280e0';
-      el('gradient-angle').value  = t.gradient.angle ?? 135;
-      el('color-grad-from-hex').textContent = t.gradient.from || '#e05252';
-      el('color-grad-to-hex').textContent   = t.gradient.to   || '#5280e0';
+      setColorInput('color-grad-from', 'color-grad-from-hex', t.gradient.from || '#e05252');
+      setColorInput('color-grad-to',   'color-grad-to-hex',   t.gradient.to   || '#5280e0');
+      el('gradient-angle').value = t.gradient.angle ?? 135;
       el('gradient-angle-label').textContent = (t.gradient.angle ?? 135) + '°';
     } else {
       setColorMode('solid');
-      const c = t.color || '#e05252';
-      el('color-solid-pick').value = c;
-      el('color-solid-hex').textContent = c;
+      setColorInput('color-solid-pick', 'color-solid-hex', t.color || '#e05252');
     }
     el('glow-group').querySelectorAll('.theme-btn').forEach(b =>
       b.classList.toggle('active', b.dataset.glow === (t.glow || 'none')));
@@ -1765,9 +1809,9 @@
 
   el('color-mode-solid').addEventListener('click', () => { setColorMode('solid'); updateThemePreview(); });
   el('color-mode-gradient').addEventListener('click', () => { setColorMode('gradient'); updateThemePreview(); });
-  el('color-solid-pick').addEventListener('input', (e) => { el('color-solid-hex').textContent = e.target.value; updateThemePreview(); });
-  el('color-grad-from').addEventListener('input', (e) => { el('color-grad-from-hex').textContent = e.target.value; updateThemePreview(); });
-  el('color-grad-to').addEventListener('input', (e) => { el('color-grad-to-hex').textContent = e.target.value; updateThemePreview(); });
+  el('color-solid-pick').addEventListener('input', (e) => { setColorInput('color-solid-pick','color-solid-hex', e.target.value); updateThemePreview(); });
+  el('color-grad-from').addEventListener('input', (e) => { setColorInput('color-grad-from','color-grad-from-hex', e.target.value); updateThemePreview(); });
+  el('color-grad-to').addEventListener('input', (e) => { setColorInput('color-grad-to','color-grad-to-hex', e.target.value); updateThemePreview(); });
   el('gradient-angle').addEventListener('input', (e) => { el('gradient-angle-label').textContent = e.target.value + '°'; updateThemePreview(); });
 
   el('glow-group').querySelectorAll('.theme-btn').forEach(b => b.addEventListener('click', () => {
