@@ -590,6 +590,133 @@
       font-size: 10px; text-align: center; color: rgba(255,255,255,0.32); min-height: 14px;
     }
 
+    /* ── Security / 2FA panel ───────────────────────────────── */
+    #settings-security-content {
+      padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 13px;
+      max-height: 72vh; overflow-y: auto;
+    }
+    #settings-security-content::-webkit-scrollbar { width: 2px; }
+    #settings-security-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+    .sec-heading {
+      font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 4px;
+    }
+    .sec-desc {
+      font-size: 11px; color: rgba(255,255,255,0.38); line-height: 1.55;
+    }
+    .sec-step-label {
+      font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(200,20,20,0.7); margin-bottom: 2px;
+    }
+    .sec-badge-enabled {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; font-weight: 700; color: #3ddd88;
+      background: rgba(20,160,80,0.1); border: 1px solid rgba(20,160,80,0.2);
+      border-radius: 6px; padding: 9px 12px;
+    }
+    .sec-spinner {
+      width: 22px; height: 22px; border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: rgba(255,255,255,0.4); border-radius: 50%;
+      animation: secSpin 0.7s linear infinite; margin: 16px auto;
+    }
+    @keyframes secSpin { to { transform: rotate(360deg); } }
+    .sec-btn-primary {
+      width: 100%; background: rgba(200,20,20,0.22); border: 1px solid rgba(200,20,20,0.38);
+      color: #ff8090; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+      padding: 9px 0; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    .sec-btn-primary:hover:not(:disabled) { background: rgba(200,20,20,0.38); color: #ffaab8; }
+    .sec-btn-primary:disabled { opacity: 0.45; cursor: default; }
+    .sec-btn-secondary {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      padding: 9px 0; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    .sec-btn-secondary:hover:not(:disabled) { color: #fff; border-color: rgba(255,255,255,0.22); }
+    .sec-btn-secondary:disabled { opacity: 0.45; cursor: default; }
+    .sec-btn-danger {
+      width: 100%; background: rgba(255,50,50,0.08); border: 1px solid rgba(255,50,50,0.2);
+      color: rgba(255,100,100,0.7); font-size: 10px; font-weight: 800; letter-spacing: 1px;
+      padding: 9px 0; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    .sec-btn-danger:hover:not(:disabled) { background: rgba(255,50,50,0.18); color: #ff6070; }
+    .sec-btn-danger:disabled { opacity: 0.45; cursor: default; }
+    .sec-btn-row { display: flex; gap: 7px; }
+    .sec-btn-row .btn-ghost {
+      flex: 0 0 auto; padding: 8px 14px; font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .sec-btn-row .sec-btn-primary { flex: 1; padding: 8px 0; }
+    .sec-err {
+      font-size: 11px; color: #ff6070; min-height: 14px;
+    }
+    .sec-code-input {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; font-size: 22px; font-weight: 700; text-align: center;
+      letter-spacing: 8px; padding: 10px 12px; border-radius: 6px; outline: none;
+      font-family: monospace; transition: border-color 0.15s;
+    }
+    .sec-code-input:focus { border-color: rgba(200,20,20,0.5); }
+    .sec-code-input::placeholder { font-size: 14px; letter-spacing: 4px; color: rgba(255,255,255,0.18); }
+    #sec-qr-wrap {
+      display: flex; justify-content: center;
+      background: #fff; border-radius: 8px; padding: 10px; width: fit-content; margin: 0 auto;
+    }
+    #sec-qr-img { width: 180px; height: 180px; display: block; }
+    .sec-secret-label {
+      font-size: 10px; color: rgba(255,255,255,0.32); text-align: center;
+    }
+    #sec-secret-display {
+      font-family: monospace; font-size: 13px; font-weight: 700;
+      color: rgba(255,255,255,0.7); letter-spacing: 3px; text-align: center;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 5px; padding: 8px 10px; word-break: break-all;
+    }
+    .sec-warning-banner {
+      background: rgba(220,160,0,0.1); border: 1px solid rgba(220,160,0,0.25);
+      border-radius: 6px; padding: 10px 12px;
+      font-size: 11px; color: rgba(255,210,80,0.85); line-height: 1.55;
+    }
+    .sec-codes-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px;
+    }
+    .sec-backup-code {
+      font-family: monospace; font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 4px;
+      padding: 5px 8px; text-align: center; letter-spacing: 1px;
+    }
+    .sec-backup-actions { display: flex; gap: 7px; }
+    .sec-backup-actions button {
+      flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+      color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      padding: 7px 0; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    .sec-backup-actions button:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
+    .sec-confirm-label {
+      display: flex; align-items: flex-start; gap: 9px;
+      font-size: 11px; color: rgba(255,255,255,0.5); cursor: pointer; line-height: 1.4;
+    }
+    .sec-confirm-label input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; accent-color: #ff6070; }
+    /* 2FA login step */
+    .login-2fa-note {
+      font-size: 11px; color: rgba(255,255,255,0.38); text-align: center;
+      line-height: 1.5; margin-bottom: 4px;
+    }
+    .login-2fa-title {
+      font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.8);
+      text-align: center; margin-bottom: 8px;
+    }
+    #login-2fa-backup-toggle {
+      font-size: 11px; color: rgba(255,255,255,0.3); text-align: center;
+      cursor: pointer; transition: color 0.15s; margin-top: -4px;
+    }
+    #login-2fa-backup-toggle:hover { color: rgba(255,255,255,0.6); }
+
     /* ── Misc ───────────────────────────────────────────────── */
     .hidden { display: none !important; }
   </style>
@@ -708,21 +835,40 @@
 <div class="modal-backdrop" id="login-backdrop">
   <div class="modal">
     <div class="modal-title">Login</div>
-    <div class="modal-field">
-      <label>Username</label>
-      <input type="text" id="login-username" autocomplete="username">
+
+    <!-- Step 1: credentials -->
+    <div id="login-main-fields">
+      <div class="modal-field">
+        <label>Username</label>
+        <input type="text" id="login-username" autocomplete="username">
+      </div>
+      <div class="modal-field">
+        <label>Password</label>
+        <input type="password" id="login-password" autocomplete="current-password">
+      </div>
+      <div class="modal-err" id="login-err"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="login-cancel-btn">Cancel</button>
+        <button class="btn-primary" id="login-submit-btn">Login</button>
+      </div>
+      <button class="modal-link" id="forgot-link-btn">Forgot password?</button>
+      <button class="modal-link" id="goto-register-btn">Don't have an account? Register</button>
     </div>
-    <div class="modal-field">
-      <label>Password</label>
-      <input type="password" id="login-password" autocomplete="current-password">
+
+    <!-- Step 2: 2FA code (shown when requires2fa) -->
+    <div id="login-2fa-step" class="hidden">
+      <div class="login-2fa-title">Two-Factor Authentication</div>
+      <div class="login-2fa-note">Enter the 6-digit code from your authenticator app.</div>
+      <input type="text" id="login-2fa-code" inputmode="numeric" maxlength="6"
+             placeholder="000000" autocomplete="one-time-code" class="sec-code-input">
+      <div id="login-2fa-backup-toggle">Use a backup code instead</div>
+      <div class="modal-err" id="login-2fa-err"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="login-2fa-cancel-btn">Cancel</button>
+        <button class="btn-primary" id="login-2fa-submit-btn">Verify</button>
+      </div>
     </div>
-    <div class="modal-err" id="login-err"></div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="login-cancel-btn">Cancel</button>
-      <button class="btn-primary" id="login-submit-btn">Login</button>
-    </div>
-    <button class="modal-link" id="forgot-link-btn">Forgot password?</button>
-    <button class="modal-link" id="goto-register-btn">Don't have an account? Register</button>
+
   </div>
 </div>
 
@@ -782,6 +928,10 @@
     <div class="settings-list">
       <button class="settings-item" id="settings-goto-theme">
         <span>Username Theme</span>
+        <span class="settings-chevron">›</span>
+      </button>
+      <button class="settings-item" id="settings-goto-security">
+        <span>Security</span>
         <span class="settings-chevron">›</span>
       </button>
       <div class="settings-item settings-toggle-row">
@@ -876,6 +1026,93 @@
         <button id="theme-reset-btn">Reset</button>
       </div>
       <div id="theme-save-status"></div>
+
+    </div>
+  </div>
+
+  <!-- Security page -->
+  <div id="settings-security" class="hidden">
+    <div class="settings-header">
+      <button class="settings-back" id="settings-security-back">‹ Back</button>
+      <span class="settings-title">Security</span>
+      <button class="settings-close" id="settings-security-close">✕</button>
+    </div>
+    <div id="settings-security-content">
+
+      <!-- Loading -->
+      <div id="sec-loading" class="hidden">
+        <div class="sec-spinner"></div>
+      </div>
+
+      <!-- 2FA disabled -->
+      <div id="sec-disabled" class="hidden">
+        <div class="sec-heading">Two-Factor Authentication</div>
+        <div class="sec-desc">Add an extra layer of security to your account. Once enabled, you'll need your authenticator app every time you log in.</div>
+        <button class="sec-btn-primary" id="sec-enable-btn">Enable 2FA</button>
+      </div>
+
+      <!-- 2FA enabled -->
+      <div id="sec-enabled" class="hidden">
+        <div class="sec-badge-enabled">✓ &nbsp;Two-Factor Authentication is enabled</div>
+        <button class="sec-btn-secondary" id="sec-regen-btn">View / Regenerate Backup Codes</button>
+        <button class="sec-btn-danger" id="sec-disable-btn">Disable 2FA</button>
+      </div>
+
+      <!-- Setup step 1: QR code -->
+      <div id="sec-setup-1" class="hidden">
+        <div class="sec-step-label">Step 1 of 2</div>
+        <div class="sec-heading">Scan QR Code</div>
+        <div class="sec-desc">Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</div>
+        <div id="sec-qr-wrap"><img id="sec-qr-img" alt="QR Code" width="180" height="180"></div>
+        <div class="sec-secret-label">Can't scan? Enter this code manually:</div>
+        <div id="sec-secret-display"></div>
+        <div class="sec-btn-row">
+          <button class="btn-ghost" id="sec-setup1-cancel">Cancel</button>
+          <button class="sec-btn-primary" id="sec-setup1-next">Next →</button>
+        </div>
+      </div>
+
+      <!-- Setup step 2: verify -->
+      <div id="sec-setup-2" class="hidden">
+        <div class="sec-step-label">Step 2 of 2</div>
+        <div class="sec-heading">Confirm Code</div>
+        <div class="sec-desc">Enter the 6-digit code from your authenticator app to confirm setup.</div>
+        <input type="text" id="sec-verify-code" inputmode="numeric" maxlength="6"
+               placeholder="000000" autocomplete="one-time-code" class="sec-code-input">
+        <div class="sec-err" id="sec-verify-err"></div>
+        <div class="sec-btn-row">
+          <button class="btn-ghost" id="sec-setup2-back">‹ Back</button>
+          <button class="sec-btn-primary" id="sec-setup2-verify">Verify &amp; Enable</button>
+        </div>
+      </div>
+
+      <!-- Step 3: backup codes -->
+      <div id="sec-setup-3" class="hidden">
+        <div class="sec-warning-banner">⚠ Save these backup codes somewhere safe. Each code can only be used once. If you lose access to your authenticator app and have no backup codes, you will be locked out of your account.</div>
+        <div id="sec-backup-codes" class="sec-codes-grid"></div>
+        <div class="sec-backup-actions">
+          <button id="sec-copy-codes">Copy All</button>
+          <button id="sec-download-codes">Download .txt</button>
+        </div>
+        <label class="sec-confirm-label">
+          <input type="checkbox" id="sec-saved-check">
+          <span>I have saved my backup codes</span>
+        </label>
+        <button class="sec-btn-primary" id="sec-done-btn" disabled>Done</button>
+      </div>
+
+      <!-- Disable confirmation -->
+      <div id="sec-disable-confirm" class="hidden">
+        <div class="sec-heading">Disable Two-Factor Authentication?</div>
+        <div class="sec-desc">Your account will only be protected by your password.</div>
+        <input type="text" id="sec-disable-code" inputmode="numeric" maxlength="6"
+               placeholder="000000" autocomplete="one-time-code" class="sec-code-input">
+        <div class="sec-err" id="sec-disable-err"></div>
+        <div class="sec-btn-row">
+          <button class="btn-ghost" id="sec-disable-cancel">Cancel</button>
+          <button class="sec-btn-danger" id="sec-disable-confirm-btn">Confirm Disable</button>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -1012,7 +1249,9 @@
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || data.message || 'Login failed');
+    if (data.requires2fa) return { requires2fa: true, tempToken: data.tempToken };
     currentUser = data.user || data;
+    return null;
   }
 
   async function doRegister(username, email, password) {
@@ -1708,7 +1947,20 @@
     if (!username || !password) { el('login-err').textContent = 'Fill in all fields.'; return; }
     el('login-submit-btn').disabled = true;
     try {
-      await doLogin(username, password);
+      const result = await doLogin(username, password);
+      if (result && result.requires2fa) {
+        _login2faTempToken = result.tempToken;
+        _login2faBackupMode = false;
+        el('login-main-fields').classList.add('hidden');
+        el('login-2fa-step').classList.remove('hidden');
+        el('login-2fa-code').maxLength = 6;
+        el('login-2fa-code').placeholder = '000000';
+        el('login-2fa-backup-toggle').textContent = 'Use a backup code instead';
+        el('login-2fa-code').value = '';
+        el('login-2fa-err').textContent = '';
+        el('login-2fa-code').focus();
+        return;
+      }
       closeModal('login-backdrop');
       el('login-username').value = ''; el('login-password').value = '';
       onLoggedIn();
@@ -1717,6 +1969,60 @@
     } finally { el('login-submit-btn').disabled = false; }
   });
   el('login-password').addEventListener('keydown', (e) => { if (e.key === 'Enter') el('login-submit-btn').click(); });
+
+  /* ── Login 2FA step ──────────────────────────────────────── */
+  let _login2faTempToken = null;
+  let _login2faBackupMode = false;
+
+  el('login-2fa-backup-toggle').addEventListener('click', () => {
+    _login2faBackupMode = !_login2faBackupMode;
+    if (_login2faBackupMode) {
+      el('login-2fa-code').maxLength = 20;
+      el('login-2fa-code').placeholder = 'backup code';
+      el('login-2fa-backup-toggle').textContent = 'Use authenticator code instead';
+    } else {
+      el('login-2fa-code').maxLength = 6;
+      el('login-2fa-code').placeholder = '000000';
+      el('login-2fa-backup-toggle').textContent = 'Use a backup code instead';
+    }
+    el('login-2fa-code').value = ''; el('login-2fa-code').focus();
+  });
+
+  el('login-2fa-submit-btn').addEventListener('click', async () => {
+    const code = el('login-2fa-code').value.trim();
+    el('login-2fa-err').textContent = '';
+    if (!code) { el('login-2fa-err').textContent = 'Enter your code.'; return; }
+    el('login-2fa-submit-btn').disabled = true;
+    try {
+      const body = _login2faBackupMode
+        ? { tempToken: _login2faTempToken, backupCode: code }
+        : { tempToken: _login2faTempToken, token: code };
+      const res = await fetch(`${API}/auth/2fa/validate`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid code');
+      currentUser = data.user || data;
+      el('login-main-fields').classList.remove('hidden');
+      el('login-2fa-step').classList.add('hidden');
+      _login2faTempToken = null; _login2faBackupMode = false;
+      closeModal('login-backdrop');
+      el('login-username').value = ''; el('login-password').value = '';
+      onLoggedIn();
+    } catch (err) {
+      el('login-2fa-err').textContent = err.message || 'Invalid code.';
+    } finally { el('login-2fa-submit-btn').disabled = false; }
+  });
+  el('login-2fa-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') el('login-2fa-submit-btn').click(); });
+
+  el('login-2fa-cancel-btn').addEventListener('click', () => {
+    el('login-main-fields').classList.remove('hidden');
+    el('login-2fa-step').classList.add('hidden');
+    _login2faTempToken = null; _login2faBackupMode = false;
+    el('login-2fa-err').textContent = '';
+  });
 
   // Register
   el('open-register-btn').addEventListener('click', () => openModal('register-backdrop'));
@@ -1986,6 +2292,155 @@
       el('theme-save-btn').disabled = false;
     }
   });
+
+  /* ── Settings → Security / 2FA ──────────────────────────── */
+  let _secBackupCodes = [];
+
+  function showSecState(id) {
+    ['sec-loading','sec-disabled','sec-enabled','sec-setup-1','sec-setup-2','sec-setup-3','sec-disable-confirm']
+      .forEach(s => el(s).classList.add('hidden'));
+    el(id).classList.remove('hidden');
+  }
+
+  function openSecurityPage() {
+    el('settings-main').classList.add('hidden');
+    el('settings-security').classList.remove('hidden');
+    const enabled = currentUser && currentUser.totp_enabled;
+    showSecState(enabled ? 'sec-enabled' : 'sec-disabled');
+  }
+
+  el('settings-goto-security').addEventListener('click', openSecurityPage);
+  el('settings-security-back').addEventListener('click', () => {
+    el('settings-security').classList.add('hidden');
+    el('settings-main').classList.remove('hidden');
+  });
+  el('settings-security-close').addEventListener('click', closeSettings);
+
+  // Enable 2FA — step 1
+  el('sec-enable-btn').addEventListener('click', async () => {
+    el('sec-enable-btn').disabled = true;
+    showSecState('sec-loading');
+    try {
+      const res = await fetch(`${API}/auth/2fa/setup`, { method: 'POST', credentials: 'include' });
+      if (!res.ok) throw new Error('Setup failed');
+      const data = await res.json();
+      const encoded = encodeURIComponent(data.otpauthUrl);
+      el('sec-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?data=${encoded}&size=200x200`;
+      el('sec-secret-display').textContent = (data.secret || '').replace(/(.{4})/g, '$1 ').trim();
+      showSecState('sec-setup-1');
+    } catch {
+      showSecState('sec-disabled');
+    } finally { el('sec-enable-btn').disabled = false; }
+  });
+
+  el('sec-setup1-cancel').addEventListener('click', () => showSecState('sec-disabled'));
+  el('sec-setup1-next').addEventListener('click', () => {
+    el('sec-verify-code').value = '';
+    el('sec-verify-err').textContent = '';
+    showSecState('sec-setup-2');
+    setTimeout(() => el('sec-verify-code').focus(), 50);
+  });
+  el('sec-setup2-back').addEventListener('click', () => showSecState('sec-setup-1'));
+
+  el('sec-setup2-verify').addEventListener('click', async () => {
+    const token = el('sec-verify-code').value.trim();
+    if (token.length < 6) { el('sec-verify-err').textContent = 'Enter a 6-digit code.'; return; }
+    el('sec-setup2-verify').disabled = true;
+    el('sec-verify-err').textContent = '';
+    try {
+      const res = await fetch(`${API}/auth/2fa/verify`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid code');
+      _secBackupCodes = data.backupCodes || [];
+      renderSecBackupCodes(_secBackupCodes);
+      el('sec-saved-check').checked = false;
+      el('sec-done-btn').disabled = true;
+      showSecState('sec-setup-3');
+    } catch (err) {
+      el('sec-verify-err').textContent = err.message || 'Invalid code, try again.';
+    } finally { el('sec-setup2-verify').disabled = false; }
+  });
+  el('sec-verify-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') el('sec-setup2-verify').click(); });
+
+  function renderSecBackupCodes(codes) {
+    const grid = el('sec-backup-codes');
+    grid.innerHTML = '';
+    codes.forEach(c => {
+      const span = document.createElement('span');
+      span.className = 'sec-backup-code';
+      span.textContent = c;
+      grid.appendChild(span);
+    });
+  }
+
+  el('sec-copy-codes').addEventListener('click', () => {
+    navigator.clipboard.writeText(_secBackupCodes.join('\n')).then(() => {
+      el('sec-copy-codes').textContent = 'Copied!';
+      setTimeout(() => { el('sec-copy-codes').textContent = 'Copy All'; }, 2000);
+    });
+  });
+  el('sec-download-codes').addEventListener('click', () => {
+    const blob = new Blob(['hitpoint.pro backup codes\n\n' + _secBackupCodes.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'hitpoint-backup-codes.txt'; a.click();
+    URL.revokeObjectURL(url);
+  });
+  el('sec-saved-check').addEventListener('change', (e) => { el('sec-done-btn').disabled = !e.target.checked; });
+  el('sec-done-btn').addEventListener('click', () => {
+    if (currentUser) currentUser.totp_enabled = true;
+    closeSettings();
+  });
+
+  // Regenerate backup codes
+  el('sec-regen-btn').addEventListener('click', async () => {
+    el('sec-regen-btn').disabled = true;
+    showSecState('sec-loading');
+    try {
+      const res = await fetch(`${API}/auth/2fa/backup-codes/regenerate`, { method: 'POST', credentials: 'include' });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      _secBackupCodes = data.backupCodes || [];
+      renderSecBackupCodes(_secBackupCodes);
+      el('sec-saved-check').checked = false;
+      el('sec-done-btn').disabled = true;
+      showSecState('sec-setup-3');
+    } catch { showSecState('sec-enabled'); }
+    finally { el('sec-regen-btn').disabled = false; }
+  });
+
+  // Disable 2FA
+  el('sec-disable-btn').addEventListener('click', () => {
+    el('sec-disable-code').value = '';
+    el('sec-disable-err').textContent = '';
+    showSecState('sec-disable-confirm');
+    setTimeout(() => el('sec-disable-code').focus(), 50);
+  });
+  el('sec-disable-cancel').addEventListener('click', () => showSecState('sec-enabled'));
+  el('sec-disable-confirm-btn').addEventListener('click', async () => {
+    const token = el('sec-disable-code').value.trim();
+    if (!token) { el('sec-disable-err').textContent = 'Enter your authenticator code.'; return; }
+    el('sec-disable-confirm-btn').disabled = true;
+    el('sec-disable-err').textContent = '';
+    try {
+      const res = await fetch(`${API}/auth/2fa/disable`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid code');
+      if (currentUser) currentUser.totp_enabled = false;
+      showSecState('sec-disabled');
+    } catch (err) {
+      el('sec-disable-err').textContent = err.message || 'Invalid code.';
+    } finally { el('sec-disable-confirm-btn').disabled = false; }
+  });
+  el('sec-disable-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') el('sec-disable-confirm-btn').click(); });
 
   /* ── Utilities ───────────────────────────────────────────── */
   function el(id) { return document.getElementById(id); }
