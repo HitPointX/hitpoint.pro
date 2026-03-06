@@ -769,6 +769,120 @@
   </div>
 </div>
 
+<!-- Settings modal -->
+<div id="settings-overlay"></div>
+<div id="settings-panel">
+
+  <!-- Main settings page -->
+  <div id="settings-main">
+    <div class="settings-header">
+      <span class="settings-title">Settings</span>
+      <button class="settings-close" id="settings-close">✕</button>
+    </div>
+    <div class="settings-list">
+      <button class="settings-item" id="settings-goto-theme">
+        <span>Username Theme</span>
+        <span class="settings-chevron">›</span>
+      </button>
+      <div class="settings-item settings-toggle-row">
+        <span>Disable Name Effects</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settings-disable-themes">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme editor page -->
+  <div id="settings-theme" class="hidden">
+    <div class="settings-header">
+      <button class="settings-back" id="settings-theme-back">‹ Back</button>
+      <span class="settings-title">Username Theme</span>
+      <button class="settings-close" id="settings-theme-close">✕</button>
+    </div>
+    <div id="settings-theme-content">
+
+      <!-- Preview -->
+      <div class="theme-section">
+        <div class="theme-label">Preview</div>
+        <div id="theme-preview-wrap">
+          <span id="theme-preview-name">username</span>
+        </div>
+      </div>
+
+      <!-- Color mode -->
+      <div class="theme-section">
+        <div class="theme-label">Color</div>
+        <div class="theme-btn-group">
+          <button class="theme-btn active" id="color-mode-solid">Solid</button>
+          <button class="theme-btn" id="color-mode-gradient">Gradient</button>
+        </div>
+      </div>
+
+      <!-- Solid color picker -->
+      <div id="color-solid-row" class="theme-color-row">
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="color" id="color-solid-pick" value="#e05252">
+          <span class="color-hex-label" id="color-solid-hex">#e05252</span>
+        </div>
+      </div>
+
+      <!-- Gradient pickers -->
+      <div id="color-gradient-row" class="theme-color-row hidden">
+        <div class="gradient-pickers">
+          <div class="gradient-pick-group">
+            <input type="color" id="color-grad-from" value="#e05252">
+            <span class="color-hex-label" id="color-grad-from-hex">#e05252</span>
+          </div>
+          <span class="gradient-arrow">→</span>
+          <div class="gradient-pick-group">
+            <input type="color" id="color-grad-to" value="#5280e0">
+            <span class="color-hex-label" id="color-grad-to-hex">#5280e0</span>
+          </div>
+        </div>
+        <div class="gradient-angle-row">
+          <span class="theme-label-sm">Angle</span>
+          <input type="range" id="gradient-angle" min="0" max="360" value="135" step="15">
+          <span id="gradient-angle-label">135°</span>
+        </div>
+      </div>
+
+      <!-- Glow -->
+      <div class="theme-section">
+        <div class="theme-label">Glow</div>
+        <div class="theme-btn-group" id="glow-group">
+          <button class="theme-btn active" data-glow="none">None</button>
+          <button class="theme-btn" data-glow="soft">Soft</button>
+          <button class="theme-btn" data-glow="strong">Strong</button>
+          <button class="theme-btn" data-glow="neon">Neon</button>
+        </div>
+      </div>
+
+      <!-- Font style -->
+      <div class="theme-section">
+        <div class="theme-label">Font Style</div>
+        <div class="theme-btn-group" id="font-group">
+          <button class="theme-btn active" data-font="default">Default</button>
+          <button class="theme-btn" data-font="mono">Mono</button>
+          <button class="theme-btn" data-font="smallcaps">Small Caps</button>
+          <button class="theme-btn" data-font="wide">Wide</button>
+          <button class="theme-btn" data-font="italic">Italic</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="theme-actions">
+        <button id="theme-save-btn">Save Theme</button>
+        <button id="theme-reset-btn">Reset</button>
+      </div>
+      <div id="theme-save-status"></div>
+
+    </div>
+  </div>
+
+</div>
+
 <script>
   const API    = 'https://chat.hitpoint.pro/api';
   const WS_URL = 'wss://chat.hitpoint.pro/ws';
@@ -1892,120 +2006,6 @@
   fetchEmotes();
   checkAuth();
 </script>
-
-<!-- Settings modal -->
-<div id="settings-overlay"></div>
-<div id="settings-panel">
-
-  <!-- Main settings page -->
-  <div id="settings-main">
-    <div class="settings-header">
-      <span class="settings-title">Settings</span>
-      <button class="settings-close" id="settings-close">✕</button>
-    </div>
-    <div class="settings-list">
-      <button class="settings-item" id="settings-goto-theme">
-        <span>Username Theme</span>
-        <span class="settings-chevron">›</span>
-      </button>
-      <div class="settings-item settings-toggle-row">
-        <span>Disable Name Effects</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="settings-disable-themes">
-          <span class="toggle-track"></span>
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <!-- Theme editor page -->
-  <div id="settings-theme" class="hidden">
-    <div class="settings-header">
-      <button class="settings-back" id="settings-theme-back">‹ Back</button>
-      <span class="settings-title">Username Theme</span>
-      <button class="settings-close" id="settings-theme-close">✕</button>
-    </div>
-    <div id="settings-theme-content">
-
-      <!-- Preview -->
-      <div class="theme-section">
-        <div class="theme-label">Preview</div>
-        <div id="theme-preview-wrap">
-          <span id="theme-preview-name">username</span>
-        </div>
-      </div>
-
-      <!-- Color mode -->
-      <div class="theme-section">
-        <div class="theme-label">Color</div>
-        <div class="theme-btn-group">
-          <button class="theme-btn active" id="color-mode-solid">Solid</button>
-          <button class="theme-btn" id="color-mode-gradient">Gradient</button>
-        </div>
-      </div>
-
-      <!-- Solid color picker -->
-      <div id="color-solid-row" class="theme-color-row">
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="color" id="color-solid-pick" value="#e05252">
-          <span class="color-hex-label" id="color-solid-hex">#e05252</span>
-        </div>
-      </div>
-
-      <!-- Gradient pickers -->
-      <div id="color-gradient-row" class="theme-color-row hidden">
-        <div class="gradient-pickers">
-          <div class="gradient-pick-group">
-            <input type="color" id="color-grad-from" value="#e05252">
-            <span class="color-hex-label" id="color-grad-from-hex">#e05252</span>
-          </div>
-          <span class="gradient-arrow">→</span>
-          <div class="gradient-pick-group">
-            <input type="color" id="color-grad-to" value="#5280e0">
-            <span class="color-hex-label" id="color-grad-to-hex">#5280e0</span>
-          </div>
-        </div>
-        <div class="gradient-angle-row">
-          <span class="theme-label-sm">Angle</span>
-          <input type="range" id="gradient-angle" min="0" max="360" value="135" step="15">
-          <span id="gradient-angle-label">135°</span>
-        </div>
-      </div>
-
-      <!-- Glow -->
-      <div class="theme-section">
-        <div class="theme-label">Glow</div>
-        <div class="theme-btn-group" id="glow-group">
-          <button class="theme-btn active" data-glow="none">None</button>
-          <button class="theme-btn" data-glow="soft">Soft</button>
-          <button class="theme-btn" data-glow="strong">Strong</button>
-          <button class="theme-btn" data-glow="neon">Neon</button>
-        </div>
-      </div>
-
-      <!-- Font style -->
-      <div class="theme-section">
-        <div class="theme-label">Font Style</div>
-        <div class="theme-btn-group" id="font-group">
-          <button class="theme-btn active" data-font="default">Default</button>
-          <button class="theme-btn" data-font="mono">Mono</button>
-          <button class="theme-btn" data-font="smallcaps">Small Caps</button>
-          <button class="theme-btn" data-font="wide">Wide</button>
-          <button class="theme-btn" data-font="italic">Italic</button>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="theme-actions">
-        <button id="theme-save-btn">Save Theme</button>
-        <button id="theme-reset-btn">Reset</button>
-      </div>
-      <div id="theme-save-status"></div>
-
-    </div>
-  </div>
-
-</div>
 
 <!-- Emote picker panel -->
 <div id="emote-picker">
