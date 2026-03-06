@@ -1358,6 +1358,7 @@
     // Apply sender's name theme if present
     if (msg.nameTheme) {
       const t = typeof msg.nameTheme === 'string' ? JSON.parse(msg.nameTheme) : msg.nameTheme;
+      userEl.dataset.theme = JSON.stringify(t);
       applyNameTheme(userEl, t);
     }
 
@@ -2242,11 +2243,19 @@
 
   el('settings-disable-themes').addEventListener('change', (e) => {
     localStorage.setItem('hp_disable_themes', e.target.checked ? '1' : '0');
+    // Update header username
     const headerU = el('header-username');
     headerU.style.cssText = '';
     if (!e.target.checked && currentUser && currentUser.nameTheme) {
       applyNameTheme(headerU, currentUser.nameTheme);
     }
+    // Re-apply or clear themes on all existing chat messages
+    document.querySelectorAll('.msg-user[data-theme]').forEach(span => {
+      span.style.cssText = '';
+      if (!e.target.checked) {
+        try { applyNameTheme(span, JSON.parse(span.dataset.theme)); } catch {}
+      }
+    });
   });
 
   el('color-mode-solid').addEventListener('click', () => { setColorMode('solid'); updateThemePreview(); });
