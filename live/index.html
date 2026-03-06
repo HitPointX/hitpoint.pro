@@ -295,11 +295,12 @@
       #stream-video { height: auto; }
       #mobile-tabs { display: flex; }
       #chat-col {
-        width: 100%; height: 420px;
+        width: 100% !important; height: 420px;
         border-left: none; border-top: 1px solid rgba(255,255,255,0.06);
         display: none;
       }
       #chat-col.tab-active { display: flex; }
+      #chat-resize-handle { display: none; pointer-events: none; }
       #page { overflow: visible; }
     }
   </style>
@@ -617,6 +618,7 @@
     let chatResizing    = false;
 
     document.getElementById('chat-resize-handle').addEventListener('mousedown', e => {
+      if (window.innerWidth <= 860) return;
       chatResizing = true;
       document.body.style.cursor     = 'col-resize';
       document.body.style.userSelect = 'none';
@@ -633,6 +635,7 @@
       document.body.style.cursor = document.body.style.userSelect = '';
     });
     document.getElementById('chat-resize-handle').addEventListener('touchstart', e => {
+      if (window.innerWidth <= 860) return;
       chatResizing = true; e.preventDefault();
     }, { passive: false });
     window.addEventListener('touchmove', e => {
@@ -641,6 +644,9 @@
       chatCol.style.width = (w <= CHAT_MIN + SNAP_THRESH ? '' : Math.min(w, chatMax()) + 'px');
     }, { passive: false });
     window.addEventListener('touchend', () => { chatResizing = false; });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 860) { chatResizing = false; chatCol.style.width = ''; }
+    });
 
     /* ── Mobile tabs ──────────────────────────────────────── */
     document.querySelectorAll('.tab-btn').forEach(btn => {
