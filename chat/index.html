@@ -268,6 +268,7 @@
       display: none; align-items: center; justify-content: center; padding: 16px;
     }
     .modal-backdrop.visible { display: flex; }
+    #sec-2fa-backdrop { z-index: 260; }
 
     .modal {
       background: rgba(13,15,23,0.99); border: 1px solid rgba(255,255,255,0.09);
@@ -597,6 +598,36 @@
     }
     #settings-security-content::-webkit-scrollbar { width: 2px; }
     #settings-security-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+    .sec-account-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .sec-account-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 7px; padding: 10px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .sec-account-title {
+      font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: rgba(255,255,255,0.68);
+    }
+    .sec-field { display: flex; flex-direction: column; gap: 4px; }
+    .sec-field label {
+      display: block; font-size: 9px; font-weight: 800; letter-spacing: 1.3px;
+      text-transform: uppercase; color: rgba(255,255,255,0.34);
+    }
+    .sec-field input {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; font-size: 13px; border-radius: 6px; padding: 8px 9px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .sec-field input:focus { border-color: rgba(255,255,255,0.24); }
+    .sec-inline-note {
+      font-size: 10px; color: rgba(255,255,255,0.28); line-height: 1.45;
+    }
+    .sec-ok {
+      font-size: 11px; color: #3ddd88; min-height: 14px;
+    }
+    .sec-divider {
+      height: 1px; background: rgba(255,255,255,0.07); margin: 3px 0 5px;
+    }
     .sec-heading {
       font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 4px;
     }
@@ -915,6 +946,23 @@
   </div>
 </div>
 
+<!-- Security 2FA confirm modal -->
+<div class="modal-backdrop" id="sec-2fa-backdrop">
+  <div class="modal">
+    <div class="modal-title" id="sec-2fa-title">Confirm with 2FA</div>
+    <div class="sec-desc" style="margin-bottom:10px;">Enter the 6-digit code from your authenticator app to apply this account change.</div>
+    <div class="modal-field">
+      <label for="sec-2fa-code">Authenticator Code</label>
+      <input type="text" id="sec-2fa-code" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code">
+    </div>
+    <div class="modal-err" id="sec-2fa-err"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="sec-2fa-cancel-btn">Cancel</button>
+      <button class="btn-primary" id="sec-2fa-confirm-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <!-- Settings modal -->
 <div id="settings-overlay"></div>
 <div id="settings-panel">
@@ -1038,6 +1086,45 @@
       <button class="settings-close" id="settings-security-close">✕</button>
     </div>
     <div id="settings-security-content">
+      <div id="sec-account-wrap" class="sec-account-wrap">
+        <div class="sec-account-card">
+          <div class="sec-account-title">Change Email</div>
+          <div class="sec-field">
+            <label for="sec-email-current-password">Current Password</label>
+            <input type="password" id="sec-email-current-password" autocomplete="current-password">
+          </div>
+          <div class="sec-field">
+            <label for="sec-new-email">New Email</label>
+            <input type="email" id="sec-new-email" autocomplete="email">
+          </div>
+          <div class="sec-inline-note">If 2FA is enabled, you'll confirm with your authenticator code before this change is applied.</div>
+          <div class="sec-err" id="sec-email-err"></div>
+          <div class="sec-ok" id="sec-email-ok"></div>
+          <button class="sec-btn-primary" id="sec-email-apply-btn">Apply Email Change</button>
+        </div>
+
+        <div class="sec-account-card">
+          <div class="sec-account-title">Change Password</div>
+          <div class="sec-field">
+            <label for="sec-pass-current-password">Current Password</label>
+            <input type="password" id="sec-pass-current-password" autocomplete="current-password">
+          </div>
+          <div class="sec-field">
+            <label for="sec-new-password">New Password</label>
+            <input type="password" id="sec-new-password" autocomplete="new-password">
+          </div>
+          <div class="sec-field">
+            <label for="sec-confirm-password">Confirm New Password</label>
+            <input type="password" id="sec-confirm-password" autocomplete="new-password">
+          </div>
+          <div class="sec-inline-note">Use a strong password. A minimum of 8 characters is recommended.</div>
+          <div class="sec-err" id="sec-pass-err"></div>
+          <div class="sec-ok" id="sec-pass-ok"></div>
+          <button class="sec-btn-primary" id="sec-pass-apply-btn">Apply Password Change</button>
+        </div>
+
+        <div class="sec-divider"></div>
+      </div>
 
       <!-- Loading -->
       <div id="sec-loading" class="hidden">
@@ -2164,12 +2251,14 @@
     el('settings-panel').classList.add('visible');
     el('settings-main').classList.remove('hidden');
     el('settings-theme').classList.add('hidden');
+    el('settings-security').classList.add('hidden');
     el('settings-disable-themes').checked = localStorage.getItem('hp_disable_themes') === '1';
   }
 
   function closeSettings() {
     el('settings-overlay').classList.remove('visible');
     el('settings-panel').classList.remove('visible');
+    cancelSec2faPrompt();
   }
 
   function openThemePage() {
@@ -2304,6 +2393,51 @@
 
   /* ── Settings → Security / 2FA ──────────────────────────── */
   let _secBackupCodes = [];
+  let _secPendingChange = null;
+
+  function setSecFeedback(kind, errText = '', okText = '') {
+    const errId = kind === 'email' ? 'sec-email-err' : 'sec-pass-err';
+    const okId  = kind === 'email' ? 'sec-email-ok'  : 'sec-pass-ok';
+    el(errId).textContent = errText;
+    el(okId).textContent  = okText;
+  }
+
+  function clearSecFeedback() {
+    setSecFeedback('email');
+    setSecFeedback('password');
+    el('sec-2fa-err').textContent = '';
+  }
+
+  function clearSecCredentialInputs() {
+    el('sec-email-current-password').value = '';
+    el('sec-new-email').value = '';
+    el('sec-pass-current-password').value = '';
+    el('sec-new-password').value = '';
+    el('sec-confirm-password').value = '';
+  }
+
+  function clearSecPendingChange(reEnableBtn = true) {
+    if (_secPendingChange && _secPendingChange.buttonId && reEnableBtn) {
+      el(_secPendingChange.buttonId).disabled = false;
+    }
+    _secPendingChange = null;
+  }
+
+  function cancelSec2faPrompt() {
+    closeModal('sec-2fa-backdrop');
+    el('sec-2fa-code').value = '';
+    el('sec-2fa-err').textContent = '';
+    clearSecPendingChange(true);
+    el('sec-2fa-confirm-btn').disabled = false;
+  }
+
+  function resetSecurityForms() {
+    clearSecFeedback();
+    clearSecCredentialInputs();
+    el('sec-email-apply-btn').disabled = false;
+    el('sec-pass-apply-btn').disabled = false;
+    cancelSec2faPrompt();
+  }
 
   function showSecState(id) {
     ['sec-loading','sec-disabled','sec-enabled','sec-setup-1','sec-setup-2','sec-setup-3','sec-disable-confirm']
@@ -2311,19 +2445,146 @@
     el(id).classList.remove('hidden');
   }
 
+  function secNeeds2faError(msg) {
+    return /2fa|totp|authenticator|one[- ]time/i.test(String(msg || ''));
+  }
+
+  async function requestSecChange(kind, payload) {
+    const endpoint = kind === 'email' ? '/auth/change-email' : '/auth/change-password';
+    const res = await fetch(`${API}${endpoint}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
+    return data;
+  }
+
+  function applySecChangeSuccess(kind, payload, data) {
+    if (kind === 'email') {
+      if (currentUser) currentUser.email = payload.newEmail;
+      el('sec-email-current-password').value = '';
+      el('sec-new-email').value = '';
+      setSecFeedback('email', '', data.message || 'Email updated.');
+      return;
+    }
+    el('sec-pass-current-password').value = '';
+    el('sec-new-password').value = '';
+    el('sec-confirm-password').value = '';
+    setSecFeedback('password', '', data.message || 'Password updated.');
+  }
+
+  function openSec2faPrompt(kind, payload, buttonId) {
+    _secPendingChange = { kind, payload, buttonId };
+    el('sec-2fa-title').textContent = kind === 'email' ? 'Confirm Email Change' : 'Confirm Password Change';
+    el('sec-2fa-code').value = '';
+    el('sec-2fa-err').textContent = '';
+    openModal('sec-2fa-backdrop');
+    setTimeout(() => el('sec-2fa-code').focus(), 40);
+  }
+
+  async function runSecChange(kind, payload, buttonId) {
+    const btn = el(buttonId);
+    btn.disabled = true;
+    setSecFeedback(kind, '', '');
+    try {
+      const data = await requestSecChange(kind, payload);
+      applySecChangeSuccess(kind, payload, data);
+    } catch (err) {
+      if (!payload.totpToken && secNeeds2faError(err.message)) {
+        openSec2faPrompt(kind, payload, buttonId);
+        return;
+      }
+      setSecFeedback(kind, err.message || 'Could not apply this change.', '');
+    } finally {
+      if (!_secPendingChange || _secPendingChange.buttonId !== buttonId) btn.disabled = false;
+    }
+  }
+
   function openSecurityPage() {
     el('settings-main').classList.add('hidden');
     el('settings-security').classList.remove('hidden');
+    resetSecurityForms();
     const enabled = currentUser && currentUser.totp_enabled;
     showSecState(enabled ? 'sec-enabled' : 'sec-disabled');
   }
 
   el('settings-goto-security').addEventListener('click', openSecurityPage);
   el('settings-security-back').addEventListener('click', () => {
+    cancelSec2faPrompt();
     el('settings-security').classList.add('hidden');
     el('settings-main').classList.remove('hidden');
   });
-  el('settings-security-close').addEventListener('click', closeSettings);
+  el('settings-security-close').addEventListener('click', () => {
+    cancelSec2faPrompt();
+    closeSettings();
+  });
+
+  el('sec-email-apply-btn').addEventListener('click', async () => {
+    const currentPassword = el('sec-email-current-password').value;
+    const newEmail = el('sec-new-email').value.trim();
+    setSecFeedback('email', '', '');
+    if (!currentPassword || !newEmail) { setSecFeedback('email', 'Fill in all fields.'); return; }
+    if (!el('sec-new-email').checkValidity()) { setSecFeedback('email', 'Enter a valid email address.'); return; }
+    const payload = { currentPassword, newEmail };
+    if (currentUser && currentUser.totp_enabled) {
+      el('sec-email-apply-btn').disabled = true;
+      openSec2faPrompt('email', payload, 'sec-email-apply-btn');
+      return;
+    }
+    await runSecChange('email', payload, 'sec-email-apply-btn');
+  });
+
+  el('sec-pass-apply-btn').addEventListener('click', async () => {
+    const currentPassword = el('sec-pass-current-password').value;
+    const newPassword = el('sec-new-password').value;
+    const confirmPassword = el('sec-confirm-password').value;
+    setSecFeedback('password', '', '');
+    if (!currentPassword || !newPassword || !confirmPassword) { setSecFeedback('password', 'Fill in all fields.'); return; }
+    if (newPassword.length < 8) { setSecFeedback('password', 'New password must be at least 8 characters.'); return; }
+    if (newPassword !== confirmPassword) { setSecFeedback('password', 'New passwords do not match.'); return; }
+    const payload = { currentPassword, newPassword };
+    if (currentUser && currentUser.totp_enabled) {
+      el('sec-pass-apply-btn').disabled = true;
+      openSec2faPrompt('password', payload, 'sec-pass-apply-btn');
+      return;
+    }
+    await runSecChange('password', payload, 'sec-pass-apply-btn');
+  });
+
+  ['sec-email-current-password','sec-new-email'].forEach(id =>
+    el(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') el('sec-email-apply-btn').click(); })
+  );
+  ['sec-pass-current-password','sec-new-password','sec-confirm-password'].forEach(id =>
+    el(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') el('sec-pass-apply-btn').click(); })
+  );
+
+  el('sec-2fa-cancel-btn').addEventListener('click', cancelSec2faPrompt);
+  el('sec-2fa-backdrop').addEventListener('click', (e) => { if (e.target === el('sec-2fa-backdrop')) cancelSec2faPrompt(); });
+  el('sec-2fa-confirm-btn').addEventListener('click', async () => {
+    if (!_secPendingChange) return;
+    const token = el('sec-2fa-code').value.trim();
+    if (token.length < 6) { el('sec-2fa-err').textContent = 'Enter a 6-digit code.'; return; }
+    const pending = _secPendingChange;
+    el('sec-2fa-confirm-btn').disabled = true;
+    el('sec-2fa-err').textContent = '';
+    try {
+      const payload = { ...pending.payload, totpToken: token };
+      const data = await requestSecChange(pending.kind, payload);
+      applySecChangeSuccess(pending.kind, payload, data);
+      closeModal('sec-2fa-backdrop');
+      clearSecPendingChange(true);
+    } catch (err) {
+      const msg = err.message || 'Invalid code.';
+      el('sec-2fa-err').textContent = msg;
+      setSecFeedback(pending.kind, msg, '');
+    } finally {
+      el('sec-2fa-confirm-btn').disabled = false;
+    }
+  });
+  el('sec-2fa-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') el('sec-2fa-confirm-btn').click(); });
 
   // Enable 2FA — step 1
   el('sec-enable-btn').addEventListener('click', async () => {
