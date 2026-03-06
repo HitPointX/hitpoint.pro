@@ -555,16 +555,24 @@
     setTimeout(nextHeart, 800 + Math.random() * 1200);
 
     /* ── Viewer count WebSocket ───────────────────────────── */
-    // Connects without auth just to receive viewer count updates.
-    // Note: your WS server must allow unauthenticated connections
-    // (even if sending is restricted to logged-in users).
+    // Fetches auth token first so logged-in users connect authenticated,
+    // preventing the live page and chat iframe from counting as two viewers.
     const viewerCountEl = document.getElementById('viewer-count');
+    const WS_API = 'https://chat.hitpoint.pro/api';
     let countWs = null, countReconnect = null;
 
-    function connectCountWs() {
+    async function connectCountWs() {
       clearTimeout(countReconnect);
+      let url = WS_CHAT;
       try {
-        countWs = new WebSocket(WS_CHAT);
+        const tr = await fetch(`${WS_API}/auth/token`, { credentials: 'include' });
+        if (tr.ok) {
+          const { token } = await tr.json();
+          if (token) url = `${WS_CHAT}?token=${encodeURIComponent(token)}`;
+        }
+      } catch {}
+      try {
+        countWs = new WebSocket(url);
         countWs.addEventListener('message', (e) => {
           try {
             const msg = JSON.parse(e.data);
