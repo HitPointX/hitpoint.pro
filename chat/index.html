@@ -796,19 +796,44 @@
   const EMOTE_CACHE_TTL = 24 * 60 * 60 * 1000;
 
   async function fetchEmotes() {
+    let usedCache = false;
     try {
       const cached = JSON.parse(localStorage.getItem(EMOTE_CACHE_KEY) || 'null');
-      if (cached && Date.now() - cached.ts < EMOTE_CACHE_TTL) {
-        emoteManifest = cached.data; buildEmoteMap(); return;
+      if (
+        cached &&
+        Date.now() - cached.ts < EMOTE_CACHE_TTL &&
+        Array.isArray(cached.data) &&
+        cached.data.length > 0
+      ) {
+        emoteManifest = cached.data;
+        buildEmoteMap();
+        usedCache = true;
       }
     } catch {}
     try {
       const res = await fetch(`${API}/emotes`);
-      if (!res.ok) return;
-      emoteManifest = await res.json();
+      if (!res.ok) {
+        if (!usedCache) {
+          const loading = el('epick-loading');
+          if (loading) loading.textContent = 'Could not load emotes.';
+        }
+        return;
+      }
+      const fresh = await res.json();
+      if (!Array.isArray(fresh) || fresh.length === 0) {
+        if (!usedCache) {
+          const loading = el('epick-loading');
+          if (loading) loading.textContent = 'No emotes available.';
+        }
+        return;
+      }
+      emoteManifest = fresh;
       localStorage.setItem(EMOTE_CACHE_KEY, JSON.stringify({ data: emoteManifest, ts: Date.now() }));
       buildEmoteMap();
-      if (pickerPopulated) { pickerPopulated = false; populatePicker(); }
+      if (pickerPopulated || (pickerOpen && !pickerPopulated)) {
+        pickerPopulated = false;
+        populatePicker();
+      }
     } catch {}
   }
 
