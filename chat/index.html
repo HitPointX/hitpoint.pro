@@ -1430,9 +1430,16 @@
   let profileTarget     = null;  // username shown in profile card
   let profileTargetRole = null;  // role of user shown in profile card
   let viewerCount       = 0;
+  let pendingViewerCount = 0;
   let viewerUsers       = [];
   let viewerGuests      = 0;
   let viewersLoaded     = false;
+  let viewerBatchTimer  = null;
+  let viewerBatchStarted = false;
+  let viewerCountRaf    = null;
+  const VIEWER_BATCH_MIN_MS = 15000;
+  const VIEWER_BATCH_RANGE_MS = 45000;
+  const VIEWER_COUNT_ANIMATION_MS = 1500;
 
   /* ── Ignore list (localStorage, client-side only) ────────── */
   const ignoreList = new Set(JSON.parse(localStorage.getItem('hp_ignore') || '[]'));
@@ -1597,7 +1604,7 @@
         markDeleted(msg.messageId);
         break;
       case 'users':
-        setViewerCount(toNonNegativeInt(msg.count, viewerCount));
+        queueViewerCountFromUsers(msg.count);
         break;
       case 'viewers':
         updateViewerData(msg.users, msg.guests);
@@ -1630,6 +1637,69 @@
     const display = viewerCount.toLocaleString();
     el('viewer-count').textContent = display;
     el('viewers-total').textContent = display;
+  }
+
+  function randomViewerBatchDelay() {
+    return VIEWER_BATCH_MIN_MS + Math.random() * VIEWER_BATCH_RANGE_MS;
+  }
+
+  function scheduleViewerBatch() {
+    clearTimeout(viewerBatchTimer);
+    viewerBatchTimer = setTimeout(flushPendingViewerCount, randomViewerBatchDelay());
+  }
+
+  function stopViewerCountAnimation() {
+    if (viewerCountRaf !== null) {
+      cancelAnimationFrame(viewerCountRaf);
+      viewerCountRaf = null;
+    }
+  }
+
+  function animateViewerCountTo(targetCount) {
+    const target = toNonNegativeInt(targetCount, viewerCount);
+    const start = viewerCount;
+    if (start === target) return;
+
+    stopViewerCountAnimation();
+    const delta = target - start;
+    const startedAt = performance.now();
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+    const tick = (now) => {
+      const progress = Math.min((now - startedAt) / VIEWER_COUNT_ANIMATION_MS, 1);
+      const next = Math.round(start + delta * easeOutCubic(progress));
+      setViewerCount(next);
+      if (progress < 1) viewerCountRaf = requestAnimationFrame(tick);
+      else {
+        viewerCountRaf = null;
+        setViewerCount(target);
+      }
+    };
+
+    viewerCountRaf = requestAnimationFrame(tick);
+  }
+
+  function flushPendingViewerCount() {
+    viewerBatchTimer = null;
+    animateViewerCountTo(pendingViewerCount);
+    scheduleViewerBatch();
+  }
+
+  function queueViewerCountFromUsers(count) {
+    pendingViewerCount = toNonNegativeInt(count, viewerCount);
+    if (!viewerBatchStarted) {
+      viewerBatchStarted = true;
+      setViewerCount(pendingViewerCount);
+      scheduleViewerBatch();
+    }
+  }
+
+  function resetViewerCountBatching() {
+    clearTimeout(viewerBatchTimer);
+    viewerBatchTimer = null;
+    stopViewerCountAnimation();
+    viewerBatchStarted = false;
+    pendingViewerCount = 0;
   }
 
   function sortViewerUsers(users) {
@@ -1770,6 +1840,7 @@
   }
 
   function resetViewerData() {
+    resetViewerCountBatching();
     viewerUsers = [];
     viewerGuests = 0;
     viewersLoaded = false;
