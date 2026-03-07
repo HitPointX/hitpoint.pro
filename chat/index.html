@@ -1811,10 +1811,12 @@
     const total = viewerUsers.length + viewerGuests + (selfUser && !selfFromList ? 1 : 0);
     const hasUsers = otherUsers.length > 0;
     const hasGuests = viewerGuests > 0;
+    const canSeeGuestCount = isMod();
+    const showGuests = canSeeGuestCount && hasGuests;
     empty.classList.toggle('hidden', total !== 0);
     listWrap.classList.toggle('hidden', !hasUsers);
-    guests.classList.toggle('hidden', !hasGuests);
-    if (hasGuests) guests.textContent = `+ ${viewerGuests.toLocaleString()} guests`;
+    guests.classList.toggle('hidden', !showGuests);
+    if (showGuests) guests.textContent = `+ ${viewerGuests.toLocaleString()} guests`;
   }
 
   function updateViewerData(users, guests) {
