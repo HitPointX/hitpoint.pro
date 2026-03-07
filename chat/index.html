@@ -224,8 +224,10 @@
 
     #send-btn {
       background: rgba(200,20,20,0.8); border: none; color: #fff;
-      font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
-      padding: 0 14px; height: 36px; border-radius: 6px; cursor: pointer;
+      font-size: 18px; font-weight: 700; line-height: 1;
+      width: 36px; height: 36px; padding: 0;
+      border-radius: 6px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
       flex-shrink: 0; transition: background 0.15s;
     }
     #send-btn:hover { background: rgba(225,30,30,0.95); }
@@ -473,7 +475,9 @@
       flex: 1; min-width: 0; font-weight: 700;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       color: #90a8c8;
+      cursor: pointer; transition: opacity 0.15s;
     }
+    .viewer-name:hover { opacity: 0.78; }
     .viewer-name.admin { color: #ff6070; }
     .viewer-name.mod { color: #3ddd88; }
     .viewer-you-tag {
@@ -578,6 +582,14 @@
     }
     #settings-btn:hover { color: rgba(255,255,255,0.72); background: rgba(255,255,255,0.06); }
     #settings-btn.visible { display: flex; }
+    #chat-popout-btn {
+      background: none; border: none; color: rgba(255,255,255,0.28); cursor: pointer;
+      padding: 3px 4px; border-radius: 4px;
+      display: none; align-items: center; justify-content: center;
+      transition: color 0.15s, background 0.15s; flex-shrink: 0;
+    }
+    #chat-popout-btn:hover { color: rgba(255,255,255,0.72); background: rgba(255,255,255,0.06); }
+    #chat-popout-btn.visible { display: flex; }
 
     /* ── Settings overlay + panel ───────────────────────────── */
     #settings-overlay {
@@ -920,21 +932,17 @@
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       </button>
+      <button id="chat-popout-btn" title="Chat Popout" aria-label="Chat Popout">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 4h6v6"></path>
+          <path d="M20 4 11 13"></path>
+          <path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path>
+        </svg>
+      </button>
     </div>
     <div id="header-right">
-      <button class="hdr-btn" id="viewer-toggle" title="Viewers" aria-label="Toggle viewer list" aria-expanded="false" aria-controls="viewers-panel">
-        <span id="viewer-toggle-icon" aria-hidden="true">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="9" cy="8.5" r="2.7"></circle>
-            <path d="M4.5 16c.8-2.2 2.5-3.3 4.5-3.3s3.7 1.1 4.5 3.3"></path>
-            <circle cx="16.8" cy="9.6" r="2"></circle>
-            <path d="M14.8 15.9c.5-1.5 1.6-2.2 3-2.2 1.4 0 2.5.7 3 2.2"></path>
-          </svg>
-        </span>
-        <span id="viewer-count">0</span>
-      </button>
       <div id="slow-mode-wrap" class="hidden">
-        <button class="hdr-btn" id="slow-mode-btn" title="Slow mode">SLOW MODE</button>
+        <button class="hdr-btn" id="slow-mode-btn" title="Slow mode">SLOW</button>
         <div id="slow-panel">
           <div class="slow-panel-title">Slow Mode</div>
           <div class="slow-panel-row">
@@ -946,6 +954,17 @@
           </div>
         </div>
       </div>
+      <button class="hdr-btn" id="viewer-toggle" title="Viewers" aria-label="Toggle viewer list" aria-expanded="false" aria-controls="viewers-panel">
+        <span id="viewer-toggle-icon" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8.5" r="2.7"></circle>
+            <path d="M4.5 16c.8-2.2 2.5-3.3 4.5-3.3s3.7 1.1 4.5 3.3"></path>
+            <circle cx="16.8" cy="9.6" r="2"></circle>
+            <path d="M14.8 15.9c.5-1.5 1.6-2.2 3-2.2 1.4 0 2.5.7 3 2.2"></path>
+          </svg>
+        </span>
+        <span id="viewer-count">0</span>
+      </button>
     </div>
   </div>
 
@@ -982,7 +1001,7 @@
           <span id="emote-btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><circle cx="5.8" cy="6.5" r="0.85" fill="currentColor"/><circle cx="10.2" cy="6.5" r="0.85" fill="currentColor"/><path d="M5.5 10c.7 1 4.3 1 5 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
         </button>
       </div>
-      <button type="submit" id="send-btn">SEND</button>
+      <button type="submit" id="send-btn" aria-label="Send message" title="Send">➣</button>
     </form>
   </div>
 
@@ -1637,7 +1656,26 @@
     const row = document.createElement('div');
     row.className = `viewer-item${isSelf ? ' viewer-self' : ''}`;
     const youTag = isSelf ? '<span class="viewer-you-tag">YOU</span>' : '';
-    row.innerHTML = `<span class="viewer-name ${user.role}">${esc(user.username)}</span>${youTag}${viewerRoleBadge(user.role)}`;
+    row.innerHTML = `<span class="viewer-name ${user.role}" tabindex="0">${esc(user.username)}</span>${youTag}${viewerRoleBadge(user.role)}`;
+
+    const nameEl = row.querySelector('.viewer-name');
+    if (nameEl) {
+      nameEl.addEventListener('click', (e) => { openProfileCard(e, user.username, user.role); });
+
+      if (isMod()) {
+        nameEl.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          openCtxMenu(e, user.username, null);
+        });
+        let lpt;
+        nameEl.addEventListener('touchstart', () => {
+          lpt = setTimeout(() => openCtxMenu({ clientX: 50, clientY: window.innerHeight * 0.6 }, user.username, null), 500);
+        }, { passive: true });
+        nameEl.addEventListener('touchend', () => clearTimeout(lpt));
+        nameEl.addEventListener('touchmove', () => clearTimeout(lpt), { passive: true });
+      }
+    }
+
     return row;
   }
 
@@ -3066,6 +3104,20 @@
     return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   function isMod() { return currentUser && ['mod','admin'].includes(currentUser.role); }
+
+  /* ── Chat popout ────────────────────────────────────────── */
+  function openChatPopout() {
+    const popup = window.open('/chat/', 'hp-chat', 'width=400,height=700,resizable=yes');
+    if (!popup) return;
+    if (window.parent && window.parent !== window) {
+      try { window.parent.postMessage({ type: 'hp-chat-popout' }, window.location.origin); } catch {}
+    }
+  }
+
+  el('chat-popout-btn').addEventListener('click', openChatPopout);
+  if (window.parent && window.parent !== window) {
+    el('chat-popout-btn').classList.add('visible');
+  }
 
   /* ── Init ────────────────────────────────────────────────── */
   resetViewerData();

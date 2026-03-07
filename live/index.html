@@ -242,19 +242,6 @@
       transition: background 0.15s;
     }
     #chat-resize-handle:hover { background: rgba(255,255,255,0.07); }
-    #chat-topbar {
-      display: flex; align-items: center; justify-content: flex-end;
-      padding: 6px 10px; flex-shrink: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      background: rgba(12,14,22,0.8);
-    }
-    #popout-btn {
-      background: none; border: 1px solid rgba(255,255,255,0.10);
-      color: rgba(255,255,255,0.38); font-size: 10px; font-weight: 700;
-      letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px;
-      cursor: pointer; transition: all 0.15s;
-    }
-    #popout-btn:hover { color: #fff; border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.05); }
 
     #chat-area { flex: 1; position: relative; min-height: 0; }
     #chat-frame {
@@ -370,9 +357,6 @@
       <!-- Chat sidebar -->
       <div id="chat-col">
         <div id="chat-resize-handle"></div>
-        <div id="chat-topbar">
-          <button id="popout-btn" title="Pop out chat">POPOUT</button>
-        </div>
         <div id="chat-area">
           <iframe id="chat-frame" src="/chat/" allow="autoplay" title="Live chat"></iframe>
           <div id="chat-popped-notice">
@@ -594,10 +578,16 @@
     const poppedNote = document.getElementById('chat-popped-notice');
     let chatWindow   = null;
 
-    document.getElementById('popout-btn').addEventListener('click', () => {
-      chatWindow = window.open('/chat/', 'hp-chat', 'width=400,height=700,resizable=yes');
+    function popoutChatFromLive() {
+      try { chatWindow = window.open('', 'hp-chat'); } catch { chatWindow = null; }
       chatFrame.style.display = 'none';
       poppedNote.classList.add('visible');
+    }
+
+    window.addEventListener('message', (e) => {
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.type !== 'hp-chat-popout') return;
+      popoutChatFromLive();
     });
 
     document.getElementById('show-chat-btn').addEventListener('click', () => {
