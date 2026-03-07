@@ -1437,6 +1437,9 @@
   let viewerBatchTimer  = null;
   let viewerBatchStarted = false;
   let viewerCountRaf    = null;
+  const VIEWER_QUICK_BATCH_THRESHOLD = 100;
+  const VIEWER_QUICK_BATCH_MIN_MS = 5000;
+  const VIEWER_QUICK_BATCH_RANGE_MS = 25000;
   const VIEWER_BATCH_MIN_MS = 15000;
   const VIEWER_BATCH_RANGE_MS = 45000;
   const VIEWER_COUNT_ANIMATION_MS = 1500;
@@ -1639,7 +1642,11 @@
     el('viewers-total').textContent = display;
   }
 
-  function randomViewerBatchDelay() {
+  function randomViewerBatchDelay(countHint = pendingViewerCount) {
+    const count = toNonNegativeInt(countHint, viewerCount);
+    if (count < VIEWER_QUICK_BATCH_THRESHOLD) {
+      return VIEWER_QUICK_BATCH_MIN_MS + Math.random() * VIEWER_QUICK_BATCH_RANGE_MS;
+    }
     return VIEWER_BATCH_MIN_MS + Math.random() * VIEWER_BATCH_RANGE_MS;
   }
 
