@@ -1805,7 +1805,6 @@
     const total = viewerUsers.length + viewerGuests + (selfUser && !selfFromList ? 1 : 0);
     const hasUsers = otherUsers.length > 0;
     const hasGuests = viewerGuests > 0;
-    setViewerCount(total);
     empty.classList.toggle('hidden', total !== 0);
     listWrap.classList.toggle('hidden', !hasUsers);
     guests.classList.toggle('hidden', !hasGuests);
