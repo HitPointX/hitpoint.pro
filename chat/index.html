@@ -39,6 +39,8 @@
       color: #c8c8dc; font-weight: 800;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
+    #header-username,
+    #header-role-badge { display: none !important; }
     .role-badge {
       font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
       padding: 2px 5px; border-radius: 3px; flex-shrink: 0;
@@ -57,6 +59,27 @@
       white-space: nowrap;
     }
     .hdr-btn:hover { color: #fff; border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.05); }
+
+    #viewer-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      min-width: 58px; justify-content: center;
+      padding: 3px 7px;
+    }
+    #viewer-toggle-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      line-height: 0;
+    }
+    #viewer-count {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.4px;
+      color: rgba(255,255,255,0.7);
+      min-width: 10px; text-align: right;
+    }
+    #viewer-toggle:hover #viewer-count { color: #fff; }
+    #viewer-toggle.active {
+      color: #fff;
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+    }
 
     #slow-mode-wrap { position: relative; }
 
@@ -372,6 +395,117 @@
     }
     .slow-off-btn:hover { color: #fff; border-color: rgba(255,255,255,0.28); }
 
+    /* ── Viewers panel ─────────────────────────────────────── */
+    #viewers-overlay {
+      position: absolute; inset: 0; z-index: 70;
+      background: rgba(0,0,0,0.45);
+      opacity: 0; pointer-events: none; transition: opacity 0.18s ease;
+    }
+    #viewers-overlay.visible { opacity: 1; pointer-events: auto; }
+    #viewers-panel {
+      position: absolute; top: 0; right: 0; bottom: 0; z-index: 80;
+      width: min(88vw, 310px);
+      background: rgba(12,14,22,0.99);
+      border-left: 1px solid rgba(255,255,255,0.1);
+      box-shadow: -16px 0 40px rgba(0,0,0,0.45);
+      transform: translateX(100%); opacity: 0;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+      display: flex; flex-direction: column;
+      will-change: transform, opacity;
+    }
+    #viewers-panel.visible { transform: translateX(0); opacity: 1; }
+    #viewers-panel-head {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+      flex-shrink: 0;
+    }
+    .viewers-head-copy { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+    .viewers-head-title {
+      font-size: 10px; font-weight: 800; letter-spacing: 1.9px; text-transform: uppercase;
+      color: rgba(255,255,255,0.46);
+    }
+    #viewers-total {
+      font-size: 12px; font-weight: 800;
+      color: rgba(255,255,255,0.82);
+    }
+    #viewers-close-btn {
+      margin-left: auto;
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.3); font-size: 15px;
+      line-height: 1; padding: 1px 4px;
+      transition: color 0.15s;
+    }
+    #viewers-close-btn:hover { color: rgba(255,255,255,0.72); }
+    #viewers-loading,
+    #viewers-empty {
+      font-size: 11px; text-align: center;
+      color: rgba(255,255,255,0.35);
+      padding: 18px 12px;
+      flex-shrink: 0;
+    }
+    #viewers-loading { color: rgba(255,255,255,0.3); }
+    #viewers-self-wrap { flex-shrink: 0; padding-top: 5px; }
+    #viewers-self-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 7px 12px 0;
+    }
+    #viewers-list-wrap {
+      flex: 1; min-height: 0; overflow-y: auto;
+      padding: 8px 0 6px;
+    }
+    #viewers-list-wrap::-webkit-scrollbar { width: 3px; }
+    #viewers-list-wrap::-webkit-scrollbar-track { background: transparent; }
+    #viewers-list-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+    #viewers-list { display: flex; flex-direction: column; }
+    .viewer-item {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 12px;
+      font-size: 12px;
+    }
+    .viewer-item:hover { background: rgba(255,255,255,0.04); }
+    .viewer-item.viewer-self {
+      background: rgba(255,255,255,0.05);
+    }
+    .viewer-name {
+      flex: 1; min-width: 0; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: #90a8c8;
+    }
+    .viewer-name.admin { color: #ff6070; }
+    .viewer-name.mod { color: #3ddd88; }
+    .viewer-you-tag {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.7px; text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 3px; padding: 1px 4px;
+      flex-shrink: 0;
+    }
+    .viewer-role-tag {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
+      padding: 2px 5px; border-radius: 3px; flex-shrink: 0;
+    }
+    .viewer-role-tag.admin {
+      background: rgba(200,20,20,0.25);
+      border: 1px solid rgba(200,20,20,0.35);
+      color: #ff6070;
+    }
+    .viewer-role-tag.mod {
+      background: rgba(20,160,80,0.2);
+      border: 1px solid rgba(20,160,80,0.3);
+      color: #3ddd88;
+    }
+    #viewers-guests {
+      flex-shrink: 0;
+      padding: 9px 12px 11px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px; letter-spacing: 0.3px;
+      color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.015);
+    }
+
     /* ── Profile card ───────────────────────────────────────── */
     #profile-card {
       position: fixed; z-index: 300; display: none;
@@ -460,6 +594,10 @@
       box-shadow: 0 10px 36px rgba(0,0,0,0.65);
     }
     #settings-panel.visible { display: block; }
+    #settings-main {
+      display: flex; flex-direction: column;
+      min-height: 228px;
+    }
     .settings-header {
       display: flex; align-items: center; gap: 6px;
       padding: 10px 12px 10px 14px;
@@ -491,6 +629,21 @@
       transition: background 0.12s, color 0.12s; text-align: left;
     }
     .settings-item:hover { background: rgba(255,255,255,0.04); color: #fff; }
+    .settings-main-footer {
+      margin-top: auto;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 6px 0;
+    }
+    .settings-item.settings-logout {
+      justify-content: center;
+      color: rgba(255,110,120,0.78);
+      font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    .settings-item.settings-logout:hover {
+      background: rgba(200,20,20,0.12);
+      color: #ff8090;
+    }
     .settings-chevron { margin-left: auto; opacity: 0.3; font-size: 18px; line-height: 1; }
     .settings-toggle-row { cursor: default; }
     .settings-toggle-row:hover { background: none; color: rgba(255,255,255,0.6); }
@@ -769,6 +922,17 @@
       </button>
     </div>
     <div id="header-right">
+      <button class="hdr-btn" id="viewer-toggle" title="Viewers" aria-label="Toggle viewer list" aria-expanded="false" aria-controls="viewers-panel">
+        <span id="viewer-toggle-icon" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8.5" r="2.7"></circle>
+            <path d="M4.5 16c.8-2.2 2.5-3.3 4.5-3.3s3.7 1.1 4.5 3.3"></path>
+            <circle cx="16.8" cy="9.6" r="2"></circle>
+            <path d="M14.8 15.9c.5-1.5 1.6-2.2 3-2.2 1.4 0 2.5.7 3 2.2"></path>
+          </svg>
+        </span>
+        <span id="viewer-count">0</span>
+      </button>
       <div id="slow-mode-wrap" class="hidden">
         <button class="hdr-btn" id="slow-mode-btn" title="Slow mode">SLOW MODE</button>
         <div id="slow-panel">
@@ -782,7 +946,6 @@
           </div>
         </div>
       </div>
-      <button class="hdr-btn hidden" id="logout-btn">LOGOUT</button>
     </div>
   </div>
 
@@ -822,6 +985,27 @@
       <button type="submit" id="send-btn">SEND</button>
     </form>
   </div>
+
+  <div id="viewers-overlay" aria-hidden="true"></div>
+  <aside id="viewers-panel" aria-hidden="true">
+    <div id="viewers-panel-head">
+      <div class="viewers-head-copy">
+        <span class="viewers-head-title">Viewers</span>
+        <span id="viewers-total">0</span>
+      </div>
+      <button id="viewers-close-btn" aria-label="Close viewers panel">✕</button>
+    </div>
+    <div id="viewers-loading">Loading viewers...</div>
+    <div id="viewers-empty" class="hidden">No viewers</div>
+    <div id="viewers-self-wrap" class="hidden">
+      <div id="viewers-self"></div>
+      <div id="viewers-self-divider"></div>
+    </div>
+    <div id="viewers-list-wrap" class="hidden">
+      <div id="viewers-list"></div>
+    </div>
+    <div id="viewers-guests" class="hidden">+ 0 guests</div>
+  </aside>
 </div>
 
 <!-- Profile card -->
@@ -989,6 +1173,9 @@
           <span class="toggle-track"></span>
         </label>
       </div>
+    </div>
+    <div class="settings-main-footer">
+      <button class="settings-item settings-logout" id="settings-logout-btn">Logout</button>
     </div>
   </div>
 
@@ -1223,6 +1410,10 @@
   let ctxTarget    = null;      // {username, messageId}
   let profileTarget     = null;  // username shown in profile card
   let profileTargetRole = null;  // role of user shown in profile card
+  let viewerCount       = 0;
+  let viewerUsers       = [];
+  let viewerGuests      = 0;
+  let viewersLoaded     = false;
 
   /* ── Ignore list (localStorage, client-side only) ────────── */
   const ignoreList = new Set(JSON.parse(localStorage.getItem('hp_ignore') || '[]'));
@@ -1298,34 +1489,22 @@
   }
 
   function onLoggedIn() {
-    el('header-username').textContent  = currentUser.username;
-    el('header-username').classList.remove('hidden');
-    const badge = el('header-role-badge');
-    if (currentUser.role !== 'viewer') {
-      badge.textContent = currentUser.role;
-      badge.className   = `role-badge ${currentUser.role}`;
-      badge.classList.remove('hidden');
-    }
     if (isMod()) el('slow-mode-wrap').classList.remove('hidden');
-    el('logout-btn').classList.remove('hidden');
     el('settings-btn').classList.add('visible');
-    if (currentUser.nameTheme) applyNameTheme(el('header-username'), currentUser.nameTheme);
     el('auth-banner').style.display  = 'none';
     el('input-form').classList.add('visible');
+    resetViewerData();
     connectWs();
   }
 
   function onLoggedOut() {
     currentUser = null;
     disconnectWs();
-    el('header-username').classList.add('hidden');
-    el('header-role-badge').classList.add('hidden');
     el('slow-mode-wrap').classList.add('hidden');
-    el('logout-btn').classList.add('hidden');
     el('settings-btn').classList.remove('visible');
-    el('header-username').style.cssText = '';
     el('auth-banner').style.display  = '';
     el('input-form').classList.remove('visible');
+    resetViewerData();
   }
 
   async function doLogin(username, password) {
@@ -1399,7 +1578,10 @@
         markDeleted(msg.messageId);
         break;
       case 'users':
-        // viewer count available if needed
+        setViewerCount(toNonNegativeInt(msg.count, viewerCount));
+        break;
+      case 'viewers':
+        updateViewerData(msg.users, msg.guests);
         break;
       case 'slowmode':
         setSlowMode(msg.enabled, msg.seconds);
@@ -1412,6 +1594,150 @@
         setEmoteMode(msg.enabled);
         break;
     }
+  }
+
+  /* ── Viewers panel ──────────────────────────────────────── */
+  function toNonNegativeInt(value, fallback = 0) {
+    const n = Number(value);
+    return Number.isFinite(n) && n >= 0 ? Math.floor(n) : fallback;
+  }
+
+  function normalizeViewerRole(role) {
+    return role === 'admin' || role === 'mod' ? role : 'viewer';
+  }
+
+  function setViewerCount(count) {
+    viewerCount = toNonNegativeInt(count, 0);
+    const display = viewerCount.toLocaleString();
+    el('viewer-count').textContent = display;
+    el('viewers-total').textContent = display;
+  }
+
+  function sortViewerUsers(users) {
+    const order = { admin: 0, mod: 1, viewer: 2 };
+    return [...users].sort((a, b) => {
+      const ra = order[a.role] ?? 9;
+      const rb = order[b.role] ?? 9;
+      if (ra !== rb) return ra - rb;
+      return a.username.localeCompare(b.username, undefined, { sensitivity: 'base' });
+    });
+  }
+
+  function sameUser(a, b) {
+    return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+  }
+
+  function viewerRoleBadge(role) {
+    if (role === 'admin') return '<span class="viewer-role-tag admin">ADMIN</span>';
+    if (role === 'mod') return '<span class="viewer-role-tag mod">MOD</span>';
+    return '';
+  }
+
+  function buildViewerRow(user, isSelf = false) {
+    const row = document.createElement('div');
+    row.className = `viewer-item${isSelf ? ' viewer-self' : ''}`;
+    const youTag = isSelf ? '<span class="viewer-you-tag">YOU</span>' : '';
+    row.innerHTML = `<span class="viewer-name ${user.role}">${esc(user.username)}</span>${youTag}${viewerRoleBadge(user.role)}`;
+    return row;
+  }
+
+  function renderViewerPanel() {
+    const loading = el('viewers-loading');
+    const empty = el('viewers-empty');
+    const selfWrap = el('viewers-self-wrap');
+    const selfList = el('viewers-self');
+    const listWrap = el('viewers-list-wrap');
+    const list = el('viewers-list');
+    const guests = el('viewers-guests');
+
+    if (!viewersLoaded) {
+      loading.classList.remove('hidden');
+      empty.classList.add('hidden');
+      selfWrap.classList.add('hidden');
+      listWrap.classList.add('hidden');
+      guests.classList.add('hidden');
+      return;
+    }
+
+    loading.classList.add('hidden');
+    selfList.innerHTML = '';
+    list.innerHTML = '';
+
+    const meName = currentUser?.username?.trim() || '';
+    const selfIndex = meName ? viewerUsers.findIndex((u) => sameUser(u.username, meName)) : -1;
+    const selfFromList = selfIndex >= 0;
+    const selfUser = meName
+      ? (selfFromList
+        ? viewerUsers[selfIndex]
+        : { username: meName, role: normalizeViewerRole(currentUser?.role) })
+      : null;
+
+    if (selfUser) {
+      selfList.appendChild(buildViewerRow(selfUser, true));
+      selfWrap.classList.remove('hidden');
+    } else {
+      selfWrap.classList.add('hidden');
+    }
+
+    const otherUsers = selfUser
+      ? viewerUsers.filter((u) => !sameUser(u.username, selfUser.username))
+      : viewerUsers;
+
+    for (const user of otherUsers) {
+      list.appendChild(buildViewerRow(user));
+    }
+
+    const total = viewerUsers.length + viewerGuests + (selfUser && !selfFromList ? 1 : 0);
+    const hasUsers = otherUsers.length > 0;
+    const hasGuests = viewerGuests > 0;
+    setViewerCount(total);
+    empty.classList.toggle('hidden', total !== 0);
+    listWrap.classList.toggle('hidden', !hasUsers);
+    guests.classList.toggle('hidden', !hasGuests);
+    if (hasGuests) guests.textContent = `+ ${viewerGuests.toLocaleString()} guests`;
+  }
+
+  function updateViewerData(users, guests) {
+    const parsedUsers = Array.isArray(users) ? users : [];
+    viewerUsers = sortViewerUsers(
+      parsedUsers
+        .filter((u) => u && typeof u.username === 'string' && u.username.trim())
+        .map((u) => ({ username: u.username.trim(), role: normalizeViewerRole(u.role) }))
+    );
+    viewerGuests = toNonNegativeInt(guests, 0);
+    viewersLoaded = true;
+    renderViewerPanel();
+  }
+
+  function openViewersPanel() {
+    renderViewerPanel();
+    el('viewers-panel').classList.add('visible');
+    el('viewers-overlay').classList.add('visible');
+    el('viewer-toggle').classList.add('active');
+    el('viewer-toggle').setAttribute('aria-expanded', 'true');
+    el('viewers-panel').setAttribute('aria-hidden', 'false');
+  }
+
+  function closeViewersPanel() {
+    el('viewers-panel').classList.remove('visible');
+    el('viewers-overlay').classList.remove('visible');
+    el('viewer-toggle').classList.remove('active');
+    el('viewer-toggle').setAttribute('aria-expanded', 'false');
+    el('viewers-panel').setAttribute('aria-hidden', 'true');
+  }
+
+  function toggleViewersPanel() {
+    if (el('viewers-panel').classList.contains('visible')) closeViewersPanel();
+    else openViewersPanel();
+  }
+
+  function resetViewerData() {
+    viewerUsers = [];
+    viewerGuests = 0;
+    viewersLoaded = false;
+    setViewerCount(0);
+    renderViewerPanel();
+    closeViewersPanel();
   }
 
   /* ── Message rendering ───────────────────────────────────── */
@@ -1685,6 +2011,13 @@
     el('msg-input').placeholder = enabled ? 'Emote mode — use :emoteName: or emoji' : 'Send a message…';
   }
 
+  el('viewer-toggle').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleViewersPanel();
+  });
+  el('viewers-close-btn').addEventListener('click', closeViewersPanel);
+  el('viewers-overlay').addEventListener('click', closeViewersPanel);
+
   el('slow-mode-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     el('slow-panel').classList.toggle('visible');
@@ -1742,7 +2075,13 @@
   document.addEventListener('click', (e) => {
     if (!e.target.closest('#ctx-menu') && !e.target.closest('.msg-user')) closeCtxMenu();
   });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeCtxMenu(); closeProfileCard(); } });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeCtxMenu();
+      closeProfileCard();
+      closeViewersPanel();
+    }
+  });
 
   /* ── Profile card ────────────────────────────────────────── */
   function openProfileCard(e, username, role) {
@@ -2156,7 +2495,10 @@
   });
 
   // Logout
-  el('logout-btn').addEventListener('click', doLogout);
+  el('settings-logout-btn').addEventListener('click', async () => {
+    closeSettings();
+    await doLogout();
+  });
 
   // Close slow panel on outside click
   document.addEventListener('click', (e) => {
@@ -2726,6 +3068,7 @@
   function isMod() { return currentUser && ['mod','admin'].includes(currentUser.role); }
 
   /* ── Init ────────────────────────────────────────────────── */
+  resetViewerData();
   fetchEmotes();
   checkAuth();
 </script>
