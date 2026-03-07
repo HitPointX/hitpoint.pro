@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VODs — hitpoint.pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; width: 100%; overflow: hidden;
+      background: #0a0a0a;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: #e0e0f0;
+    }
+
+    /* ── Restricted screen ──────────────────────────────── */
+    #restricted {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: #0a0a0a;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; text-align: center; padding: 24px;
+    }
+    #restricted.visible { display: flex; }
+    #restricted-404 {
+      font-size: 6rem; font-weight: 900; letter-spacing: -3px; line-height: 1;
+      color: rgba(180,20,20,0.35);
+    }
+    #restricted-title {
+      font-size: 13px; font-weight: 800; letter-spacing: 3px;
+      text-transform: uppercase; color: rgba(255,255,255,0.45);
+    }
+    #restricted-msg {
+      font-size: 13px; color: rgba(255,255,255,0.28);
+      max-width: 360px; line-height: 1.65;
+    }
+    #restricted-link {
+      display: inline-block; margin-top: 6px;
+      background: rgba(200,20,20,0.8); border-radius: 6px;
+      color: #fff; text-decoration: none;
+      font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 9px 20px;
+      transition: background 0.15s;
+    }
+    #restricted-link:hover { background: rgba(220,30,30,0.95); }
+
+    /* ── Page shell ─────────────────────────────────────── */
+    #page {
+      display: none; flex-direction: column; height: 100vh;
+    }
+    #page.visible { display: flex; }
+
+    /* ── Top bar ────────────────────────────────────────── */
+    #top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px; flex-shrink: 0;
+      background: rgba(8,10,16,0.9);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(8px); gap: 14px;
+    }
+    #nav-back {
+      color: rgba(255,255,255,0.38); text-decoration: none;
+      font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; transition: color 0.2s; white-space: nowrap;
+    }
+    #nav-back:hover { color: #00afff; }
+    #admin-badge {
+      font-size: 10px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; padding: 4px 10px;
+      border-radius: 999px; border: 1px solid rgba(200,20,20,0.4);
+      color: rgba(210,90,90,0.9); background: rgba(200,20,20,0.1);
+      user-select: none;
+    }
+
+    /* ── Mobile selector ────────────────────────────────── */
+    #mobile-selector {
+      display: none; padding: 8px 12px; flex-shrink: 0;
+      background: rgba(8,10,16,0.9);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    #vod-select {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 6px;
+      color: #e0e0f0; font-size: 13px; padding: 8px 10px; outline: none;
+    }
+    #vod-select option { background: #0a0a0a; }
+
+    /* ── Content area ───────────────────────────────────── */
+    #content-area {
+      flex: 1; display: flex; min-height: 0; overflow: hidden;
+    }
+
+    /* ── Sidebar ────────────────────────────────────────── */
+    #sidebar {
+      width: 280px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      background: #0a0a0a;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    #sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    #sidebar-title {
+      font-size: 11px; font-weight: 800; letter-spacing: 2.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.4);
+    }
+    #refresh-btn {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.28); padding: 4px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.15s, background 0.15s;
+    }
+    #refresh-btn:hover { color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.06); }
+    #refresh-btn.spinning svg { animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #vod-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+    #vod-list::-webkit-scrollbar { width: 4px; }
+    #vod-list::-webkit-scrollbar-track { background: transparent; }
+    #vod-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+    .vod-entry {
+      padding: 11px 14px; cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .vod-entry:hover { background: rgba(255,255,255,0.04); }
+    .vod-entry.active {
+      background: rgba(200,20,20,0.1);
+      border-left-color: rgba(200,20,20,0.8);
+    }
+    .vod-date {
+      font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.72);
+      letter-spacing: 0.2px;
+    }
+    .vod-meta {
+      font-size: 11px; color: rgba(255,255,255,0.3);
+      margin-top: 3px; letter-spacing: 0.2px;
+    }
+
+    /* skeletons */
+    .skeleton {
+      height: 52px; margin: 5px 14px; border-radius: 4px;
+      background: linear-gradient(90deg,
+        rgba(255,255,255,0.04) 25%,
+        rgba(255,255,255,0.08) 50%,
+        rgba(255,255,255,0.04) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    #vod-empty {
+      display: none; padding: 32px 14px; text-align: center;
+      font-size: 12px; color: rgba(255,255,255,0.22); letter-spacing: 0.5px;
+    }
+    #vod-error { display: none; padding: 20px 14px; text-align: center; }
+    #vod-error-msg {
+      font-size: 12px; color: rgba(255,110,90,0.85);
+      margin-bottom: 12px; line-height: 1.55;
+    }
+    #retry-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 4px; cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    #retry-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+    /* ── Main area ──────────────────────────────────────── */
+    #main {
+      flex: 1; min-width: 0; display: flex; flex-direction: column;
+      overflow-y: auto; background: #000;
+    }
+    #main::-webkit-scrollbar { width: 4px; }
+    #main::-webkit-scrollbar-track { background: transparent; }
+    #main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+    #placeholder {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px;
+      color: rgba(255,255,255,0.18); font-size: 12px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    #placeholder svg { opacity: 0.12; margin-bottom: 4px; }
+
+    #player-section { display: none; flex-direction: column; flex: 1; }
+    #player-section.visible { display: flex; }
+
+    #player-wrap {
+      width: 100%; aspect-ratio: 16/9;
+      background: #000; position: relative; flex-shrink: 0;
+    }
+    #vod-video {
+      display: block; width: 100%; height: 100%;
+      object-fit: contain; background: #000; outline: none;
+    }
+
+    /* ── Info bar ───────────────────────────────────────── */
+    #info-bar {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-shrink: 0; flex-wrap: wrap;
+    }
+    #info-left { display: flex; flex-direction: column; gap: 5px; }
+    #vod-title {
+      font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.82);
+    }
+    #vod-size-label {
+      font-size: 12px; color: rgba(255,255,255,0.3);
+    }
+    #download-btn {
+      display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
+      background: rgba(200,20,20,0.8); border-radius: 6px;
+      color: #fff; text-decoration: none;
+      font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 9px 16px;
+      transition: background 0.15s;
+    }
+    #download-btn:hover { background: rgba(220,30,30,0.95); }
+
+    /* ── Mobile ─────────────────────────────────────────── */
+    @media (max-width: 720px) {
+      html, body { overflow: auto; }
+      #page { height: auto; min-height: 100vh; }
+      #content-area { flex-direction: column; overflow: visible; min-height: 0; }
+      #sidebar { display: none; }
+      #mobile-selector { display: block; }
+      #main { overflow: visible; flex: 1; }
+      #placeholder { min-height: 200px; flex: none; padding: 48px 0; }
+      #player-section { flex: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Restricted access -->
+  <div id="restricted">
+    <div id="restricted-404">404</div>
+    <div id="restricted-title">Restricted Access</div>
+    <div id="restricted-msg">This page is only accessible to administrators. Contact the site administrator if you believe this is an error.</div>
+    <a id="restricted-link" href="https://hitpoint.pro/live">&larr; Back to Live</a>
+  </div>
+
+  <!-- VOD player -->
+  <div id="page">
+
+    <div id="top-bar">
+      <a href="https://hitpoint.pro/live" id="nav-back">&larr; HITPOINT.PRO</a>
+      <span id="admin-badge">ADMIN</span>
+    </div>
+
+    <div id="mobile-selector">
+      <select id="vod-select">
+        <option value="">Select a stream&hellip;</option>
+      </select>
+    </div>
+
+    <div id="content-area">
+
+      <!-- Sidebar -->
+      <div id="sidebar">
+        <div id="sidebar-header">
+          <span id="sidebar-title">Past Streams</span>
+          <button id="refresh-btn" title="Refresh list">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2v4H9"/>
+              <path d="M1 12V8h4"/>
+              <path d="M2.34 5a5.5 5.5 0 1 1-.65 4.5"/>
+            </svg>
+          </button>
+        </div>
+        <div id="vod-list"></div>
+        <div id="vod-empty">No VODs available</div>
+        <div id="vod-error">
+          <div id="vod-error-msg">Unable to load VODs.</div>
+          <button id="retry-btn">Retry</button>
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div id="main">
+
+        <div id="placeholder">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <polygon points="5,3 19,12 5,21"/>
+          </svg>
+          Select a stream to watch
+        </div>
+
+        <div id="player-section">
+          <div id="player-wrap">
+            <video id="vod-video" controls preload="metadata" playsinline></video>
+          </div>
+          <div id="info-bar">
+            <div id="info-left">
+              <div id="vod-title"></div>
+              <div id="vod-size-label"></div>
+            </div>
+            <a id="download-btn" href="#" download>
+              <svg width="11" height="12" viewBox="0 0 11 12" fill="currentColor">
+                <rect x="0" y="10" width="11" height="1.5" rx="0.5"/>
+                <path d="M5.5 0v8M2 5.5l3.5 3.5L9 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+              Download
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+  <script>
+    const API      = 'https://chat.hitpoint.pro/api';
+    const VOD_BASE = 'https://stream.hitpoint.pro/vods/';
+
+    // ── Helpers ────────────────────────────────────────────
+    function formatSize(bytes) {
+      if (!bytes) return '—';
+      if (bytes >= 1e9) return (bytes / 1e9).toFixed(1) + ' GB';
+      if (bytes >= 1e6) return (bytes / 1e6).toFixed(1) + ' MB';
+      return Math.round(bytes / 1e3) + ' KB';
+    }
+
+    function parseVodDate(vod) {
+      if (vod.created_at) {
+        const d = new Date(vod.created_at);
+        if (!isNaN(d)) return d;
+      }
+      const m = (vod.filename || '').match(/stream_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+      if (m) return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+      return null;
+    }
+
+    function formatVodDate(d) {
+      if (!d) return 'Unknown date';
+      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+        + ' \u00b7 ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    // ── Elements ───────────────────────────────────────────
+    const restricted    = document.getElementById('restricted');
+    const page          = document.getElementById('page');
+    const vodListEl     = document.getElementById('vod-list');
+    const vodEmpty      = document.getElementById('vod-empty');
+    const vodError      = document.getElementById('vod-error');
+    const vodErrorMsg   = document.getElementById('vod-error-msg');
+    const refreshBtn    = document.getElementById('refresh-btn');
+    const retryBtn      = document.getElementById('retry-btn');
+    const placeholder   = document.getElementById('placeholder');
+    const playerSection = document.getElementById('player-section');
+    const vodVideo      = document.getElementById('vod-video');
+    const vodTitle      = document.getElementById('vod-title');
+    const vodSizeLabel  = document.getElementById('vod-size-label');
+    const downloadBtn   = document.getElementById('download-btn');
+    const vodSelect     = document.getElementById('vod-select');
+
+    let vods            = [];
+    let currentFilename = null;
+    let hlsInstance     = null;
+
+    // ── Auth gate ──────────────────────────────────────────
+    async function checkAuth() {
+      try {
+        const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
+        if (!res.ok) { showRestricted(); return; }
+        const user = await res.json().catch(() => null);
+        if (!user || user.role !== 'admin') { showRestricted(); return; }
+      } catch {
+        showRestricted(); return;
+      }
+      page.classList.add('visible');
+      loadVods();
+    }
+
+    function showRestricted() {
+      restricted.classList.add('visible');
+    }
+
+    // ── VOD list ───────────────────────────────────────────
+    function showSkeleton() {
+      vodListEl.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+      vodEmpty.style.display = 'none';
+      vodError.style.display = 'none';
+    }
+
+    async function loadVods() {
+      showSkeleton();
+      refreshBtn.classList.add('spinning');
+      try {
+        const res = await fetch(`${API}/vods`, { credentials: 'include' });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || data.message || `Server error (${res.status})`);
+        }
+        vods = await res.json();
+        renderVodList();
+      } catch (err) {
+        vodListEl.innerHTML = '';
+        vodErrorMsg.textContent = err.message || 'Unable to load VODs.';
+        vodError.style.display = 'block';
+      } finally {
+        refreshBtn.classList.remove('spinning');
+      }
+    }
+
+    function renderVodList() {
+      vodListEl.innerHTML = '';
+      vodSelect.innerHTML = '<option value="">Select a stream\u2026</option>';
+      vodError.style.display = 'none';
+
+      if (!vods.length) { vodEmpty.style.display = 'block'; return; }
+      vodEmpty.style.display = 'none';
+
+      // Sort newest first
+      vods.sort((a, b) => {
+        const da = parseVodDate(a), db = parseVodDate(b);
+        return (db ? db.getTime() : 0) - (da ? da.getTime() : 0);
+      });
+
+      vods.forEach(vod => {
+        const d       = parseVodDate(vod);
+        const dateStr = formatVodDate(d);
+        const sizeStr = formatSize(vod.size_bytes);
+
+        const el = document.createElement('div');
+        el.className = 'vod-entry';
+        el.dataset.filename = vod.filename;
+        el.innerHTML = `<div class="vod-date">${dateStr}</div><div class="vod-meta">${sizeStr}</div>`;
+        el.addEventListener('click', () => selectVod(vod));
+        if (vod.filename === currentFilename) el.classList.add('active');
+        vodListEl.appendChild(el);
+
+        const opt = document.createElement('option');
+        opt.value = vod.filename;
+        opt.textContent = dateStr + ' \u2014 ' + sizeStr;
+        if (vod.filename === currentFilename) opt.selected = true;
+        vodSelect.appendChild(opt);
+      });
+    }
+
+    function selectVod(vod) {
+      currentFilename = vod.filename;
+      const url = VOD_BASE + vod.filename;
+
+      document.querySelectorAll('.vod-entry').forEach(el => {
+        el.classList.toggle('active', el.dataset.filename === vod.filename);
+      });
+      vodSelect.value = vod.filename;
+
+      vodTitle.textContent     = formatVodDate(parseVodDate(vod));
+      vodSizeLabel.textContent = formatSize(vod.size_bytes);
+      downloadBtn.href         = url;
+      downloadBtn.download     = vod.filename;
+
+      placeholder.style.display = 'none';
+      playerSection.classList.add('visible');
+      loadVideo(url, vod.filename);
+    }
+
+    function loadVideo(url, filename) {
+      if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+      vodVideo.src = '';
+
+      if (filename.endsWith('.m3u8') && Hls.isSupported()) {
+        hlsInstance = new Hls();
+        hlsInstance.loadSource(url);
+        hlsInstance.attachMedia(vodVideo);
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => vodVideo.play().catch(() => {}));
+      } else if (filename.endsWith('.m3u8') && vodVideo.canPlayType('application/vnd.apple.mpegurl')) {
+        vodVideo.src = url;
+        vodVideo.load();
+      } else {
+        vodVideo.src = url;
+        vodVideo.load();
+      }
+    }
+
+    // ── Events ─────────────────────────────────────────────
+    refreshBtn.addEventListener('click', loadVods);
+    retryBtn.addEventListener('click', loadVods);
+    vodSelect.addEventListener('change', () => {
+      const vod = vods.find(v => v.filename === vodSelect.value);
+      if (vod) selectVod(vod);
+    });
+
+    // ── Boot ───────────────────────────────────────────────
+    checkAuth();
+  </script>
+</body>
+</html>
