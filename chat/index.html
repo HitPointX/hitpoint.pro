@@ -2232,7 +2232,7 @@
   });
 
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('#profile-card') && !e.target.closest('.msg-user')) closeProfileCard();
+    if (!e.target.closest('#profile-card') && !e.target.closest('.msg-user') && !e.target.closest('.viewer-name')) closeProfileCard();
   });
   el('messages').addEventListener('scroll', closeProfileCard);
 
