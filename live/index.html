@@ -45,24 +45,25 @@
     /* ── Top bar ──────────────────────────────────────────── */
     #top-bar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 18px; flex-shrink: 0;
+      padding: 5px 12px; flex-shrink: 0;
       background: rgba(8,10,16,0.75);
       border-bottom: 1px solid rgba(255,255,255,0.05);
-      gap: 14px;
+      gap: 8px;
       backdrop-filter: blur(8px);
     }
     #nav-back {
       color: rgba(255,255,255,0.38); text-decoration: none;
-      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      font-size: 9px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
       transition: color 0.2s ease; white-space: nowrap;
     }
     #nav-back:hover { color: #00afff; }
 
-    #header-meta { display: flex; align-items: center; gap: 10px; }
+    #header-meta { display: flex; align-items: center; gap: 6px; }
 
     #status-badge {
-      font-size: 11px; font-weight: 800; padding: 5px 11px;
-      border-radius: 999px; letter-spacing: 2px; border: 1px solid transparent;
+      font-size: 9px; font-weight: 800; padding: 3px 8px;
+      border-radius: 999px; letter-spacing: 1.3px; border: 1px solid transparent;
+      line-height: 1;
       text-transform: uppercase; user-select: none;
       transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
     }
@@ -83,12 +84,6 @@
       0%,100% { box-shadow: 0 0 10px rgba(0,200,120,0.2); }
       50%      { box-shadow: 0 0 22px rgba(0,200,120,0.5); }
     }
-
-    #viewer-count {
-      font-size: 11px; color: rgba(255,255,255,0.32);
-      letter-spacing: 0.5px; display: none;
-    }
-    #viewer-count.visible { display: inline; }
 
     /* ── Content area ─────────────────────────────────────── */
     #content-area {
@@ -297,7 +292,6 @@
     <div id="top-bar">
       <a href="/x" id="nav-back">&larr; HITPOINT.PRO</a>
       <div id="header-meta">
-        <span id="viewer-count" aria-live="polite"></span>
         <div id="status-badge" class="checking">CHECKING</div>
       </div>
     </div>
@@ -374,7 +368,6 @@
   <script>
     const _sk = [68,122,78,83,89,98,104,113,169,178,131,139,57,55,112,75,85,133,99,150,108,164,118,176,135,145,52,105,72,76,84,89];
     const STREAM_URL = `https://stream.hitpoint.pro/hls/${_sk.map((c,i)=>String.fromCharCode(c-((i*7+13)%97))).join('')}.m3u8`;
-    const WS_CHAT    = 'wss://chat.hitpoint.pro/ws';
     const POLL_OFFLINE = 10000;
     const POLL_LIVE    = 30000;
 
@@ -534,44 +527,6 @@
       setTimeout(nextHeart, 500 + Math.random() * 2000);
     }
     setTimeout(nextHeart, 800 + Math.random() * 1200);
-
-    /* ── Viewer count WebSocket ───────────────────────────── */
-    // Fetches auth token first so logged-in users connect authenticated,
-    // preventing the live page and chat iframe from counting as two viewers.
-    const viewerCountEl = document.getElementById('viewer-count');
-    const WS_API = 'https://chat.hitpoint.pro/api';
-    let countWs = null, countReconnect = null;
-
-    async function connectCountWs() {
-      clearTimeout(countReconnect);
-      let url = WS_CHAT;
-      try {
-        const tr = await fetch(`${WS_API}/auth/token`, { credentials: 'include' });
-        if (tr.ok) {
-          const { token } = await tr.json();
-          if (token) url = `${WS_CHAT}?token=${encodeURIComponent(token)}`;
-        }
-      } catch {}
-      try {
-        countWs = new WebSocket(url);
-        countWs.addEventListener('message', (e) => {
-          try {
-            const msg = JSON.parse(e.data);
-            if (msg.type === 'users') {
-              const n = msg.count || 0;
-              viewerCountEl.textContent = n === 1 ? '1 viewer' : `${n} viewers`;
-              viewerCountEl.classList.add('visible');
-            }
-          } catch {}
-        });
-        countWs.addEventListener('close', () => {
-          countWs = null;
-          countReconnect = setTimeout(connectCountWs, 8000);
-        });
-        countWs.addEventListener('error', () => {});
-      } catch {}
-    }
-    connectCountWs();
 
     /* ── Chat popout ──────────────────────────────────────── */
     const chatFrame  = document.getElementById('chat-frame');
