@@ -293,7 +293,7 @@
 
         <section id="player-section">
           <div id="player-wrap">
-            <video id="clip-video" controls autoplay preload="metadata" playsinline></video>
+            <video id="clip-video" controls controlslist="nodownload" autoplay preload="metadata" playsinline></video>
           </div>
           <div id="info-bar">
             <div id="info-left">
@@ -330,6 +330,9 @@
     const clipDateMainEl = document.getElementById('clip-date-main');
     const clipDurationMainEl = document.getElementById('clip-duration-main');
     const downloadBtnEl = document.getElementById('download-btn');
+    if (clipVideoEl.controlsList && clipVideoEl.controlsList.add) {
+      clipVideoEl.controlsList.add('nodownload');
+    }
 
     let clips = [];
     let activeFilename = null;
