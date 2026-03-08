@@ -761,6 +761,7 @@
       if (userSeeked && nearLiveEdge) {
         userSeeked = false;
         setHlsLiveSyncEnabled(true);
+        if (video.paused) video.play().catch(()=>{});
       }
       const paused = video.paused;
       const atEdge = !isFinite(dist) || dist < LIVE_EDGE_THRESHOLD;
