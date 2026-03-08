@@ -180,6 +180,29 @@
     @keyframes liveDotBlink { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
     #ctrl-live-btn.behind { background: rgba(90,10,10,0.75); cursor: pointer; }
     #ctrl-live-btn.behind:hover { background: rgba(210,15,15,0.9); }
+    #ctrl-clip-btn {
+      display: none;
+      align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      color: #fff;
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 1.4px; text-transform: uppercase;
+      padding: 4px 9px;
+      height: 26px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+    #ctrl-clip-btn:hover {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.24);
+    }
+    #ctrl-clip-btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
     #ctrl-offset {
       display: none; font-size: 11px; font-weight: 600;
       color: rgba(255,255,255,0.5); letter-spacing: 0.3px;
@@ -207,6 +230,121 @@
       width: 13px; height: 13px; border-radius: 50%; border: none;
       background: #fff; cursor: pointer;
     }
+
+    /* ── Clip dialog + toast ─────────────────────────────── */
+    #clip-dialog {
+      position: absolute;
+      left: 50%;
+      bottom: 74px;
+      transform: translateX(-50%);
+      width: min(360px, calc(100% - 24px));
+      background: rgba(12,14,22,0.97);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 10px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+      padding: 12px;
+      z-index: 12;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #clip-dialog.visible { display: flex; }
+    #clip-dialog-title {
+      font-size: 12px;
+      color: rgba(255,255,255,0.74);
+      letter-spacing: 0.3px;
+    }
+    #clip-title-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 6px;
+      color: #e0e0f0;
+      font-size: 13px;
+      padding: 8px 10px;
+      outline: none;
+    }
+    #clip-title-input:focus {
+      border-color: rgba(224,48,48,0.72);
+      box-shadow: 0 0 0 2px rgba(224,48,48,0.14);
+    }
+    #clip-dialog-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .clip-dialog-btn {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.75);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .clip-dialog-btn:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.24);
+      background: rgba(255,255,255,0.10);
+    }
+    #clip-generate-btn {
+      background: rgba(224,48,48,0.84);
+      border-color: rgba(224,48,48,0.9);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    #clip-generate-btn:hover { background: rgba(228,60,60,0.96); }
+    #clip-generate-btn:disabled {
+      opacity: 0.72;
+      cursor: default;
+      background: rgba(224,48,48,0.62);
+    }
+    #clip-generate-spinner {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.45);
+      border-top-color: rgba(255,255,255,1);
+      display: none;
+      animation: clipSpin 0.75s linear infinite;
+    }
+    #clip-generate-btn.loading #clip-generate-spinner { display: inline-block; }
+    @keyframes clipSpin { to { transform: rotate(360deg); } }
+    #clip-dialog-error {
+      min-height: 15px;
+      font-size: 11px;
+      color: rgba(255,120,110,0.92);
+      line-height: 1.35;
+    }
+
+    #clip-toast {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      background: rgba(20,180,80,0.15);
+      border: 1px solid rgba(20,180,80,0.3);
+      color: #3ddd88;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      z-index: 12;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      display: none;
+      white-space: nowrap;
+    }
+    #clip-toast.visible { display: block; opacity: 1; }
+    #clip-toast.fade { opacity: 0; }
 
     /* ── Mobile tabs (hidden on desktop) ─────────────────── */
     #mobile-tabs {
@@ -327,6 +465,7 @@
               <button id="ctrl-live-btn" class="at-edge" aria-label="Go to live">
                 <span id="ctrl-live-dot"></span>LIVE
               </button>
+              <button id="ctrl-clip-btn" aria-label="Create clip">✂ CLIP</button>
               <span id="ctrl-offset"></span>
             </div>
             <div id="ctrl-right">
@@ -339,6 +478,20 @@
               </button>
             </div>
           </div>
+
+          <div id="clip-dialog" aria-hidden="true">
+            <div id="clip-dialog-title">Name your clip</div>
+            <input id="clip-title-input" type="text" maxlength="80" placeholder="e.g. Insane clutch moment">
+            <div id="clip-dialog-error"></div>
+            <div id="clip-dialog-actions">
+              <button class="clip-dialog-btn" id="clip-cancel-btn" type="button">Cancel</button>
+              <button class="clip-dialog-btn" id="clip-generate-btn" type="button">
+                <span id="clip-generate-spinner" aria-hidden="true"></span>
+                <span id="clip-generate-label">Generate</span>
+              </button>
+            </div>
+          </div>
+          <div id="clip-toast" role="status" aria-live="polite">✓ Clip created and posted to chat</div>
         </div>
 
         <!-- Mobile tabs -->
@@ -440,6 +593,8 @@
     }
     function handleOffline() {
       if (isLive) { isLive = false; destroyHls(); }
+      ctrlClip.style.display = 'none';
+      closeClipDialog();
       setBadge('offline'); showOffline(); schedulePoll(POLL_OFFLINE);
     }
     function schedulePoll(ms) { clearTimeout(pollTimer); pollTimer = setTimeout(checkStream, ms); }
@@ -447,6 +602,7 @@
     /* ── Custom controls ──────────────────────────────────── */
     const ctrlPlay    = document.getElementById('ctrl-play');
     const ctrlLive    = document.getElementById('ctrl-live-btn');
+    const ctrlClip    = document.getElementById('ctrl-clip-btn');
     const ctrlOffset  = document.getElementById('ctrl-offset');
     const ctrlMute    = document.getElementById('ctrl-mute');
     const ctrlFs      = document.getElementById('ctrl-fs');
@@ -456,11 +612,107 @@
     const iconUnmute  = document.getElementById('icon-unmute');
     const seekbar     = document.getElementById('seekbar');
     const seekbarWrap = document.getElementById('seekbar-wrap');
+    const clipDialog  = document.getElementById('clip-dialog');
+    const clipTitleInput = document.getElementById('clip-title-input');
+    const clipDialogError = document.getElementById('clip-dialog-error');
+    const clipCancelBtn = document.getElementById('clip-cancel-btn');
+    const clipGenerateBtn = document.getElementById('clip-generate-btn');
+    const clipGenerateLabel = document.getElementById('clip-generate-label');
+    const clipToast = document.getElementById('clip-toast');
     const pauseIcon   = `<svg width="11" height="14" viewBox="0 0 10 12" fill="currentColor"><rect x="0" y="0" width="3.5" height="12"/><rect x="6.5" y="0" width="3.5" height="12"/></svg>`;
     const playIcon    = `<svg width="12" height="14" viewBox="0 0 10 12" fill="currentColor"><polygon points="0,0 10,6 0,12"/></svg>`;
 
     const LIVE_EDGE_THRESHOLD = 20;
+    const CLIP_VISIBLE_THRESHOLD = 2;
+    const CLIP_API = 'https://chat.hitpoint.pro/api/clips';
     let hideTimer = null;
+    let clipToastTimer = null;
+    let clipToastFadeTimer = null;
+
+    function getClipDistanceFromLive() {
+      if (!hls || !Number.isFinite(hls.liveSyncPosition) || !Number.isFinite(video.currentTime)) return null;
+      return hls.liveSyncPosition - video.currentTime;
+    }
+
+    function updateClipButtonVisibility() {
+      const dist = getClipDistanceFromLive();
+      const visible = isLive && dist != null && dist > CLIP_VISIBLE_THRESHOLD;
+      ctrlClip.style.display = visible ? 'inline-flex' : 'none';
+      if (!visible && clipDialog.classList.contains('visible')) closeClipDialog();
+    }
+
+    function showClipError(message) {
+      clipDialogError.textContent = message || '';
+    }
+
+    function openClipDialog() {
+      showClipError('');
+      clipDialog.classList.add('visible');
+      clipDialog.setAttribute('aria-hidden', 'false');
+      clipTitleInput.value = '';
+      clipGenerateBtn.disabled = false;
+      clipGenerateBtn.classList.remove('loading');
+      clipGenerateLabel.textContent = 'Generate';
+      setTimeout(() => clipTitleInput.focus(), 0);
+    }
+
+    function closeClipDialog() {
+      clipDialog.classList.remove('visible');
+      clipDialog.setAttribute('aria-hidden', 'true');
+      showClipError('');
+    }
+
+    function showClipToast() {
+      clearTimeout(clipToastTimer);
+      clearTimeout(clipToastFadeTimer);
+      clipToast.classList.remove('fade');
+      clipToast.classList.add('visible');
+      clipToastFadeTimer = setTimeout(() => clipToast.classList.add('fade'), 2500);
+      clipToastTimer = setTimeout(() => {
+        clipToast.classList.remove('visible');
+        clipToast.classList.remove('fade');
+      }, 3000);
+    }
+
+    async function submitClip() {
+      const title = clipTitleInput.value.trim();
+      if (!title) {
+        showClipError('Please enter a clip name');
+        return;
+      }
+      const dist = getClipDistanceFromLive();
+      if (dist == null) {
+        showClipError('Stream must be live to clip');
+        return;
+      }
+      const startOffset = Math.min(120, Math.max(1, Math.round(dist)));
+      clipGenerateBtn.disabled = true;
+      clipGenerateBtn.classList.add('loading');
+      clipGenerateLabel.textContent = 'Clipping...';
+      showClipError('');
+      try {
+        const res = await fetch(CLIP_API, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, startOffset }),
+        });
+        if (res.ok) {
+          closeClipDialog();
+          showClipToast();
+          return;
+        }
+        if (res.status === 401) showClipError('You must be logged in to create clips');
+        else if (res.status === 503) showClipError('Stream must be live to clip');
+        else showClipError('Clip failed — try again');
+      } catch {
+        showClipError('Clip failed — try again');
+      } finally {
+        clipGenerateBtn.disabled = false;
+        clipGenerateBtn.classList.remove('loading');
+        clipGenerateLabel.textContent = 'Generate';
+      }
+    }
 
     function showControls() {
       controls.classList.remove('hidden'); clearTimeout(hideTimer);
@@ -513,6 +765,7 @@
       }
       seekbarWrap.classList.toggle('visible', paused);
       if (paused && isFinite(dist)) { seekbar.value = Math.round(120 - Math.min(120, Math.max(0, dist))); updateSeekbarFill(); }
+      updateClipButtonVisibility();
     }
     video.addEventListener('timeupdate', updateLiveEdge);
     video.addEventListener('seeking', () => {
@@ -541,7 +794,26 @@
       if (hls && hls.liveSyncPosition != null) video.currentTime = hls.liveSyncPosition;
       else if (isFinite(video.duration)) video.currentTime = video.duration;
       requestAnimationFrame(() => { suppressSeekingFlag = false; });
+      ctrlClip.style.display = 'none';
+      closeClipDialog();
       video.play().catch(()=>{});
+    });
+    ctrlClip.addEventListener('click', () => {
+      if (ctrlClip.style.display === 'none') return;
+      openClipDialog();
+    });
+    clipCancelBtn.addEventListener('click', closeClipDialog);
+    clipGenerateBtn.addEventListener('click', submitClip);
+    clipTitleInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitClip();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && clipDialog.classList.contains('visible')) {
+        closeClipDialog();
+      }
     });
 
     /* ── Offline heart blink ──────────────────────────────── */
