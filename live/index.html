@@ -630,8 +630,18 @@
     let clipToastFadeTimer = null;
 
     function getClipDistanceFromLive() {
-      if (!hls || !Number.isFinite(hls.liveSyncPosition) || !Number.isFinite(video.currentTime)) return null;
-      return hls.liveSyncPosition - video.currentTime;
+      if (!Number.isFinite(video.currentTime)) return null;
+      let liveTarget = null;
+      if (hls && Number.isFinite(hls.liveSyncPosition)) {
+        liveTarget = hls.liveSyncPosition;
+      } else if (video.seekable && video.seekable.length > 0) {
+        const seekableEnd = video.seekable.end(video.seekable.length - 1);
+        if (Number.isFinite(seekableEnd)) liveTarget = Math.max(0, seekableEnd - LIVE_SYNC_DURATION);
+      } else if (Number.isFinite(video.duration)) {
+        liveTarget = Math.max(0, video.duration - LIVE_SYNC_DURATION);
+      }
+      if (!Number.isFinite(liveTarget)) return null;
+      return Math.max(0, liveTarget - video.currentTime);
     }
 
     function updateClipButtonVisibility() {
@@ -768,6 +778,9 @@
       updateClipButtonVisibility();
     }
     video.addEventListener('timeupdate', updateLiveEdge);
+    video.addEventListener('durationchange', updateClipButtonVisibility);
+    video.addEventListener('loadedmetadata', updateClipButtonVisibility);
+    video.addEventListener('progress', updateClipButtonVisibility);
     video.addEventListener('seeking', () => {
       if (suppressSeekingFlag) {
         suppressSeekingFlag = false;
