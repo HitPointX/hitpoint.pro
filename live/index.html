@@ -376,6 +376,10 @@
     const overlay = document.getElementById('offline-overlay');
 
     let hls = null, isLive = false, pollTimer = null;
+    let userSeeked = false;
+    let suppressSeekingFlag = false;
+    const LIVE_SYNC_DURATION = 3;
+    const LIVE_SYNC_RESTORE_THRESHOLD = 1.5;
 
     /* ── Stream badge ─────────────────────────────────────── */
     function setBadge(state) {
@@ -388,15 +392,29 @@
     function destroyHls() {
       if (hls) { hls.destroy(); hls = null; }
       video.src = '';
+      userSeeked = false;
+      suppressSeekingFlag = false;
+    }
+
+    function setHlsLiveSyncEnabled(enabled) {
+      if (!hls || !hls.config) return;
+      hls.config.liveSyncDuration = enabled ? LIVE_SYNC_DURATION : Infinity;
     }
 
     function attachHls() {
       destroyHls();
       if (Hls.isSupported()) {
-        hls = new Hls({ maxBufferLength:30, maxMaxBufferLength:60, liveSyncDurationCount:3, liveMaxLatencyDurationCount:6 });
+        hls = new Hls({
+          liveSyncDuration: LIVE_SYNC_DURATION,
+          liveMaxLatencyDuration: 10,
+          maxFragLookUpTolerance: 0.2,
+          liveBackBufferLength: 120,
+        });
         hls.loadSource(STREAM_URL);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          userSeeked = false;
+          setHlsLiveSyncEnabled(true);
           isLive = true; setBadge('live'); showLive();
           video.play().catch(() => {});
         });
@@ -477,6 +495,11 @@
     function updateLiveEdge() {
       if (!isLive) return;
       const dist = video.duration - video.currentTime;
+      const nearLiveEdge = !isFinite(dist) || dist < LIVE_SYNC_RESTORE_THRESHOLD;
+      if (userSeeked && nearLiveEdge) {
+        userSeeked = false;
+        setHlsLiveSyncEnabled(true);
+      }
       const paused = video.paused;
       const atEdge = !isFinite(dist) || dist < LIVE_EDGE_THRESHOLD;
       ctrlLive.classList.toggle('at-edge', atEdge && !paused);
@@ -492,7 +515,16 @@
       if (paused && isFinite(dist)) { seekbar.value = Math.round(120 - Math.min(120, Math.max(0, dist))); updateSeekbarFill(); }
     }
     video.addEventListener('timeupdate', updateLiveEdge);
-    video.addEventListener('seeking',    updateLiveEdge);
+    video.addEventListener('seeking', () => {
+      if (suppressSeekingFlag) {
+        suppressSeekingFlag = false;
+        updateLiveEdge();
+        return;
+      }
+      userSeeked = true;
+      setHlsLiveSyncEnabled(false);
+      updateLiveEdge();
+    });
 
     seekbar.addEventListener('input', () => {
       const dist = 120 - Number(seekbar.value);
@@ -503,8 +535,12 @@
 
     ctrlLive.addEventListener('click', () => {
       if (!ctrlLive.classList.contains('behind')) return;
+      userSeeked = false;
+      setHlsLiveSyncEnabled(true);
+      suppressSeekingFlag = true;
       if (hls && hls.liveSyncPosition != null) video.currentTime = hls.liveSyncPosition;
       else if (isFinite(video.duration)) video.currentTime = video.duration;
+      requestAnimationFrame(() => { suppressSeekingFlag = false; });
       video.play().catch(()=>{});
     });
 
