@@ -631,14 +631,17 @@
 
     function getClipDistanceFromLive() {
       if (!Number.isFinite(video.currentTime)) return null;
+      if (Number.isFinite(video.duration)) {
+        return Math.max(0, video.duration - video.currentTime);
+      }
       let liveTarget = null;
       if (hls && Number.isFinite(hls.liveSyncPosition)) {
         liveTarget = hls.liveSyncPosition;
       } else if (video.seekable && video.seekable.length > 0) {
         const seekableEnd = video.seekable.end(video.seekable.length - 1);
-        if (Number.isFinite(seekableEnd)) liveTarget = Math.max(0, seekableEnd - LIVE_SYNC_DURATION);
+        if (Number.isFinite(seekableEnd)) liveTarget = seekableEnd;
       } else if (Number.isFinite(video.duration)) {
-        liveTarget = Math.max(0, video.duration - LIVE_SYNC_DURATION);
+        liveTarget = video.duration;
       }
       if (!Number.isFinite(liveTarget)) return null;
       return Math.max(0, liveTarget - video.currentTime);
