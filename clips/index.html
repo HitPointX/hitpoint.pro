@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clips ➫ hitpoint.pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0c0c10;
+      --header: rgba(12,14,22,0.99);
+      --border: rgba(255,255,255,0.06);
+      --text: #e0e0f0;
+      --muted: rgba(255,255,255,0.42);
+      --muted-soft: rgba(255,255,255,0.28);
+      --red: #e03030;
+      --red-soft: rgba(224,48,48,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    body { overflow: hidden; }
+
+    #page {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--bg);
+    }
+
+    /* Top bar (VODs style) */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 18px;
+      background: var(--header);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      backdrop-filter: blur(8px);
+    }
+    #logo-link {
+      color: rgba(255,255,255,0.38);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    #logo-link:hover { color: #00afff; }
+    #back-btn {
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.54);
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    #back-btn:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.28);
+      background: rgba(255,255,255,0.08);
+    }
+
+    #content-area {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: var(--bg);
+      overflow: hidden;
+    }
+    #sidebar-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2.2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      flex-shrink: 0;
+    }
+    #clip-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    #clip-list::-webkit-scrollbar { width: 4px; }
+    #clip-list::-webkit-scrollbar-track { background: transparent; }
+    #clip-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+    #clip-empty {
+      display: none;
+      padding: 30px 14px;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.4px;
+    }
+    .clip-entry {
+      display: grid;
+      grid-template-columns: 108px 1fr;
+      gap: 10px;
+      padding: 10px 14px;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .clip-entry:hover { background: rgba(255,255,255,0.04); }
+    .clip-entry.active {
+      background: var(--red-soft);
+      border-left-color: var(--red);
+    }
+    .clip-thumb {
+      position: relative;
+      width: 108px;
+      aspect-ratio: 16/9;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(0,0,0,0.52);
+      flex-shrink: 0;
+    }
+    .clip-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .clip-thumb-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.4);
+      font-size: 18px;
+      background: rgba(0,0,0,0.55);
+    }
+    .clip-copy { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .clip-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .clip-meta {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .clip-time {
+      font-size: 11px;
+      color: var(--muted-soft);
+      letter-spacing: 0.2px;
+    }
+
+    /* Main panel */
+    #main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: #000;
+    }
+    #main::-webkit-scrollbar { width: 4px; }
+    #main::-webkit-scrollbar-track { background: transparent; }
+    #main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+    #placeholder {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      color: rgba(255,255,255,0.2);
+      font-size: 12px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    #player-section { display: none; flex-direction: column; flex: 1; }
+    #player-section.visible { display: flex; }
+    #player-wrap {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      flex-shrink: 0;
+    }
+    #clip-video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      background: #000;
+      outline: none;
+    }
+
+    #info-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      flex-shrink: 0;
+    }
+    #info-left { display: flex; flex-direction: column; gap: 6px; }
+    #clip-title-main {
+      font-size: 18px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.25;
+    }
+    #clip-byline, #clip-date-main, #clip-duration-main {
+      font-size: 12px;
+      color: rgba(255,255,255,0.44);
+    }
+    #download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(224,48,48,0.82);
+      color: #fff;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: 10px;
+      font-weight: 800;
+      border-radius: 6px;
+      padding: 9px 16px;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    #download-btn:hover { background: rgba(230,60,60,0.95); }
+
+    @media (max-width: 860px) {
+      body { overflow: auto; }
+      #page { height: auto; min-height: 100vh; }
+      #content-area { flex-direction: column; overflow: visible; min-height: 0; }
+      #sidebar { width: 100%; max-height: 42vh; border-right: none; border-bottom: 1px solid var(--border); }
+      #main { overflow: visible; flex: 1; }
+      #placeholder { min-height: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="page">
+    <div id="top-bar">
+      <a id="logo-link" href="https://hitpoint.pro/live">HITPOINT.PRO</a>
+      <button id="back-btn" type="button">&larr; Back</button>
+    </div>
+
+    <div id="content-area">
+      <aside id="sidebar">
+        <div id="sidebar-head">Clips</div>
+        <div id="clip-list"></div>
+        <div id="clip-empty">No clips yet</div>
+      </aside>
+
+      <main id="main">
+        <div id="placeholder">Select a clip to play</div>
+
+        <section id="player-section">
+          <div id="player-wrap">
+            <video id="clip-video" controls autoplay preload="metadata" playsinline></video>
+          </div>
+          <div id="info-bar">
+            <div id="info-left">
+              <div id="clip-title-main"></div>
+              <div id="clip-byline"></div>
+              <div id="clip-date-main"></div>
+              <div id="clip-duration-main"></div>
+            </div>
+            <a id="download-btn" href="#" download>
+              <svg width="11" height="12" viewBox="0 0 11 12" fill="currentColor" aria-hidden="true">
+                <rect x="0" y="10" width="11" height="1.5" rx="0.5"></rect>
+                <path d="M5.5 0v8M2 5.5l3.5 3.5L9 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+              </svg>
+              Download
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://chat.hitpoint.pro/api';
+    const CLIP_BASE = 'https://stream.hitpoint.pro/clips/';
+
+    const backBtn = document.getElementById('back-btn');
+    const clipListEl = document.getElementById('clip-list');
+    const clipEmptyEl = document.getElementById('clip-empty');
+    const placeholderEl = document.getElementById('placeholder');
+    const playerSectionEl = document.getElementById('player-section');
+    const clipVideoEl = document.getElementById('clip-video');
+    const clipTitleMainEl = document.getElementById('clip-title-main');
+    const clipBylineEl = document.getElementById('clip-byline');
+    const clipDateMainEl = document.getElementById('clip-date-main');
+    const clipDurationMainEl = document.getElementById('clip-duration-main');
+    const downloadBtnEl = document.getElementById('download-btn');
+
+    let clips = [];
+    let activeFilename = null;
+
+    function durationText(seconds) {
+      const s = Math.max(0, Number(seconds) || 0);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = Math.floor(s % 60);
+      if (h > 0) return `${h}h ${m}m ${sec}s`;
+      if (m > 0) return `${m}m ${sec}s`;
+      return `${sec}s`;
+    }
+
+    function fullDateText(ts) {
+      const d = new Date(Number(ts) || Date.now());
+      if (Number.isNaN(d.getTime())) return 'Unknown date';
+      const datePart = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return `${datePart} at ${timePart}`;
+    }
+
+    function relativeTimeText(ts) {
+      const t = Number(ts);
+      if (!Number.isFinite(t)) return 'Unknown time';
+      const diffSec = Math.max(0, Math.floor((Date.now() - t) / 1000));
+      if (diffSec < 45) return 'just now';
+      const mins = Math.floor(diffSec / 60);
+      if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+      const days = Math.floor(hours / 24);
+      return `${days} day${days === 1 ? '' : 's'} ago`;
+    }
+
+    function clipVideoUrl(clip) {
+      return `${CLIP_BASE}${clip.filename}`;
+    }
+
+    function clipThumbUrl(clip) {
+      return clip.thumbnail ? `${CLIP_BASE}${clip.thumbnail}` : '';
+    }
+
+    function setActiveEntry() {
+      document.querySelectorAll('.clip-entry').forEach((entry) => {
+        entry.classList.toggle('active', entry.dataset.filename === activeFilename);
+      });
+    }
+
+    function selectClip(clip) {
+      activeFilename = clip.filename;
+      setActiveEntry();
+
+      const src = clipVideoUrl(clip);
+      clipVideoEl.src = src;
+      clipVideoEl.play().catch(() => {});
+
+      clipTitleMainEl.textContent = clip.title || 'Untitled clip';
+      clipBylineEl.textContent = `Clipped by ${clip.username || 'Unknown'}`;
+      clipDateMainEl.textContent = fullDateText(clip.created_at);
+      clipDurationMainEl.textContent = `Duration: ${durationText(clip.duration_seconds)}`;
+      downloadBtnEl.href = src;
+      downloadBtnEl.download = clip.filename || 'clip.mp4';
+
+      placeholderEl.style.display = 'none';
+      playerSectionEl.classList.add('visible');
+    }
+
+    function buildClipEntry(clip) {
+      const entry = document.createElement('div');
+      entry.className = 'clip-entry';
+      entry.dataset.filename = clip.filename || '';
+
+      const thumbWrap = document.createElement('div');
+      thumbWrap.className = 'clip-thumb';
+      const fallback = document.createElement('div');
+      fallback.className = 'clip-thumb-fallback';
+      fallback.innerHTML = '&#9654;';
+      thumbWrap.appendChild(fallback);
+
+      const thumb = clipThumbUrl(clip);
+      if (thumb) {
+        const img = document.createElement('img');
+        img.src = thumb;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.addEventListener('error', () => { img.remove(); });
+        thumbWrap.appendChild(img);
+      }
+
+      const copy = document.createElement('div');
+      copy.className = 'clip-copy';
+      const title = document.createElement('div');
+      title.className = 'clip-title';
+      title.textContent = clip.title || 'Untitled clip';
+      const meta = document.createElement('div');
+      meta.className = 'clip-meta';
+      meta.textContent = `Clipped by ${clip.username || 'Unknown'} • ${durationText(clip.duration_seconds)}`;
+      const time = document.createElement('div');
+      time.className = 'clip-time';
+      time.textContent = relativeTimeText(clip.created_at);
+      copy.appendChild(title);
+      copy.appendChild(meta);
+      copy.appendChild(time);
+
+      entry.appendChild(thumbWrap);
+      entry.appendChild(copy);
+      entry.addEventListener('click', () => selectClip(clip));
+      return entry;
+    }
+
+    function renderClipList() {
+      clipListEl.innerHTML = '';
+      if (!clips.length) {
+        clipEmptyEl.style.display = 'block';
+        placeholderEl.style.display = 'flex';
+        playerSectionEl.classList.remove('visible');
+        return;
+      }
+
+      clipEmptyEl.style.display = 'none';
+      clips.forEach((clip) => clipListEl.appendChild(buildClipEntry(clip)));
+    }
+
+    async function loadClips() {
+      clipEmptyEl.style.display = 'none';
+      clipListEl.innerHTML = '';
+      try {
+        const res = await fetch(`${API}/clips`);
+        if (!res.ok) throw new Error(`Unable to load clips (${res.status})`);
+        const data = await res.json();
+        clips = Array.isArray(data) ? data : [];
+        clips.sort((a, b) => (Number(b.created_at) || 0) - (Number(a.created_at) || 0));
+        renderClipList();
+        if (clips.length) selectClip(clips[0]);
+      } catch {
+        clipEmptyEl.textContent = 'No clips yet';
+        clipEmptyEl.style.display = 'block';
+      }
+    }
+
+    backBtn.addEventListener('click', () => {
+      if (window.history.length > 1) window.history.back();
+      else window.location.href = 'https://hitpoint.pro/live';
+    });
+
+    loadClips();
+  </script>
+</body>
+</html>
