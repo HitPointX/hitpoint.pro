@@ -128,6 +128,14 @@
     .msg.system.local-error {
       color: rgba(255,140,100,0.9);
     }
+    .msg.system.local-whisper {
+      color: rgba(213,194,255,0.95);
+      background: rgba(112,74,164,0.18);
+      border: 1px solid rgba(142,104,196,0.28);
+      border-radius: 4px;
+      margin: 2px 10px;
+      padding: 4px 8px;
+    }
     .msg-badge {
       font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
       padding: 1px 4px; border-radius: 2px; align-self: flex-start; flex-shrink: 0; margin-top: 2px;
@@ -1703,6 +1711,10 @@
         appendLocalError(msg.message);
         if (autoScroll) scrollBottom(); else el('scroll-pill').classList.add('visible');
         break;
+      case 'whisper':
+        appendWhisper(msg.content, msg.timestamp);
+        if (autoScroll) scrollBottom(); else el('scroll-pill').classList.add('visible');
+        break;
       case 'clip':
         appendClipCard(msg.clip);
         if (autoScroll) scrollBottom(); else el('scroll-pill').classList.add('visible');
@@ -2047,6 +2059,16 @@
     const div = document.createElement('div');
     div.className = 'msg system local-error';
     div.textContent = text;
+    el('messages').appendChild(div);
+  }
+
+  function appendWhisper(content, timestamp) {
+    const text = String(content || '').trim();
+    if (!text) return;
+    const time = timestamp ? ` (${fmtTime(timestamp)})` : '';
+    const div = document.createElement('div');
+    div.className = 'msg system local-whisper';
+    div.textContent = `🔒 whisper: ${text}${time}`;
     el('messages').appendChild(div);
   }
 
