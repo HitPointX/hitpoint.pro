@@ -125,6 +125,9 @@
       display: block; padding: 3px 12px;
       font-size: 11px; font-style: italic; color: rgba(255,255,255,0.25);
     }
+    .msg.system.local-error {
+      color: rgba(255,140,100,0.9);
+    }
     .msg-badge {
       font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
       padding: 1px 4px; border-radius: 2px; align-self: flex-start; flex-shrink: 0; margin-top: 2px;
@@ -1684,6 +1687,10 @@
         appendSystem(msg.content);
         if (autoScroll) scrollBottom();
         break;
+      case 'error':
+        appendLocalError(msg.message);
+        if (autoScroll) scrollBottom(); else el('scroll-pill').classList.add('visible');
+        break;
       case 'clip':
         appendClipCard(msg.clip);
         if (autoScroll) scrollBottom(); else el('scroll-pill').classList.add('visible');
@@ -2007,6 +2014,15 @@
     const div = document.createElement('div');
     div.className   = 'msg system';
     div.textContent = content;
+    el('messages').appendChild(div);
+  }
+
+  function appendLocalError(content) {
+    const text = String(content || '').trim();
+    if (!text) return;
+    const div = document.createElement('div');
+    div.className = 'msg system local-error';
+    div.textContent = text;
     el('messages').appendChild(div);
   }
 
