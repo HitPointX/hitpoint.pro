@@ -2357,6 +2357,7 @@
     '/clear                  — clear all chat messages',
     '/slowmode <secs|off>    — enable/disable slow mode',
     '/emotemode [off]        — toggle emote-only mode',
+    '/whisper <user> <msg>   — send a private whisper',
     '/ban <user>             — permanently ban a user',
     '/unban <user>           — remove a ban',
     '/kick <user>            — remove user for 10 minutes',
@@ -2409,6 +2410,10 @@
           wsSend({ type: 'emotemode', enabled: true });
           localSystem('Emote mode enabled.');
         }
+        break;
+
+      case 'whisper':
+        localSystem('Usage: /whisper <username> <message> — only visible to the sender, not broadcast.');
         break;
 
       case 'ban':
