@@ -134,6 +134,12 @@
     }
     .msg-badge.admin { background: rgba(200,20,20,0.28); color: #ff6070; }
     .msg-badge.mod   { background: rgba(20,160,80,0.22);  color: #3ddd88; }
+    .msg-badge.bot {
+      background: rgba(42,58,58,0.7);
+      border: 1px solid rgba(84,122,120,0.6);
+      color: #8ed1c6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
     .msg-user {
       font-weight: 700; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s;
     }
@@ -584,6 +590,12 @@
       background: rgba(20,160,80,0.2);
       border: 1px solid rgba(20,160,80,0.3);
       color: #3ddd88;
+    }
+    .viewer-role-tag.bot {
+      background: rgba(42,58,58,0.7);
+      border: 1px solid rgba(84,122,120,0.6);
+      color: #8ed1c6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     }
     #viewers-guests {
       flex-shrink: 0;
@@ -1815,17 +1827,23 @@
     return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
   }
 
-  function viewerRoleBadge(role) {
-    if (role === 'admin') return '<span class="viewer-role-tag admin">ADMIN</span>';
-    if (role === 'mod') return '<span class="viewer-role-tag mod">MOD</span>';
-    return '';
+  function isBotFlag(value) {
+    return value === true || value === 1;
+  }
+
+  function viewerRoleBadge(role, isBot = false) {
+    let badge = '';
+    if (role === 'admin') badge += '<span class="viewer-role-tag admin">ADMIN</span>';
+    else if (role === 'mod') badge += '<span class="viewer-role-tag mod">MOD</span>';
+    if (isBot) badge += '<span class="viewer-role-tag bot">BOT</span>';
+    return badge;
   }
 
   function buildViewerRow(user, isSelf = false) {
     const row = document.createElement('div');
     row.className = `viewer-item${isSelf ? ' viewer-self' : ''}`;
     const youTag = isSelf ? '<span class="viewer-you-tag">YOU</span>' : '';
-    row.innerHTML = `<span class="viewer-name ${user.role}" tabindex="0">${esc(user.username)}</span>${youTag}${viewerRoleBadge(user.role)}`;
+    row.innerHTML = `<span class="viewer-name ${user.role}" tabindex="0">${esc(user.username)}</span>${youTag}${viewerRoleBadge(user.role, isBotFlag(user.isBot))}`;
 
     const nameEl = row.querySelector('.viewer-name');
     if (nameEl) {
@@ -1876,7 +1894,7 @@
     const selfUser = meName
       ? (selfFromList
         ? viewerUsers[selfIndex]
-        : { username: meName, role: normalizeViewerRole(currentUser?.role) })
+        : { username: meName, role: normalizeViewerRole(currentUser?.role), isBot: isBotFlag(currentUser?.is_bot ?? currentUser?.isBot) })
       : null;
 
     if (selfUser) {
@@ -1910,7 +1928,11 @@
     viewerUsers = sortViewerUsers(
       parsedUsers
         .filter((u) => u && typeof u.username === 'string' && u.username.trim())
-        .map((u) => ({ username: u.username.trim(), role: normalizeViewerRole(u.role) }))
+        .map((u) => ({
+          username: u.username.trim(),
+          role: normalizeViewerRole(u.role),
+          isBot: isBotFlag(u.is_bot),
+        }))
     );
     viewerGuests = toNonNegativeInt(guests, 0);
     viewersLoaded = true;
@@ -1954,6 +1976,7 @@
     if (ignoreList.has(msg.username)) return;
 
     const role    = msg.role || 'viewer';
+    const isBot   = isBotFlag(msg.is_bot);
     const time    = msg.timestamp ? fmtTime(msg.timestamp) : '';
     const safeU   = esc(msg.username || '');
     const safeC   = parseEmotes(esc(msg.content || ''));
@@ -1964,8 +1987,9 @@
     div.dataset.user = msg.username || '';
 
     let badge = '';
-    if (role === 'admin') badge = `<span class="msg-badge admin">ADMIN</span>`;
-    else if (role === 'mod') badge = `<span class="msg-badge mod">MOD</span>`;
+    if (role === 'admin') badge += `<span class="msg-badge admin">ADMIN</span>`;
+    else if (role === 'mod') badge += `<span class="msg-badge mod">MOD</span>`;
+    if (isBot) badge += `<span class="msg-badge bot">BOT</span>`;
 
     div.innerHTML = `
       ${badge}
