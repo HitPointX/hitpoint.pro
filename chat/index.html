@@ -2156,8 +2156,20 @@
   }
 
   function openExternal(url) {
-    const w = window.open(url, '_blank', 'noopener,noreferrer');
-    if (!w) window.location.href = url;
+    const targetUrl = String(url || '').trim();
+    if (!targetUrl) return;
+    const w = window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    if (w) return;
+
+    // Never navigate the embedded chat frame away from /chat/.
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({ type: 'hp-chat-open-external', url: targetUrl }, window.location.origin);
+      } catch {}
+      return;
+    }
+
+    window.location.href = targetUrl;
   }
 
   function appendClipCard(clip) {
