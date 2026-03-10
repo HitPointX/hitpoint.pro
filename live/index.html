@@ -268,6 +268,12 @@
       border-color: rgba(224,48,48,0.72);
       box-shadow: 0 0 0 2px rgba(224,48,48,0.14);
     }
+    #clip-dialog-info {
+      min-height: 15px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.52);
+      line-height: 1.35;
+    }
     #clip-dialog-actions {
       display: flex;
       gap: 8px;
@@ -482,6 +488,7 @@
           <div id="clip-dialog" aria-hidden="true">
             <div id="clip-dialog-title">Name your clip</div>
             <input id="clip-title-input" type="text" maxlength="80" placeholder="e.g. Insane clutch moment">
+            <div id="clip-dialog-info"></div>
             <div id="clip-dialog-error"></div>
             <div id="clip-dialog-actions">
               <button class="clip-dialog-btn" id="clip-cancel-btn" type="button">Cancel</button>
@@ -614,6 +621,7 @@
     const seekbarWrap = document.getElementById('seekbar-wrap');
     const clipDialog  = document.getElementById('clip-dialog');
     const clipTitleInput = document.getElementById('clip-title-input');
+    const clipDialogInfo = document.getElementById('clip-dialog-info');
     const clipDialogError = document.getElementById('clip-dialog-error');
     const clipCancelBtn = document.getElementById('clip-cancel-btn');
     const clipGenerateBtn = document.getElementById('clip-generate-btn');
@@ -654,12 +662,30 @@
       if (!visible && clipDialog.classList.contains('visible')) closeClipDialog();
     }
 
+    function getClipStartOffset() {
+      const dist = getClipDistanceFromLive();
+      if (dist == null) return null;
+      return Math.min(120, Math.max(1, Math.round(dist)));
+    }
+
+    function updateClipDialogInfo() {
+      if (!clipDialogInfo) return;
+      const startOffset = getClipStartOffset();
+      if (startOffset == null) {
+        clipDialogInfo.textContent = 'Clip timing unavailable until stream data is ready.';
+        return;
+      }
+      const capped = startOffset >= 120;
+      clipDialogInfo.textContent = `Rewound ${startOffset}s from live. Estimated clip length: ${startOffset}s${capped ? ' (max 120s).' : '.'}`;
+    }
+
     function showClipError(message) {
       clipDialogError.textContent = message || '';
     }
 
     function openClipDialog() {
       showClipError('');
+      updateClipDialogInfo();
       clipDialog.classList.add('visible');
       clipDialog.setAttribute('aria-hidden', 'false');
       clipTitleInput.value = '';
@@ -693,12 +719,11 @@
         showClipError('Please enter a clip name');
         return;
       }
-      const dist = getClipDistanceFromLive();
-      if (dist == null) {
+      const startOffset = getClipStartOffset();
+      if (startOffset == null) {
         showClipError('Stream must be live to clip');
         return;
       }
-      const startOffset = Math.min(120, Math.max(1, Math.round(dist)));
       clipGenerateBtn.disabled = true;
       clipGenerateBtn.classList.add('loading');
       clipGenerateLabel.textContent = 'Clipping...';
@@ -780,6 +805,7 @@
       seekbarWrap.classList.toggle('visible', paused);
       if (paused && isFinite(dist)) { seekbar.value = Math.round(120 - Math.min(120, Math.max(0, dist))); updateSeekbarFill(); }
       updateClipButtonVisibility();
+      if (clipDialog.classList.contains('visible')) updateClipDialogInfo();
     }
     video.addEventListener('timeupdate', updateLiveEdge);
     video.addEventListener('durationchange', updateClipButtonVisibility);
