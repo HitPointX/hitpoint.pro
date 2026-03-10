@@ -10,15 +10,212 @@
   gtag('config', 'AW-18004893946');
 </script>
   <meta charset="UTF-8" />
-  <title>Redirecting...</title>
+  <title>HitPoint - LIVE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #f2f2f2;
+      background:
+        radial-gradient(circle at 20% -10%, rgba(154, 45, 76, 0.26), transparent 48%),
+        radial-gradient(circle at 90% 95%, rgba(138, 36, 66, 0.2), transparent 52%),
+        #0c0c10;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 0 0 1px rgba(154, 45, 76, 0.35),
+        0 0 56px rgba(138, 36, 66, 0.18),
+        inset 0 0 48px rgba(154, 45, 76, 0.12);
+      pointer-events: none;
+    }
+
+    .redirect-card {
+      width: min(100%, 520px);
+      background: rgba(10, 12, 18, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+      backdrop-filter: blur(5px);
+      padding: 26px 24px;
+      text-align: center;
+    }
+
+    .redirect-card h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: pre;
+      line-height: 1.1;
+      min-height: 1.3em;
+    }
+
+    #redirect-title .glitch-char {
+      display: inline-block;
+      will-change: transform, filter, color;
+    }
+
+    #redirect-title .glitch-char.space {
+      width: 0.38em;
+    }
+
+    #redirect-title .glitch-char.is-glitching {
+      animation: title-glitch 200ms steps(1, end) 1;
+    }
+
+    @keyframes title-glitch {
+      0% {
+        transform: translate(0, 0);
+        color: #ffffff;
+        filter: none;
+      }
+      20% {
+        transform: translate(-1px, 0);
+        filter: drop-shadow(-1px 0 rgba(255, 40, 60, 0.72)) drop-shadow(1px 0 rgba(0, 210, 255, 0.62));
+      }
+      45% {
+        transform: translate(1px, -0.5px);
+        color: #ffd5dd;
+        filter: blur(0.25px) hue-rotate(-12deg);
+      }
+      70% {
+        transform: translate(-1px, 0.5px);
+        filter: drop-shadow(1px 0 rgba(255, 125, 35, 0.7)) drop-shadow(-1px 0 rgba(0, 210, 255, 0.58));
+      }
+      100% {
+        transform: translate(0, 0);
+        color: #ffffff;
+        filter: none;
+      }
+    }
+
+    .redirect-card p {
+      margin: 0 0 18px;
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 0.95rem;
+    }
+
+    .live-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      background: linear-gradient(135deg, #23252d 0%, #4a4d56 74%, #4f4953 87%, #8a2442 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.36),
+        inset -1px -1px 0 rgba(172, 45, 82, 0.28),
+        inset 0 -3px 6px rgba(150, 32, 66, 0.15);
+    }
+
+    .live-link:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .live-link .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      animation: live-dot 1.8s ease-in-out infinite;
+    }
+
+    @keyframes live-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.28; }
+    }
+  </style>
   <meta http-equiv="refresh" content="3; url=https://hitpoint.pro/live" />
   <script>
     // JavaScript fallback redirect :P
     setTimeout(() => { window.location.href = "https://hitpoint.pro/live"; }, 3000);
+
+    // Toned-down per-letter glitch for redirect title.
+    document.addEventListener("DOMContentLoaded", () => {
+      const titleEl = document.getElementById("redirect-title");
+      if (!titleEl) return;
+
+      const titleText = titleEl.textContent;
+      titleEl.textContent = "";
+
+      const letters = [];
+      for (const [index, ch] of [...titleText].entries()) {
+        const span = document.createElement("span");
+        span.className = "glitch-char";
+        span.textContent = ch;
+        if (ch === " ") span.classList.add("space");
+        if (/[A-Za-z0-9]/.test(ch)) {
+          letters.push({ el: span, index });
+        }
+        titleEl.appendChild(span);
+      }
+
+      const glitchOnce = (entry) => {
+        if (Math.random() > 0.2) {
+          entry.el.classList.add("is-glitching");
+          setTimeout(() => entry.el.classList.remove("is-glitching"), 180 + Math.random() * 90);
+        }
+      };
+
+      const pulseLetter = (entry) => {
+        const base = 700 + (entry.index % 4) * 240;
+        const jitter = 500 + Math.random() * 450;
+        const wait = base + jitter;
+
+        setTimeout(() => {
+          if (!document.body.contains(entry.el)) return;
+          glitchOnce(entry);
+          pulseLetter(entry);
+        }, wait);
+      };
+
+      letters.forEach((entry) => {
+        const initial = 120 + Math.random() * 640;
+        setTimeout(() => {
+          if (!document.body.contains(entry.el)) return;
+          glitchOnce(entry);
+          pulseLetter(entry);
+        }, initial);
+      });
+    });
   </script>
 </head>
 <body>
-  <p>If you are not redirected automatically, <a href="https://hitpoint.pro/live">click here</a>.</p>
+  <main class="redirect-card" aria-live="polite">
+    <h1 id="redirect-title">HitPoint - LIVE</h1>
+    <p>Redirecting you to the stream now.</p>
+    <a class="live-link" href="https://hitpoint.pro/live"><span class="dot"></span>Go to Live</a>
+  </main>
 </body>
 </html>
