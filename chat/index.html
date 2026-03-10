@@ -1986,6 +1986,7 @@
   /* ── Message rendering ───────────────────────────────────── */
   function appendMessage(msg) {
     if (ignoreList.has(msg.username)) return;
+    if (shouldHideBangCommandForCurrentViewer(msg)) return;
 
     const role    = msg.role || 'viewer';
     const isBot   = isBotFlag(msg.is_bot);
@@ -2051,6 +2052,21 @@
     div.className   = 'msg system';
     div.textContent = content;
     el('messages').appendChild(div);
+  }
+
+  function isPrivateBangCommand(content) {
+    const raw = String(content || '').trimStart();
+    if (!raw.startsWith('!')) return false;
+    const cmd = raw.slice(1).split(/\s+/, 1)[0]?.toLowerCase() || '';
+    return !!cmd && cmd !== 'song';
+  }
+
+  function shouldHideBangCommandForCurrentViewer(msg) {
+    // Mods/admins can see all command messages.
+    if (isMod()) return false;
+    // Senders can still see their own command message.
+    if (sameUser(msg?.username, currentUser?.username)) return false;
+    return isPrivateBangCommand(msg?.content);
   }
 
   function appendLocalError(content) {
