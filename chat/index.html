@@ -321,14 +321,20 @@
     }
 
     #send-btn {
-      background: rgba(200,20,20,0.8); border: none; color: #fff;
+      background: linear-gradient(135deg, #23252d 0%, #4a4d56 58%, #8a1f3b 100%);
+      border: 1px solid rgba(255,255,255,0.08); color: #fff;
       font-size: 18px; font-weight: 700; line-height: 1;
       width: 36px; height: 36px; padding: 0;
       border-radius: 6px; cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center;
-      flex-shrink: 0; transition: background 0.15s;
+      flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      transition: background 0.15s, border-color 0.15s, transform 0.12s;
     }
-    #send-btn:hover { background: rgba(225,30,30,0.95); }
+    #send-btn:hover {
+      background: linear-gradient(135deg, #2a2d36 0%, #575b66 56%, #a3294c 100%);
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+    }
     #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     #slow-notice {
