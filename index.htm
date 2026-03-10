@@ -25,9 +25,10 @@
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
       color: #f2f2f2;
       background:
-        radial-gradient(circle at 20% -10%, rgba(154, 45, 76, 0.26), transparent 48%),
-        radial-gradient(circle at 90% 95%, rgba(138, 36, 66, 0.2), transparent 52%),
-        #0c0c10;
+        radial-gradient(circle at center, rgba(8, 9, 14, 0.96) 0%, rgba(8, 9, 14, 0.92) 36%, rgba(8, 9, 14, 0.58) 54%, rgba(8, 9, 14, 0) 74%),
+        radial-gradient(circle at 18% -8%, rgba(124, 26, 50, 0.2), transparent 42%),
+        radial-gradient(circle at 88% 104%, rgba(110, 20, 42, 0.18), transparent 44%),
+        #0b0c10;
       display: grid;
       place-items: center;
       padding: 24px;
@@ -55,15 +56,15 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(72% 72% at -12% -14%, rgba(136, 18, 38, 0.86) 0%, rgba(136, 18, 38, 0.46) 21%, rgba(136, 18, 38, 0.2) 37%, rgba(136, 18, 38, 0.08) 54%, transparent 73%),
-        radial-gradient(72% 72% at 112% 114%, rgba(136, 18, 38, 0.86) 0%, rgba(136, 18, 38, 0.46) 21%, rgba(136, 18, 38, 0.2) 37%, rgba(136, 18, 38, 0.08) 54%, transparent 73%),
-        repeating-radial-gradient(circle at -12% -14%, rgba(162, 38, 58, 0.16) 0 1.5px, rgba(92, 16, 31, 0.08) 1.5px 3px, transparent 3px 32px),
-        repeating-radial-gradient(circle at 112% 114%, rgba(162, 38, 58, 0.16) 0 1.5px, rgba(92, 16, 31, 0.08) 1.5px 3px, transparent 3px 32px);
-      background-size: 100% 100%, 100% 100%, 124% 124%, 124% 124%;
-      opacity: 0.56;
+        radial-gradient(58% 58% at -12% -14%, rgba(132, 20, 38, 0.72) 0%, rgba(132, 20, 38, 0.36) 20%, rgba(132, 20, 38, 0.14) 34%, rgba(132, 20, 38, 0.05) 46%, transparent 60%),
+        radial-gradient(58% 58% at 112% 114%, rgba(132, 20, 38, 0.72) 0%, rgba(132, 20, 38, 0.36) 20%, rgba(132, 20, 38, 0.14) 34%, rgba(132, 20, 38, 0.05) 46%, transparent 60%),
+        repeating-radial-gradient(circle at -12% -14%, rgba(152, 34, 52, 0.1) 0 1.2px, rgba(88, 15, 28, 0.05) 1.2px 2.4px, transparent 2.4px 42px),
+        repeating-radial-gradient(circle at 112% 114%, rgba(152, 34, 52, 0.1) 0 1.2px, rgba(88, 15, 28, 0.05) 1.2px 2.4px, transparent 2.4px 42px);
+      background-size: 100% 100%, 100% 100%, 112% 112%, 112% 112%;
+      opacity: 0.44;
       mix-blend-mode: screen;
-      filter: saturate(0.96) brightness(0.82) contrast(1.05);
-      animation: corner-bleed 6.6s ease-in-out infinite;
+      filter: saturate(0.9) brightness(0.74) contrast(1.08);
+      animation: corner-bleed 7.2s ease-in-out infinite;
       pointer-events: none;
       z-index: 0;
     }
@@ -71,28 +72,28 @@
     @keyframes corner-bleed {
       0%,
       100% {
-        opacity: 0.48;
-        filter: saturate(0.95) brightness(0.8) contrast(1.08);
-        transform: scale(1.008);
-        background-size: 100% 100%, 100% 100%, 118% 118%, 118% 118%;
+        opacity: 0.4;
+        filter: saturate(0.86) brightness(0.68) contrast(1.1);
+        transform: scale(1.004);
+        background-size: 100% 100%, 100% 100%, 108% 108%, 108% 108%;
       }
       30% {
-        opacity: 0.64;
-        filter: saturate(1.06) brightness(0.92) contrast(1.08);
-        transform: scale(1.026);
-        background-size: 103% 103%, 103% 103%, 130% 130%, 130% 130%;
+        opacity: 0.5;
+        filter: saturate(0.95) brightness(0.8) contrast(1.1);
+        transform: scale(1.014);
+        background-size: 102% 102%, 102% 102%, 114% 114%, 114% 114%;
       }
       55% {
-        opacity: 0.78;
-        filter: saturate(1.22) brightness(1.1) contrast(1.12);
-        transform: scale(1.045);
-        background-size: 108% 108%, 108% 108%, 146% 146%, 146% 146%;
+        opacity: 0.58;
+        filter: saturate(1.08) brightness(0.96) contrast(1.12);
+        transform: scale(1.024);
+        background-size: 104% 104%, 104% 104%, 122% 122%, 122% 122%;
       }
       78% {
-        opacity: 0.58;
-        filter: saturate(1.03) brightness(0.9) contrast(1.08);
-        transform: scale(1.02);
-        background-size: 102% 102%, 102% 102%, 134% 134%, 134% 134%;
+        opacity: 0.46;
+        filter: saturate(0.9) brightness(0.76) contrast(1.1);
+        transform: scale(1.01);
+        background-size: 101% 101%, 101% 101%, 116% 116%, 116% 116%;
       }
     }
 
