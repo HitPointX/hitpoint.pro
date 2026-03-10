@@ -866,8 +866,15 @@
 
     window.addEventListener('message', (e) => {
       if (e.origin !== window.location.origin) return;
-      if (e.data?.type !== 'hp-chat-popout') return;
-      popoutChatFromLive();
+      if (e.data?.type === 'hp-chat-popout') {
+        popoutChatFromLive();
+        return;
+      }
+      if (e.data?.type === 'hp-chat-open-external') {
+        const url = String(e.data?.url || '').trim();
+        if (!/^https?:\/\//i.test(url)) return;
+        try { window.open(url, '_blank', 'noopener,noreferrer'); } catch {}
+      }
     });
 
     document.getElementById('show-chat-btn').addEventListener('click', () => {
