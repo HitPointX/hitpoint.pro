@@ -1712,7 +1712,7 @@
         if (autoScroll) scrollBottom(); else el('scroll-pill').classList.add('visible');
         break;
       case 'whisper':
-        appendWhisper(msg.content, msg.timestamp);
+        appendWhisper(msg);
         if (autoScroll) scrollBottom(); else el('scroll-pill').classList.add('visible');
         break;
       case 'clip':
@@ -2062,13 +2062,23 @@
     el('messages').appendChild(div);
   }
 
-  function appendWhisper(content, timestamp) {
-    const text = String(content || '').trim();
+  function whisperPrefix(payload) {
+    const role = String(payload?.fromRole || '').trim().toLowerCase();
+    const fromIsBot = payload?.fromIsBot === true || payload?.fromIsBot === 1 || payload?.is_bot === true || payload?.is_bot === 1;
+    if (!role || role === 'is_bot' || fromIsBot) return 'hitbot: ';
+    if (role === 'mod') return 'mod \u2192 you: ';
+    if (role === 'admin') return 'admin \u2192 you: ';
+    const fromName = String(payload?.fromUsername || '').trim();
+    if (fromName) return `${fromName} \u2192 you: `;
+    return 'whisper: ';
+  }
+
+  function appendWhisper(payload) {
+    const text = String(payload?.content || '').trim();
     if (!text) return;
-    const time = timestamp ? ` (${fmtTime(timestamp)})` : '';
     const div = document.createElement('div');
     div.className = 'msg system local-whisper';
-    div.textContent = `🔒 whisper: ${text}${time}`;
+    div.textContent = `🔒 ${whisperPrefix(payload)}${text}`;
     el('messages').appendChild(div);
   }
 
