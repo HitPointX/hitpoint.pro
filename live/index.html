@@ -169,25 +169,36 @@
     .ctrl-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
     #ctrl-live-btn {
       display: flex; align-items: center; gap: 5px;
-      background: linear-gradient(135deg, #23252d 0%, #4a4d56 55%, #9a2246 100%);
+      background: linear-gradient(135deg, #23252d 0%, #4a4d56 74%, #4f4953 87%, #8a2442 100%);
       border: 1px solid rgba(255,255,255,0.10); border-radius: 4px;
       color: #fff; font-size: 10px; font-weight: 800;
       letter-spacing: 1.5px; text-transform: uppercase;
       padding: 4px 9px 4px 7px; height: 26px; cursor: default;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+      box-shadow:
+        0 4px 10px rgba(0,0,0,0.35),
+        inset -1px -1px 0 rgba(172,45,82,0.30),
+        inset 0 -3px 6px rgba(150,32,66,0.15);
       transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
     }
     #ctrl-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; flex-shrink: 0; }
     #ctrl-live-btn.at-edge #ctrl-live-dot { animation: liveDotBlink 1.8s ease-in-out infinite; }
     @keyframes liveDotBlink { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
     #ctrl-live-btn.behind {
-      background: linear-gradient(135deg, #1f2128 0%, #3f434d 54%, #741a36 100%);
+      background: linear-gradient(135deg, #1f2128 0%, #3f434d 75%, #45404a 88%, #6e1f38 100%);
       border-color: rgba(255,255,255,0.08);
+      box-shadow:
+        0 4px 10px rgba(0,0,0,0.35),
+        inset -1px -1px 0 rgba(136,34,64,0.22),
+        inset 0 -2px 5px rgba(120,24,53,0.12);
       cursor: pointer;
     }
     #ctrl-live-btn.behind:hover {
-      background: linear-gradient(135deg, #2b2e37 0%, #595d67 54%, #b12c57 100%);
+      background: linear-gradient(135deg, #2b2e37 0%, #595d67 73%, #62525d 87%, #9a2d4c 100%);
       border-color: rgba(255,255,255,0.16);
+      box-shadow:
+        0 6px 12px rgba(0,0,0,0.36),
+        inset -1px -1px 0 rgba(191,57,98,0.36),
+        inset 0 -3px 7px rgba(170,40,78,0.20);
       transform: translateY(-1px);
     }
     #ctrl-clip-btn {
