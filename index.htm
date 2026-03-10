@@ -97,6 +97,34 @@
       }
     }
 
+    #fan-layer {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(74vw, 1120px);
+      min-width: 560px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.38;
+      mix-blend-mode: screen;
+      filter: saturate(0.92) brightness(0.78) contrast(1.08);
+    }
+
+    #fan-layer img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    @media (max-width: 860px) {
+      #fan-layer {
+        width: 96vw;
+        min-width: 0;
+        opacity: 0.34;
+      }
+    }
+
     .redirect-card {
       width: min(100%, 520px);
       background: rgba(10, 12, 18, 0.82);
@@ -307,6 +335,9 @@
   </script>
 </head>
 <body>
+  <div id="fan-layer" aria-hidden="true">
+    <img src="/heart_fan_loop.gif" alt="">
+  </div>
   <main class="redirect-card" aria-live="polite">
     <h1 id="redirect-title">HitPoint ✖ LIVE</h1>
     <p>Redirecting you to the stream now.</p>
