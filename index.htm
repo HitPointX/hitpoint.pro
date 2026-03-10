@@ -131,11 +131,46 @@
 
     #redirect-title .glitch-char {
       display: inline-block;
+      position: relative;
+      z-index: 1;
+      isolation: isolate;
+      color: #06060a;
       will-change: transform, filter, color;
+    }
+
+    #redirect-title .glitch-char::before,
+    #redirect-title .glitch-char::after {
+      content: attr(data-char);
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    #redirect-title .glitch-char::before {
+      background: linear-gradient(128deg, rgba(255, 128, 156, 0.96) 4%, rgba(176, 44, 79, 0.9) 56%, rgba(255, 157, 96, 0.78) 100%);
+      transform: translate(0.52px, -0.5px);
+      opacity: 0.9;
+      filter: saturate(1.1);
+    }
+
+    #redirect-title .glitch-char::after {
+      background: linear-gradient(302deg, rgba(255, 110, 150, 0.78) 0%, rgba(138, 31, 58, 0.84) 54%, rgba(255, 185, 122, 0.58) 100%);
+      transform: translate(-0.46px, 0.44px);
+      opacity: 0.72;
     }
 
     #redirect-title .glitch-char.space {
       width: 0.38em;
+    }
+
+    #redirect-title .glitch-char.space::before,
+    #redirect-title .glitch-char.space::after {
+      content: none;
     }
 
     #redirect-title .glitch-char.is-glitching {
@@ -145,7 +180,7 @@
     @keyframes title-glitch {
       0% {
         transform: translate(0, 0);
-        color: #ffffff;
+        color: #06060a;
         filter: none;
       }
       20% {
@@ -154,7 +189,7 @@
       }
       45% {
         transform: translate(1px, -0.5px);
-        color: #ffd5dd;
+        color: #180d17;
         filter: blur(0.25px) hue-rotate(-12deg);
       }
       70% {
@@ -163,7 +198,7 @@
       }
       100% {
         transform: translate(0, 0);
-        color: #ffffff;
+        color: #06060a;
         filter: none;
       }
     }
@@ -231,6 +266,7 @@
         const span = document.createElement("span");
         span.className = "glitch-char";
         span.textContent = ch;
+        span.dataset.char = ch;
         if (ch === " ") span.classList.add("space");
         if (/[A-Za-z0-9]/.test(ch)) {
           letters.push({ el: span, index });
