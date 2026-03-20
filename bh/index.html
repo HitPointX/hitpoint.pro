@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observer Well</title>
+  <meta
+    name="description"
+    content="A real-time black-hole funnel scene with spiraling particles, a glowing orb, and a bounded inspect camera."
+  >
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #020202;
+      --panel: rgba(255, 255, 255, 0.06);
+      --panel-border: rgba(255, 255, 255, 0.12);
+      --text: rgba(255, 255, 255, 0.9);
+      --muted: rgba(255, 255, 255, 0.58);
+      --glow: rgba(255, 255, 255, 0.18);
+      --accent: #f1f1f1;
+      --danger: rgba(255, 255, 255, 0.18);
+      font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.06), transparent 24%),
+        radial-gradient(circle at 50% 58%, rgba(255, 255, 255, 0.035), transparent 46%),
+        linear-gradient(180deg, #080808 0%, #010101 45%, #000000 100%);
+      overflow: hidden;
+    }
+
+    body {
+      color: var(--text);
+    }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      isolation: isolate;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.03), transparent 22%),
+        radial-gradient(circle at 50% 52%, rgba(255, 255, 255, 0.022), transparent 38%);
+    }
+
+    #scene {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .noise {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.24;
+      mix-blend-mode: screen;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0 1px, transparent 1.4px),
+        radial-gradient(circle at 80% 18%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 32% 72%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1.2px),
+        radial-gradient(circle at 74% 82%, rgba(255, 255, 255, 0.05) 0 1px, transparent 1.5px);
+      background-size: 170px 170px, 220px 220px, 260px 260px, 200px 200px;
+    }
+
+    .veil {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      background:
+        radial-gradient(circle at 50% 48%, transparent 20%, rgba(0, 0, 0, 0.08) 48%, rgba(0, 0, 0, 0.4) 100%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.1), transparent 24%, transparent 75%, rgba(0, 0, 0, 0.28));
+    }
+
+    .hud {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 22px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .card {
+      max-width: min(420px, calc(100vw - 44px));
+      padding: 14px 16px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      backdrop-filter: blur(14px) saturate(130%);
+      box-shadow:
+        0 20px 48px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      pointer-events: auto;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: 0.94;
+      font-weight: 650;
+      letter-spacing: -0.04em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .pill {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 11px;
+      transition:
+        transform 160ms ease,
+        background 160ms ease,
+        border-color 160ms ease;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+
+    button[aria-pressed="true"] {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.34);
+    }
+
+    .status {
+      min-width: 240px;
+      text-align: right;
+    }
+
+    .status strong {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.82);
+      margin-bottom: 8px;
+    }
+
+    .status span,
+    .status a {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status a {
+      pointer-events: auto;
+    }
+
+    .loading {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0.08), transparent 18%),
+        rgba(0, 0, 0, 0.82);
+      transition: opacity 500ms ease, visibility 500ms ease;
+    }
+
+    .loading.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .omen-canvas,
+    .message-layer,
+    .glyph-layer,
+    .whiteout {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .omen-canvas {
+      z-index: 5;
+    }
+
+    .message-layer {
+      z-index: 6;
+      display: grid;
+      place-items: center;
+      padding: 32px;
+      opacity: 0;
+      transition: opacity 900ms ease;
+    }
+
+    .message-layer.active {
+      opacity: 1;
+    }
+
+    .message-shell {
+      max-width: min(72vw, 980px);
+      text-align: center;
+      color: rgba(255, 255, 255, 0.96);
+      text-shadow: 0 0 24px rgba(255, 90, 90, 0.28), 0 0 60px rgba(255, 255, 255, 0.12);
+      font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: clamp(30px, 4.8vw, 74px);
+      font-weight: 500;
+      line-height: 1.14;
+      letter-spacing: 0.18em;
+      white-space: pre-line;
+      transform: scale(0.96);
+      transition: transform 1400ms ease, letter-spacing 1400ms ease, opacity 1200ms ease;
+    }
+
+    .message-shell.energy {
+      animation: energyPulse 2.4s ease-in-out infinite;
+    }
+
+    .message-shell.expand {
+      transform: scale(1.28);
+      letter-spacing: 0.26em;
+    }
+
+    @keyframes energyPulse {
+      0%, 100% {
+        text-shadow: 0 0 24px rgba(255, 100, 100, 0.26), 0 0 50px rgba(255, 255, 255, 0.12);
+      }
+      50% {
+        text-shadow: 0 0 32px rgba(255, 100, 100, 0.44), 0 0 90px rgba(255, 255, 255, 0.28);
+      }
+    }
+
+    .glyph-layer {
+      z-index: 9;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transition: opacity 1200ms ease;
+      color: rgba(110, 110, 128, 0.62);
+      font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      white-space: pre-wrap;
+      text-align: center;
+      padding: 42px;
+      mix-blend-mode: multiply;
+    }
+
+    .glyph-layer.active {
+      opacity: 1;
+    }
+
+    .glyph-shell {
+      max-width: min(92vw, 1220px);
+      font-size: clamp(12px, 1.6vw, 24px);
+      line-height: 1.9;
+      opacity: 0.62;
+    }
+
+    .whiteout {
+      z-index: 8;
+      background: #fff;
+      opacity: 0;
+      transition: opacity 1800ms ease;
+    }
+
+    .loading-card {
+      width: min(520px, calc(100vw - 32px));
+      padding: 24px;
+      border-radius: 22px;
+      background: rgba(10, 10, 10, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.44);
+    }
+
+    .loading-bar {
+      margin-top: 16px;
+      height: 3px;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .loading-bar::after {
+      content: "";
+      display: block;
+      width: 40%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.86), transparent);
+      animation: drift 1600ms linear infinite;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translateX(-120%);
+      }
+
+      to {
+        transform: translateX(320%);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .hud {
+        padding: 14px;
+      }
+
+      .row {
+        flex-direction: column;
+      }
+
+      .status {
+        text-align: left;
+      }
+
+      .card {
+        max-width: none;
+      }
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene" aria-hidden="true"></canvas>
+    <canvas id="omenCanvas" class="omen-canvas" aria-hidden="true"></canvas>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="veil" aria-hidden="true"></div>
+
+    <div class="hud">
+      <div class="row">
+        <section class="card">
+          <span class="eyebrow">Observer Well</span>
+        </section>
+      </div>
+    </div>
+
+    <div id="messageLayer" class="message-layer" aria-live="polite">
+      <div id="messageText" class="message-shell"></div>
+    </div>
+    <div id="glyphLayer" class="glyph-layer" aria-hidden="true">
+      <div id="glyphText" class="glyph-shell"></div>
+    </div>
+    <div id="whiteout" class="whiteout" aria-hidden="true"></div>
+
+    <div class="loading" id="loadingScreen">
+      <div class="loading-card">
+        <span class="eyebrow">Stand by</span>
+        <h1>Opening the throat.</h1>
+        <p id="loadingText">Checking renderer support and staging the particle flow.</p>
+        <div class="loading-bar" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    const loadingText = document.getElementById("loadingText");
+    const statusText = document.getElementById("statusText");
+
+    try {
+      await import("./main.js");
+    } catch (error) {
+      console.error(error);
+
+      if (statusText) {
+        statusText.textContent = "Startup failed.";
+      }
+
+      if (loadingText) {
+        const message = error && error.message ? error.message : String(error);
+        loadingText.textContent = `Scene bootstrap failed: ${message}`;
+      }
+    }
+  </script>
+</body>
+</html>
