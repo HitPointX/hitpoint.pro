@@ -50,9 +50,11 @@ const state = {
     glyphString: "",
     whiteout: 0,
     redirectQueued: false,
+    glyphRevealStarted: false,
     attackTimer: 0,
     burstTimer: 0,
     interactionCooldown: 0,
+    streaks: [],
   },
 };
 
@@ -86,6 +88,7 @@ let lastFrame = performance.now();
 let orbCoreLight;
 let orbCatchLight;
 let orbMaterial;
+let awakeningCubeGroup;
 let omenContext;
 let userIdleAt = performance.now();
 let orbBaseColor;
@@ -93,11 +96,18 @@ let orbBaseColor;
 const ORB_AFK_TRIGGER_SECONDS = 15 * 60;
 const ORB_AFK_MAX_ZOOM = 0.97;
 const ORB_ATTACK_STAGE_TIME = 12;
+const GLYPH_REVEAL_DELAY = 0.58;
+const GLYPH_REDIRECT_DELAY = 7.1;
+const GLYPH_REDIRECT_NAV_DELAY_MS = 1100;
+const AWAKENING_CUBE_COUNT = 26;
 const ORB_RED = new THREE.Color(2.6, 0.05, 0.05);
 const ORB_WHITE = new THREE.Color(1, 1, 1);
 const ORB_HALO_RED = new THREE.Color(1.6, 0.08, 0.08);
 const ORB_LIGHT_RED = new THREE.Color(1, 0.08, 0.08);
 const ORB_CATCH_RED = new THREE.Color(1, 0.12, 0.12);
+const CUBE_BASE_COLOR = new THREE.Color(0.08, 0.14, 0.34);
+const CUBE_EMISSIVE_COLOR = new THREE.Color(0.42, 0.86, 2.5);
+const CUBE_HOT_EMISSIVE_COLOR = new THREE.Color(0.86, 0.52, 2.1);
 
 const AWAKENING_MESSAGES = [
   { text: "I '  V E\nB E E N \nW A I T I N G\nF O R\nY O U", typeSpeed: 0.22, hold: 3.6 },
@@ -110,7 +120,7 @@ const AWAKENING_MESSAGES = [
   { text: "I ' V E\nB E E N\nO B S E R V I N G\nY O U R\nE V E R Y\nM O M E N T", typeSpeed: 0.18, hold: 4.8 },
   { text: "L E T\nM E \nS H O W\nY O U", typeSpeed: 0.25, hold: 4.0 },
   { text: "T A K E\nM Y\nE N E R G Y", typeSpeed: 0.26, hold: 8.0, energy: true },
-  { text: "T A K E \nT H I S\nG I F T", typeSpeed: 0.24, hold: 5.2, gift: true },
+  { text: "T A K E \nT H I S\nG I F T", typeSpeed: 0.24, hold: 6.2, gift: true },
 ];
 
 const ORB_BASE = {
@@ -456,6 +466,7 @@ async function boot() {
   setLoading("Cutting the funnel and placing the core light.");
   createFunnel(funnelVertex, funnelFragment);
   createOrb();
+  createAwakeningCubeGroup();
   createMist();
 
   setLoading("Seeding the spiral field.");
@@ -652,6 +663,50 @@ function createOrb() {
   scene.add(orbCatchLight);
 }
 
+function createAwakeningCubeGroup() {
+  awakeningCubeGroup = new THREE.Group();
+  awakeningCubeGroup.visible = false;
+  const cubeGeometry = new THREE.BoxGeometry(0.18, 0.18, 0.18);
+
+  for (let i = 0; i < AWAKENING_CUBE_COUNT; i += 1) {
+    const angle = Math.random() * Math.PI * 2;
+    const lift = THREE.MathUtils.lerp(-0.2, 0.95, Math.pow(Math.random(), 0.68));
+    const direction = new THREE.Vector3(
+      Math.cos(angle) * THREE.MathUtils.lerp(0.55, 1, Math.random()),
+      lift,
+      Math.sin(angle) * THREE.MathUtils.lerp(0.55, 1, Math.random()),
+    ).normalize();
+    const material = new THREE.MeshStandardMaterial({
+      color: CUBE_BASE_COLOR.clone(),
+      emissive: CUBE_EMISSIVE_COLOR.clone(),
+      emissiveIntensity: 0.8,
+      metalness: 0.6,
+      roughness: 0.24,
+      transparent: true,
+      opacity: 0,
+    });
+    const cube = new THREE.Mesh(cubeGeometry, material);
+    cube.renderOrder = 7;
+    cube.scale.setScalar(0.001);
+    cube.userData = {
+      direction,
+      radius: 0.48 + Math.random() * 1.38,
+      size: 0.12 + Math.random() * 0.2,
+      emergeAt: Math.random() * 0.6,
+      driftSeed: Math.random() * 100,
+      driftSpeed: 0.55 + Math.random() * 1.05,
+      spinSpeed: new THREE.Vector3(
+        0.5 + Math.random() * 0.9,
+        0.45 + Math.random() * 1.2,
+        0.3 + Math.random() * 0.8,
+      ),
+    };
+    awakeningCubeGroup.add(cube);
+  }
+
+  scene.add(awakeningCubeGroup);
+}
+
 function createMist() {
   const mistTexture = createRadialTexture("rgba(255,255,255,0.75)", "rgba(255,255,255,0)");
 
@@ -797,6 +852,8 @@ function animateFocalObjects(dt) {
     coreMist.material.opacity = THREE.MathUtils.clamp(baseMistOpacity * resolvedOrbMod.mistOpacity, 0.0, 0.12);
     coreMist.scale.setScalar(baseMistScale * resolvedOrbMod.mistScale);
   }
+
+  updateAwakeningCubes();
 }
 
 function updateFocusTarget() {
@@ -1211,11 +1268,11 @@ function updateAwakening(dt) {
       whiteout.style.opacity = String(awakening.whiteout);
     }
     awakening.messageElapsed += dt;
-    if (awakening.messageElapsed >= 5.4 && !awakening.redirectQueued) {
+    if (awakening.messageElapsed >= GLYPH_REDIRECT_DELAY && !awakening.redirectQueued) {
       awakening.redirectQueued = true;
       window.setTimeout(() => {
         window.location.assign(new URL("/x/", window.location.href).href);
-      }, 600);
+      }, GLYPH_REDIRECT_NAV_DELAY_MS);
     }
   }
 }
@@ -1236,11 +1293,14 @@ function startAwakeningSequence() {
   awakening.messageText = "";
   awakening.whiteout = 0;
   awakening.redirectQueued = false;
+  awakening.glyphRevealStarted = false;
   awakening.glyphString = buildGlyphGift();
+  awakening.streaks = [];
   state.orbEvents.active = null;
   state.orbEvents.observedTime = 0;
   if (messageLayer) {
     messageLayer.classList.remove("active");
+    messageLayer.style.opacity = "";
   }
   if (glyphLayer) {
     glyphLayer.classList.remove("active");
@@ -1284,14 +1344,24 @@ function updateAwakeningMessages(dt) {
   }
 
   if (current.gift && charsVisible >= current.text.length) {
+    const typedDuration = current.text.length * current.typeSpeed;
+    const revealProgress = THREE.MathUtils.clamp((awakening.messageElapsed - typedDuration) / current.hold, 0, 1);
+    const fadeProgress = THREE.MathUtils.smoothstep(revealProgress, 0.02, 0.92);
+    awakening.whiteout = Math.max(awakening.whiteout, fadeProgress);
     if (whiteout) {
-      whiteout.style.opacity = "1";
+      whiteout.style.opacity = String(awakening.whiteout);
     }
-    if (glyphLayer) {
-      glyphLayer.classList.add("active");
+    if (messageLayer) {
+      messageLayer.style.opacity = String(THREE.MathUtils.clamp(1 - fadeProgress * 0.94, 0, 1));
     }
-    if (glyphText) {
-      glyphText.textContent = awakening.glyphString;
+    if (!awakening.glyphRevealStarted && revealProgress >= GLYPH_REVEAL_DELAY) {
+      awakening.glyphRevealStarted = true;
+      if (glyphLayer) {
+        glyphLayer.classList.add("active");
+      }
+      if (glyphText) {
+        glyphText.textContent = awakening.glyphString;
+      }
     }
   }
 
@@ -1305,6 +1375,7 @@ function updateAwakeningMessages(dt) {
     awakening.messageElapsed = 0;
     if (messageLayer) {
       messageLayer.classList.remove("active");
+      messageLayer.style.opacity = "0";
     }
     return;
   }
@@ -1320,6 +1391,7 @@ function startAwakeningMessage(index) {
   awakening.messageText = "";
   if (messageLayer) {
     messageLayer.classList.add("active");
+    messageLayer.style.opacity = "";
   }
   if (messageText) {
     messageText.textContent = "";
@@ -1372,6 +1444,63 @@ function applyAwakeningOrbModifiers(modifiers) {
   }
 }
 
+function updateAwakeningCubes() {
+  if (!awakeningCubeGroup || !orb) {
+    return;
+  }
+
+  const emergence = getAwakeningCubeProgress();
+  if (emergence <= 0.001) {
+    awakeningCubeGroup.visible = false;
+    return;
+  }
+
+  const rage = getAwakeningRage();
+  const instability = getAwakeningSparkInstability();
+  const motionFactor = state.reduceMotion ? 0.45 : 1;
+  awakeningCubeGroup.visible = true;
+  awakeningCubeGroup.position.copy(orb.position);
+  awakeningCubeGroup.rotation.y = Math.sin(elapsed * 0.22) * 0.08 + emergence * 0.12;
+
+  for (const cube of awakeningCubeGroup.children) {
+    const cubeEmergence = THREE.MathUtils.smoothstep(
+      emergence,
+      cube.userData.emergeAt,
+      Math.min(1, cube.userData.emergeAt + 0.32),
+    );
+    const visible = cubeEmergence > 0.001;
+    cube.visible = visible;
+    if (!visible) {
+      continue;
+    }
+
+    const driftTime = elapsed * cube.userData.driftSpeed;
+    const travelProgress = Math.pow(cubeEmergence, 1.12);
+    const fadeProgress = THREE.MathUtils.smoothstep(cubeEmergence, 0.06, 0.68);
+    const radius = cube.userData.radius * travelProgress;
+    const hoverMix = cubeEmergence * motionFactor;
+    const hoverX = Math.sin(driftTime + cube.userData.driftSeed) * 0.08 * hoverMix;
+    const hoverY = Math.cos(driftTime * 1.3 + cube.userData.driftSeed * 0.7) * 0.11 * hoverMix;
+    const hoverZ = Math.sin(driftTime * 0.9 + cube.userData.driftSeed * 1.2) * 0.07 * hoverMix;
+    cube.position.copy(cube.userData.direction).multiplyScalar(radius);
+    cube.position.x += hoverX;
+    cube.position.y += hoverY + emergence * 0.1 * travelProgress;
+    cube.position.z += hoverZ;
+
+    const pulse = 0.92 + Math.sin(elapsed * 3.6 + cube.userData.driftSeed * 1.9) * 0.12;
+    const scale = cube.userData.size * cubeEmergence * pulse;
+    cube.scale.setScalar(scale);
+    cube.rotation.x += 0.003 * cube.userData.spinSpeed.x * motionFactor;
+    cube.rotation.y += 0.004 * cube.userData.spinSpeed.y * motionFactor;
+    cube.rotation.z += 0.003 * cube.userData.spinSpeed.z * motionFactor;
+
+    cube.material.opacity = THREE.MathUtils.clamp(fadeProgress * 0.72, 0, 0.72);
+    cube.material.color.copy(CUBE_BASE_COLOR).lerp(ORB_RED, rage * 0.12);
+    cube.material.emissive.copy(CUBE_EMISSIVE_COLOR).lerp(CUBE_HOT_EMISSIVE_COLOR, instability * 0.35);
+    cube.material.emissiveIntensity = 0.35 + fadeProgress * 2.2 + instability * 0.8;
+  }
+}
+
 function getAwakeningRage() {
   const awakening = state.orbAwakening;
   if (!awakening.started) {
@@ -1390,6 +1519,47 @@ function getAwakeningRage() {
   return 1.25;
 }
 
+function getAwakeningCubeProgress() {
+  const awakening = state.orbAwakening;
+  if (!awakening.started) {
+    return 0;
+  }
+
+  if (awakening.phase === "anger") {
+    const phaseProgress = THREE.MathUtils.clamp(awakening.elapsed / ORB_ATTACK_STAGE_TIME, 0, 1);
+    return THREE.MathUtils.smoothstep(phaseProgress, 0.42, 1);
+  }
+
+  if (awakening.phase === "messages") {
+    const messageProgress = awakening.messageIndex < 0
+      ? 0
+      : awakening.messageIndex / Math.max(AWAKENING_MESSAGES.length - 1, 1);
+    return THREE.MathUtils.clamp(0.76 + messageProgress * 0.24, 0, 1);
+  }
+
+  return 1;
+}
+
+function getAwakeningSparkInstability() {
+  const awakening = state.orbAwakening;
+  if (!awakening.started) {
+    return 0;
+  }
+
+  if (awakening.phase === "anger") {
+    return THREE.MathUtils.clamp(awakening.elapsed / ORB_ATTACK_STAGE_TIME, 0, 1);
+  }
+
+  if (awakening.phase === "messages") {
+    const messageProgress = awakening.messageIndex < 0
+      ? 0
+      : awakening.messageIndex / Math.max(AWAKENING_MESSAGES.length - 1, 1);
+    return THREE.MathUtils.clamp(0.82 + messageProgress * 0.42, 0, 1.28);
+  }
+
+  return 1.4;
+}
+
 function spawnAwakeningStreakBurst() {
   const awakening = state.orbAwakening;
   if (!omenCanvas || !omenContext || !orb) {
@@ -1401,25 +1571,60 @@ function spawnAwakeningStreakBurst() {
     return;
   }
 
-  if (!awakening.streaks) {
-    awakening.streaks = [];
+  const rage = getAwakeningRage();
+  const instability = getAwakeningSparkInstability();
+  const glyphBounds = getGlyphBoundsOnCanvas();
+  const edgeMode = Boolean(glyphBounds && (awakening.glyphRevealStarted || awakening.phase === "glyph"));
+  const count = 3 + Math.floor(Math.random() * 3 + rage * 2.4 + instability * 2.2);
+  const chainPool = edgeMode && glyphBounds
+    ? [sampleGlyphEdgePoint(glyphBounds, 18), sampleGlyphEdgePoint(glyphBounds, 28)]
+    : [origin];
+
+  for (let i = 0; i < count; i += 1) {
+    let source = chainPool[Math.floor(Math.random() * chainPool.length)] || origin;
+    if (!edgeMode || (i === 0 && Math.random() < 0.55)) {
+      source = origin;
+    }
+
+    let target = edgeMode && glyphBounds
+      ? sampleGlyphEdgePoint(glyphBounds, 24 + Math.random() * 16)
+      : sampleFreeSparkPoint(origin, instability);
+    if (Math.hypot(target.x - source.x, target.y - source.y) < 30 * getPixelRatio()) {
+      target = edgeMode && glyphBounds
+        ? sampleGlyphEdgePoint(glyphBounds, 42)
+        : sampleFreeSparkPoint(origin, instability + 0.18);
+    }
+
+    const seed = Math.random() * 1000 + elapsed * 37 + i * 19;
+    const points = buildLightningPath(source, target, instability, seed);
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const distance = Math.max(Math.hypot(dx, dy), 0.001);
+    const normalX = -dy / distance;
+    const normalY = dx / distance;
+
+    awakening.streaks.push({
+      points,
+      life: 0,
+      maxLife: 0.12 + Math.random() * 0.18 + instability * 0.08,
+      width: 0.9 + Math.random() * 1.1 + rage * 1.2,
+      alpha: 0.42 + Math.random() * 0.32,
+      seed,
+      instability,
+      distance,
+      normalX,
+      normalY,
+    });
+
+    chainPool.push(target);
+    if (points.length > 3 && Math.random() < 0.42 + instability * 0.28) {
+      const branchPoint = points[1 + Math.floor(Math.random() * (points.length - 2))];
+      chainPool.push(branchPoint);
+    }
   }
 
-  const rage = getAwakeningRage();
-  const count = 3 + Math.floor(Math.random() * 4 + rage * 2);
-  for (let i = 0; i < count; i += 1) {
-    const targetX = omenCanvas.width * (0.25 + Math.random() * 0.5);
-    const targetY = omenCanvas.height * (0.08 + Math.random() * 0.28);
-    awakening.streaks.push({
-      x1: origin.x,
-      y1: origin.y,
-      x2: targetX + (Math.random() - 0.5) * omenCanvas.width * 0.12,
-      y2: targetY + (Math.random() - 0.5) * omenCanvas.height * 0.08,
-      life: 0,
-      maxLife: 0.18 + Math.random() * 0.32,
-      width: 1 + Math.random() * 2 + rage * 2,
-      alpha: 0.45 + Math.random() * 0.35,
-    });
+  if (awakening.streaks.length > 160) {
+    awakening.streaks.splice(0, awakening.streaks.length - 160);
   }
 }
 
@@ -1435,6 +1640,8 @@ function renderOmenCanvas(dt) {
   }
 
   const remaining = [];
+  omenContext.save();
+  omenContext.globalCompositeOperation = "screen";
   for (const streak of awakening.streaks) {
     streak.life += dt;
     if (streak.life >= streak.maxLife) {
@@ -1442,21 +1649,160 @@ function renderOmenCanvas(dt) {
     }
 
     const progress = streak.life / streak.maxLife;
-    const alpha = (1 - progress) * streak.alpha;
-    const gradient = omenContext.createLinearGradient(streak.x1, streak.y1, streak.x2, streak.y2);
-    gradient.addColorStop(0, `rgba(255, 120, 120, ${alpha})`);
-    gradient.addColorStop(0.4, `rgba(255, 40, 40, ${alpha * 0.9})`);
-    gradient.addColorStop(1, "rgba(255,255,255,0)");
-    omenContext.strokeStyle = gradient;
-    omenContext.lineWidth = streak.width * getPixelRatio();
-    omenContext.beginPath();
-    omenContext.moveTo(streak.x1, streak.y1);
-    omenContext.lineTo(streak.x2, streak.y2);
-    omenContext.stroke();
+    const alpha = Math.pow(1 - progress, 0.65) * streak.alpha;
+    const flicker = 0.74 + Math.abs(Math.sin(elapsed * (18 + streak.instability * 18) + streak.seed)) * 0.48;
+    const points = getRenderedSparkPoints(streak);
+    drawSparkStroke(points, streak.width, alpha, flicker);
     remaining.push(streak);
   }
+  omenContext.restore();
 
   awakening.streaks = remaining;
+}
+
+function drawSparkStroke(points, width, alpha, flicker) {
+  if (!omenContext || points.length < 2) {
+    return;
+  }
+
+  const pixelRatio = getPixelRatio();
+  traceSparkPath(points);
+  omenContext.strokeStyle = `rgba(72, 156, 255, ${alpha * 0.26 * flicker})`;
+  omenContext.lineWidth = width * 5.2 * pixelRatio;
+  omenContext.lineCap = "round";
+  omenContext.lineJoin = "round";
+  omenContext.stroke();
+
+  traceSparkPath(points);
+  omenContext.strokeStyle = `rgba(104, 210, 255, ${alpha * 0.58 * flicker})`;
+  omenContext.lineWidth = width * 2.6 * pixelRatio;
+  omenContext.stroke();
+
+  traceSparkPath(points);
+  omenContext.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.96})`;
+  omenContext.lineWidth = Math.max(1, width * 0.82 * pixelRatio);
+  omenContext.stroke();
+
+  const endPoint = points[points.length - 1];
+  omenContext.fillStyle = `rgba(210, 240, 255, ${alpha * 0.7})`;
+  omenContext.beginPath();
+  omenContext.arc(endPoint.x, endPoint.y, width * 1.4 * pixelRatio, 0, Math.PI * 2);
+  omenContext.fill();
+}
+
+function traceSparkPath(points) {
+  omenContext.beginPath();
+  omenContext.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i += 1) {
+    omenContext.lineTo(points[i].x, points[i].y);
+  }
+}
+
+function getRenderedSparkPoints(streak) {
+  const rendered = [];
+  const lastIndex = streak.points.length - 1;
+
+  for (let i = 0; i <= lastIndex; i += 1) {
+    const source = streak.points[i];
+    let x = source.x;
+    let y = source.y;
+
+    if (i > 0 && i < lastIndex) {
+      const t = i / lastIndex;
+      const envelope = Math.sin(t * Math.PI);
+      const wave = Math.sin(elapsed * (20 + streak.instability * 14) + streak.seed * 0.13 + i * 1.9);
+      const secondary = noiseWave(elapsed * (0.8 + streak.instability * 0.22) + t, 2.4 + streak.instability * 1.6, streak.seed + i);
+      const jitter = (wave * 0.56 + secondary * 0.44) * streak.distance * (0.01 + streak.instability * 0.026) * envelope;
+      x += streak.normalX * jitter;
+      y += streak.normalY * jitter;
+    }
+
+    rendered.push({ x, y });
+  }
+
+  return rendered;
+}
+
+function buildLightningPath(start, end, instability, seed) {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const distance = Math.max(Math.hypot(dx, dy), 0.001);
+  const invDistance = 1 / distance;
+  const tangentX = dx * invDistance;
+  const tangentY = dy * invDistance;
+  const normalX = -tangentY;
+  const normalY = tangentX;
+  const segments = Math.max(4, Math.min(12, Math.round(distance / (52 * getPixelRatio())) + 3));
+  const points = [{ x: start.x, y: start.y }];
+
+  for (let i = 1; i < segments; i += 1) {
+    const t = i / segments;
+    const envelope = Math.sin(t * Math.PI);
+    const lateralNoise = noiseWave(t + seed * 0.01, 1.9 + instability * 2.4, seed * 0.7);
+    const lateralOffset = lateralNoise * distance * (0.03 + instability * 0.075) * envelope;
+    const forwardJitter = (steppedNoise(t + seed * 0.02, segments * 2.2, seed + i * 0.9) - 0.5) * distance * 0.024 * instability;
+
+    points.push({
+      x: start.x + dx * t + normalX * lateralOffset + tangentX * forwardJitter,
+      y: start.y + dy * t + normalY * lateralOffset + tangentY * forwardJitter,
+    });
+  }
+
+  points.push({ x: end.x, y: end.y });
+  return points;
+}
+
+function sampleFreeSparkPoint(origin, instability) {
+  const angle = Math.random() * Math.PI * 2;
+  const distance = Math.min(omenCanvas.width, omenCanvas.height) * (0.08 + Math.random() * 0.1 + instability * 0.09);
+  return {
+    x: origin.x + Math.cos(angle) * distance,
+    y: origin.y + Math.sin(angle) * distance * 0.72 - distance * (0.16 + Math.random() * 0.22),
+  };
+}
+
+function getGlyphBoundsOnCanvas() {
+  if (!glyphText || !omenCanvas) {
+    return null;
+  }
+
+  const rect = glyphText.getBoundingClientRect();
+  const canvasRect = omenCanvas.getBoundingClientRect();
+  if (rect.width < 1 || rect.height < 1 || canvasRect.width < 1 || canvasRect.height < 1) {
+    return null;
+  }
+
+  const scaleX = omenCanvas.width / canvasRect.width;
+  const scaleY = omenCanvas.height / canvasRect.height;
+  return {
+    left: (rect.left - canvasRect.left) * scaleX,
+    top: (rect.top - canvasRect.top) * scaleY,
+    right: (rect.right - canvasRect.left) * scaleX,
+    bottom: (rect.bottom - canvasRect.top) * scaleY,
+    width: rect.width * scaleX,
+    height: rect.height * scaleY,
+  };
+}
+
+function sampleGlyphEdgePoint(bounds, outward = 0) {
+  const pad = outward * getPixelRatio();
+  const edge = Math.floor(Math.random() * 4);
+  const jitterX = (Math.random() - 0.5) * bounds.width * 0.1;
+  const jitterY = (Math.random() - 0.5) * bounds.height * 0.1;
+
+  if (edge === 0) {
+    return { x: bounds.left + Math.random() * bounds.width + jitterX, y: bounds.top - pad + jitterY * 0.2 };
+  }
+
+  if (edge === 1) {
+    return { x: bounds.right + pad + jitterX * 0.2, y: bounds.top + Math.random() * bounds.height + jitterY };
+  }
+
+  if (edge === 2) {
+    return { x: bounds.left + Math.random() * bounds.width + jitterX, y: bounds.bottom + pad + jitterY * 0.2 };
+  }
+
+  return { x: bounds.left - pad + jitterX * 0.2, y: bounds.top + Math.random() * bounds.height + jitterY };
 }
 
 function getOrbScreenPosition() {
