@@ -716,12 +716,14 @@ function createParticles(vertexShader, fragmentShader) {
     fragmentShader,
     uniforms,
     transparent: true,
+    depthTest: false,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
 
   particles = new THREE.Mesh(geometry, material);
   particles.frustumCulled = false;
+  particles.renderOrder = 2;
   scene.add(particles);
   base.dispose();
 }
