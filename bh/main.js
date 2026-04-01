@@ -20,7 +20,7 @@ const BG_MODE = new URLSearchParams(location.search).has('bg');
 
 if (BG_MODE) {
   const s = document.createElement('style');
-  s.textContent = '.hud,.noise,.veil{display:none!important}body,#app{background:none!important}';
+  s.textContent = '.hud,.noise,.veil,#loadingScreen{display:none!important}body,#app{background:none!important}';
   document.head.appendChild(s);
 }
 
