@@ -16,6 +16,7 @@ const glyphLayer = document.getElementById("glyphLayer");
 const glyphText = document.getElementById("glyphText");
 const whiteout = document.getElementById("whiteout");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const BG_MODE = new URLSearchParams(location.search).has('bg');
 
 const CONFIG = {
   outerRadius: 30,
@@ -480,8 +481,15 @@ async function boot() {
   applyMotionProfile();
   omenContext = omenCanvas ? omenCanvas.getContext("2d") : null;
   onResize();
-  setStatus("Drag to orbit. Scroll to close the gap. The camera stays above the floor and out of the focal objects.");
-  loadingScreen.classList.add("hidden");
+  if (BG_MODE) {
+    loadingScreen.classList.add("hidden");
+    document.querySelector(".hud")?.remove();
+    document.body.style.background = "none";
+    document.getElementById("app").style.background = "none";
+  } else {
+    setStatus("Drag to orbit. Scroll to close the gap. The camera stays above the floor and out of the focal objects.");
+    loadingScreen.classList.add("hidden");
+  }
   requestAnimationFrame(animate);
 }
 
@@ -514,9 +522,15 @@ function createScene() {
 
 function createCamera() {
   camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 160);
-  focusTarget = CONFIG.farTarget.clone();
+  focusTarget = BG_MODE
+    ? new THREE.Vector3(0.18, -5.5, -0.18)
+    : CONFIG.farTarget.clone();
   zoomTarget = focusTarget.clone();
-  camera.position.set(-0.6, 10.2, 41.5);
+  camera.position.set(
+    BG_MODE ? -0.4 : -0.6,
+    BG_MODE ? 17.5 : 10.2,
+    BG_MODE ? 36.0 : 41.5
+  );
   camera.lookAt(focusTarget);
 }
 
@@ -532,6 +546,9 @@ function createControls() {
   controls.maxDistance = 46;
   controls.minPolarAngle = 0.14;
   controls.maxPolarAngle = 1.18;
+  if (BG_MODE) {
+    controls.enabled = false;
+  }
 }
 
 function createPost() {
@@ -793,7 +810,7 @@ function animate(now) {
     return;
   }
 
-  elapsed += dt;
+  elapsed += BG_MODE ? dt * 0.68 : dt;
   updateFocusTarget();
   updateAwakening(dt);
   updateOrbEventState(dt);
