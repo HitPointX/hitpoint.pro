@@ -18,6 +18,12 @@ const whiteout = document.getElementById("whiteout");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const BG_MODE = new URLSearchParams(location.search).has('bg');
 
+if (BG_MODE) {
+  const s = document.createElement('style');
+  s.textContent = '.hud,.noise,.veil{display:none!important}body,#app{background:none!important}';
+  document.head.appendChild(s);
+}
+
 const CONFIG = {
   outerRadius: 30,
   funnelRadius: 56,
@@ -523,13 +529,13 @@ function createScene() {
 function createCamera() {
   camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 160);
   focusTarget = BG_MODE
-    ? new THREE.Vector3(0.18, -5.5, -0.18)
+    ? new THREE.Vector3(0.1, -3.0, -0.1)
     : CONFIG.farTarget.clone();
   zoomTarget = focusTarget.clone();
   camera.position.set(
-    BG_MODE ? -0.4 : -0.6,
-    BG_MODE ? 17.5 : 10.2,
-    BG_MODE ? 36.0 : 41.5
+    BG_MODE ? -0.3 : -0.6,
+    BG_MODE ? 24.0 : 10.2,
+    BG_MODE ? 28.0 : 41.5
   );
   camera.lookAt(focusTarget);
 }
@@ -810,7 +816,7 @@ function animate(now) {
     return;
   }
 
-  elapsed += BG_MODE ? dt * 0.68 : dt;
+  elapsed += BG_MODE ? dt * 0.51 : dt;
   updateFocusTarget();
   updateAwakening(dt);
   updateOrbEventState(dt);
@@ -1023,9 +1029,11 @@ function enforceCameraBounds() {
   keepCameraAboveSurface(camera.position, 1.9);
   keepOutsideSphere(camera.position, orb?.position, 0.82);
 
-  controls.target.x = THREE.MathUtils.clamp(controls.target.x, -2.6, 2.8);
-  controls.target.y = THREE.MathUtils.clamp(controls.target.y, -13.6, -8.2);
-  controls.target.z = THREE.MathUtils.clamp(controls.target.z, -2.8, 2.8);
+  if (!BG_MODE) {
+    controls.target.x = THREE.MathUtils.clamp(controls.target.x, -2.6, 2.8);
+    controls.target.y = THREE.MathUtils.clamp(controls.target.y, -13.6, -8.2);
+    controls.target.z = THREE.MathUtils.clamp(controls.target.z, -2.8, 2.8);
+  }
 }
 
 function keepCameraAboveSurface(position, lift) {
