@@ -191,6 +191,8 @@
       text-align: center;
       position: relative;
       z-index: 3;
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
 
     .redirect-card h1 {
@@ -333,10 +335,28 @@
       50% { opacity: 0.28; }
     }
   </style>
-  <meta http-equiv="refresh" content="3; url=https://hitpoint.pro/live" />
   <script>
-    // JavaScript fallback redirect :P
-    setTimeout(() => { window.location.href = "https://hitpoint.pro/live"; }, 3000);
+    // Stream status check — show live banner only if stream is up.
+    (async () => {
+      const _sk = [68,122,78,83,89,98,104,113,169,178,131,139,57,55,112,75,85,133,99,150,108,164,118,176,135,145,52,105,72,76,84,89];
+      const streamUrl = `https://stream.hitpoint.pro/hls/${_sk.map((c,i)=>String.fromCharCode(c-((i*7+13)%97))).join('')}.m3u8`;
+      let live = false;
+      try {
+        const r = await fetch(streamUrl + '?_=' + Date.now(), {
+          method: 'HEAD', cache: 'no-store',
+          signal: AbortSignal.timeout(2000)
+        });
+        live = r.ok;
+      } catch {}
+
+      const card = document.querySelector('.redirect-card');
+      if (live) {
+        card.style.opacity = '1';
+        setTimeout(() => { window.location.href = 'https://hitpoint.pro/live'; }, 3000);
+      } else {
+        window.location.href = 'https://hitpoint.pro/x';
+      }
+    })();
 
     // Toned-down per-letter glitch for redirect title.
     document.addEventListener("DOMContentLoaded", () => {
