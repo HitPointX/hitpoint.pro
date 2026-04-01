@@ -92,6 +92,8 @@ let orbBase;
 let zoomTarget;
 let elapsed = 0;
 let lastFrame = performance.now();
+let bgLastRender = 0;
+const BG_FRAME_INTERVAL = 1000 / 30; // 30 fps cap for bg mode
 let orbCoreLight;
 let orbCatchLight;
 let orbMaterial;
@@ -560,7 +562,9 @@ function createControls() {
 function createPost() {
   composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.95, 0.75, 0.2);
+  const bloomW = BG_MODE ? Math.floor(window.innerWidth * 0.5) : window.innerWidth;
+  const bloomH = BG_MODE ? Math.floor(window.innerHeight * 0.5) : window.innerHeight;
+  bloomPass = new UnrealBloomPass(new THREE.Vector2(bloomW, bloomH), 0.95, 0.75, 0.2);
   composer.addPass(bloomPass);
 }
 
@@ -808,6 +812,9 @@ function createParticles(vertexShader, fragmentShader) {
 
 function animate(now) {
   requestAnimationFrame(animate);
+
+  if (BG_MODE && now - bgLastRender < BG_FRAME_INTERVAL) return;
+  bgLastRender = now;
 
   const dt = Math.min((now - lastFrame) * 0.001, 0.05);
   lastFrame = now;
@@ -1129,12 +1136,14 @@ function isWebGLAvailable() {
 }
 
 function getPixelRatio() {
+  if (BG_MODE) return Math.min(window.devicePixelRatio || 1, 1.0);
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
   const cap = coarsePointer ? 1.2 : 1.5;
   return Math.min(window.devicePixelRatio || 1, cap);
 }
 
 function getParticleCount() {
+  if (BG_MODE) return 20000;
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
   if (state.reduceMotion) {
     return coarsePointer ? 9000 : 18000;
