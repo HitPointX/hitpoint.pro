@@ -10,7 +10,7 @@ resize();
 window.addEventListener('resize', resize);
 
 // 
- Color Palette System 
+// Color Palette System 
 
 class Palette {
 constructor() {
@@ -47,7 +47,7 @@ return `hsla(${hues[idx]}, 90%, 65%, ${alpha})`;
 }
 
 // 
- Star System 
+// Star System 
 
 class Star {
 constructor() { this.init(); }
@@ -81,7 +81,7 @@ ctx.fill();
 }
 
 // 
- Nebula Cloud 
+// Nebula Cloud 
 
 class Nebula {
 constructor() { this.init(); }
@@ -112,7 +112,7 @@ ctx.fill();
 }
 
 // 
- Firefly Particle 
+// Firefly Particle 
 
 class Firefly {
 constructor() { this.init(); }
@@ -182,7 +182,7 @@ ctx.fill();
 }
 
 // 
- Flower / Organic Bloom 
+// Flower / Organic Bloom 
 
 class Flower {
 constructor(x, y) {
@@ -298,7 +298,7 @@ ctx.fill();
 }
 
 // 
- Shooting Star 
+// Shooting Star 
 
 class ShootingStar {
 constructor() {
@@ -371,7 +371,7 @@ ctx.fill();
 }
 
 // 
-  Firework Burst 
+//  Firework Burst 
 
 const BURST_CHANCE = 0.002;
 const MAX_BURSTS = 5;
@@ -681,7 +681,7 @@ class FireworkBurst {
 }
 
 // 
-  Aurora Borealis 
+//  Aurora Borealis 
 
 class Aurora {
 constructor() {
@@ -720,7 +720,7 @@ ctx.fill();
 }
 
 // 
- Mouse 
+// Mouse 
 
 const mouse = { x: W / 2, y: H / 2 };
 window.addEventListener('mousemove', e => {
@@ -734,7 +734,7 @@ mouse.y = e.touches[0].clientY;
 }, { passive: false });
 
 // 
-  Click to bloom 
+//  Click to bloom 
 
 const flowers = [];
 const bursts = [];
@@ -750,7 +750,7 @@ canvas.addEventListener('click', e => {
 });
 
 // 
- Initialize Systems 
+// Initialize Systems 
 
 const palette = new Palette();
 const stars = Array.from({ length: 300 }, () => new Star());
@@ -767,7 +767,7 @@ flowers.push(new Flower(fx, fy));
 }
 
 // 
- Background gradient 
+// Background gradient 
 
 function drawBackground(time) {
 const grd = ctx.createLinearGradient(0, 0, 0, H);
@@ -782,7 +782,7 @@ ctx.fillRect(0, 0, W, H);
 }
 
 // 
- Cursor glow 
+// Cursor glow 
 
 function drawCursor(time) {
 const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 40);
@@ -797,7 +797,7 @@ ctx.fill();
 }
 
 // 
- Ground / Horizon glow 
+// Ground / Horizon glow 
 
 function drawGround(time) {
 const grd = ctx.createLinearGradient(0, H * 0.85, 0, H);
@@ -821,7 +821,7 @@ ctx.stroke();
 }
 
 // 
- Main Loop 
+// Main Loop 
 
 let lastTime = performance.now();
 let globalTime = 0;
@@ -865,7 +865,7 @@ for (let i = bursts.length - 1; i >= 0; i--) {
 }
 
 // 
- Draw 
+// Draw 
 
 drawBackground(globalTime);
 

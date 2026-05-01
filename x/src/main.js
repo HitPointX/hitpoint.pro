@@ -164,7 +164,7 @@
   
   const _pfCodes = [91,73,84,79,43,77,81,95,79,44,70];
   const targetPhrase = String.fromCharCode(..._pfCodes.map((b,i)=> b - ((i%5)+7)));
-  const ACCEPTED_PHRASES = [targetPhrase, 'BREATH'];
+  const ACCEPTED_PHRASES = [targetPhrase, 'BREATH', 'HOPE'];
   let _secretHashHex = null;
   (async()=>{ try { const enc=new TextEncoder().encode(targetPhrase); const d=await crypto.subtle.digest('SHA-256',enc); _secretHashHex=[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join(''); } catch(e){} })();
   
@@ -281,6 +281,7 @@
         const prog = Math.min(1, (t/dur));
         const strength = (1-prog);
       
+        const vibAmp = 3.5;
         const shakeAmp = effects.shake ? 6.5 : 0;
         const ax = (Math.random()-0.5)*(vibAmp + shakeAmp)*strength;
         const ay = (Math.random()-0.5)*(vibAmp*0.8 + shakeAmp*0.4)*strength;
@@ -332,12 +333,11 @@
       if (exactMatch) {
         wrap.classList.add('success');
         haloSuccess = true;
-        if (!window._standbyTriggered) {
+        if (trimmed === 'HOPE') {
+          triggerHopeBloom();
+        } else if (!window._standbyTriggered) {
           window._standbyTriggered = true;
           document.dispatchEvent(new CustomEvent('standby:passphrase', { detail: { phrase: trimmed } }));
-        }
-        if (trimmed.toUpperCase() === 'HOPE') {
-          triggerHopeBloom();
         }
       } else {
 	        wrap.classList.remove('success');
@@ -902,10 +902,10 @@ function startQuoteSweep() {
 
     const ctx = canvas.getContext('2d');
     let W, H;
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
     function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = canvas.width = window.innerWidth * dpr;
-      H = canvas.height = window.innerHeight * dpr;
+      W = canvas.width = window.innerWidth * DPR;
+      H = canvas.height = window.innerHeight * DPR;
       canvas.style.width = window.innerWidth + 'px';
       canvas.style.height = window.innerHeight + 'px';
     }
