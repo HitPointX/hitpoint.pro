@@ -1034,37 +1034,7 @@ function startQuoteSweep() {
       globalTime += dt;
       paletteHue.value = (paletteHue.value + dt * 8) % 360;
 
-      // Background gradient
-      const bg = ctx.createLinearGradient(0, 0, 0, H);
-      const h1 = (paletteHue.value + 240) % 360;
-      const h2 = (paletteHue.value + 280) % 360;
-      bg.addColorStop(0, `hsl(${h1},60%,${3+Math.sin(globalTime*0.05)*1}%)`);
-      bg.addColorStop(0.5, `hsl(${(h1+h2)/2},50%,${2+Math.sin(globalTime*0.07)*0.5}%)`);
-      bg.addColorStop(1, `hsl(${h2},40%,1%)`);
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, W, H);
-
-      // Stars
-      for (let i = 0; i < 80; i++) {
-        const sx = ((i * 137.5) % W);
-        const sy = ((i * 97.3) % (H * 0.6));
-        const twinkle = (Math.sin(globalTime * (1 + i*0.1) + i) + 1) / 2;
-        const a = 0.2 + twinkle * 0.5;
-        ctx.beginPath(); ctx.arc(sx, sy, 0.5 + Math.random()*0.3, 0, Math.PI*2);
-        ctx.fillStyle = `rgba(255,255,${240+Math.random()*15},${a})`;
-        ctx.fill();
-      }
-
-      // Ground line
-      const lineHue = (paletteHue.value + 120) % 360;
-      ctx.beginPath();
-      for (let x = 0; x <= W; x += 2) {
-        const y = H * 0.87 + Math.sin(x*0.005+globalTime*0.2)*5*DPR;
-        if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      }
-      ctx.strokeStyle = hsl(lineHue, 40, 25, 0.15 + Math.sin(globalTime*0.3)*0.05);
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      ctx.clearRect(0, 0, W, H);
 
       // Spawn flowers periodically
       if (Math.random() < dt * 3 && flowers.length < 80) {
@@ -1081,20 +1051,13 @@ function startQuoteSweep() {
       fireflies.forEach(f => { f.update(dt); f.draw(globalTime); });
       flowers.forEach(f => f.draw(globalTime));
 
-      // Vignette
-      const vig = ctx.createRadialGradient(W/2,H/2,W*0.3*DPR, W/2,H/2,W*0.75*DPR);
-      vig.addColorStop(0, 'rgba(0,0,0,0)');
-      vig.addColorStop(1, 'rgba(0,0,0,0.4)');
-      ctx.fillStyle = vig;
-      ctx.fillRect(0, 0, W, H);
-
       if (redirectTimer === null && globalTime >= 3) {
         redirectTimer = globalTime + 1.2;
       }
 
       if (redirectTimer !== null && globalTime >= redirectTimer) {
-        canvas.style.transition = 'opacity 1.2s ease';
-        canvas.style.opacity = '0';
+        document.body.style.transition = 'opacity 1.2s ease';
+        document.body.style.opacity = '0';
         setTimeout(() => { window.location.href = '/sg'; }, 1400);
         return;
       }
