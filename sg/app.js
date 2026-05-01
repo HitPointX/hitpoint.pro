@@ -134,9 +134,9 @@ const dx = mouse.x - this.x;
 const dy = mouse.y - this.y;
 const dist = Math.sqrt(dx * dx + dy * dy);
 
-if (dist < 200 && dist > 1) {
-this.vx += (dx / dist) * 0.015;
-this.vy += (dy / dist) * 0.015;
+if (dist < 320 && dist > 1) {
+this.vx += (dx / dist) * 0.025;
+this.vy += (dy / dist) * 0.025;
 }
 
 // Return to wander area slowly
@@ -303,7 +303,7 @@ ctx.fill();
 class ShootingStar {
 constructor() {
 this.active = false;
-this.timer = Math.random() * 5 + 3;
+this.timer = Math.random() * 3 + 1;
 }
 update(dt) {
 if (!this.active) {
@@ -318,7 +318,7 @@ this.life -= dt;
 
 if (this.life <= 0 || this.x > W + 100 || this.y > H + 100) {
 this.active = false;
-this.timer = Math.random() * 8 + 4;
+this.timer = Math.random() * 4 + 2;
 }
 }
 launch() {
@@ -373,7 +373,7 @@ ctx.fill();
 // 
 //  Firework Burst 
 
-const BURST_CHANCE = 0.002;
+const BURST_CHANCE = 0.003;
 const MAX_BURSTS = 5;
 
 class FireworkBurst {
@@ -756,15 +756,8 @@ const palette = new Palette();
 const stars = Array.from({ length: 300 }, () => new Star());
 const nebulae = Array.from({ length: 8 }, () => new Nebula());
 const fireflies = Array.from({ length: 40 }, () => new Firefly());
-const shootingStars = [new ShootingStar(), new ShootingStar()];
+const shootingStars = [new ShootingStar(), new ShootingStar(), new ShootingStar(), new ShootingStar()];
 const aurora = new Aurora();
-
-// Initial flowers
-for (let i = 0; i < 12; i++) {
-const fx = Math.random() * W;
-const fy = H * 0.5 + Math.random() * H * 0.4;
-flowers.push(new Flower(fx, fy));
-}
 
 // 
 // Background gradient 
@@ -785,13 +778,13 @@ ctx.fillRect(0, 0, W, H);
 // Cursor glow 
 
 function drawCursor(time) {
-const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 40);
-grd.addColorStop(0, `rgba(255, 240, 200, ${0.15 + Math.sin(time * 2) * 0.05})`);
-grd.addColorStop(0.5, `rgba(255, 200, 150, ${0.05 + Math.sin(time * 3) * 0.02})`);
+const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 90);
+grd.addColorStop(0, `rgba(255, 240, 200, ${0.35 + Math.sin(time * 2) * 0.08})`);
+grd.addColorStop(0.4, `rgba(255, 200, 150, ${0.15 + Math.sin(time * 3) * 0.04})`);
 grd.addColorStop(1, 'rgba(255, 180, 100, 0)');
 
 ctx.beginPath();
-ctx.arc(mouse.x, mouse.y, 40, 0, Math.PI * 2);
+ctx.arc(mouse.x, mouse.y, 90, 0, Math.PI * 2);
 ctx.fillStyle = grd;
 ctx.fill();
 }
@@ -835,13 +828,6 @@ globalTime += dt;
 
 // Update
 palette.update(dt);
-
-// Spawn flowers periodically
-if (Math.random() < dt * 0.3 && flowers.length < 60) {
-const fx = Math.random() * W;
-const fy = H * 0.5 + Math.random() * H * 0.45;
-flowers.push(new Flower(fx, fy));
-}
 
 // Remove dead flowers
 for (let i = flowers.length - 1; i >= 0; i--) {

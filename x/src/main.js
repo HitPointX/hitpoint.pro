@@ -1088,11 +1088,8 @@ function startQuoteSweep() {
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, W, H);
 
-      if (redirectTimer === null) {
-        const aliveCount = flowers.filter(f => f.alive).length;
-        if (globalTime > 2 && aliveCount < 5) {
-          redirectTimer = globalTime + 1.5;
-        }
+      if (redirectTimer === null && globalTime >= 3) {
+        redirectTimer = globalTime + 1.2;
       }
 
       if (redirectTimer !== null && globalTime >= redirectTimer) {
