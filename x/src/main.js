@@ -328,15 +328,18 @@
 	          return h === _secretHashHex && trimmed.length === targetPhrase.length;
 	        } catch { return false; }
 	      };
-	      const exactMatch = ACCEPTED_PHRASES.includes(trimmed);
-	      if (exactMatch) {
-	        wrap.classList.add('success');
-	        haloSuccess = true;
-	        if (!window._standbyTriggered) {
-	          window._standbyTriggered = true;
-	          document.dispatchEvent(new CustomEvent('standby:passphrase', { detail: { phrase: trimmed } }));
-	        }
-	      } else {
+    const exactMatch = ACCEPTED_PHRASES.includes(trimmed);
+      if (exactMatch) {
+        wrap.classList.add('success');
+        haloSuccess = true;
+        if (!window._standbyTriggered) {
+          window._standbyTriggered = true;
+          document.dispatchEvent(new CustomEvent('standby:passphrase', { detail: { phrase: trimmed } }));
+        }
+        if (trimmed.toUpperCase() === 'HOPE') {
+          triggerHopeBloom();
+        }
+      } else {
 	        wrap.classList.remove('success');
 	        if (!prefixMatch) haloSuccess = false;
 	      }
@@ -878,4 +881,229 @@ function startQuoteSweep() {
   requestAnimationFrame(frame);
 }
 
-window.startFinalMessage = function(){};
+  window.startFinalMessage = function(){};
+
+  // --- Hope bloom: flower animation then redirect to /sg ---
+  let hopeBloomDone = false;
+  function triggerHopeBloom() {
+    if (hopeBloomDone) return;
+    hopeBloomDone = true;
+    const overlay = document.getElementById('quoteOverlay');
+    if (overlay) overlay.style.display = 'none';
+    const smokeEl = document.getElementById('smokeCanvas');
+    if (smokeEl) smokeEl.style.opacity = '0';
+
+    const canvas = document.createElement('canvas');
+    Object.assign(canvas.style, {
+      position: 'fixed', left: '0', top: '0', width: '100vw', height: '100vh',
+      zIndex: '9999', pointerEvents: 'none'
+    });
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = canvas.width = window.innerWidth * dpr;
+      H = canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const paletteHue = { value: Math.random() * 360 };
+    function hsl(h, s, l, a) { return `hsla(${((h%360)+360)%360},${s}%,${l}%,${a})`; }
+
+    class Flower {
+      constructor(x, y) {
+        this.x = x; this.y = y;
+        this.bloom = 0; this.maxBloom = 0.5 + Math.random() * 0.5;
+        this.petals = 5 + Math.floor(Math.random() * 4);
+        this.size = 12 + Math.random() * 20;
+        this.hueOff = Math.random() * 360;
+        this.rotSpeed = (Math.random() - 0.5) * 0.008;
+        this.wobble = Math.random() * Math.PI * 2;
+        this.stemH = 40 + Math.random() * 70;
+        this.alive = true; this.dying = false; this.age = 0;
+      }
+      update(dt) {
+        if (this.bloom < this.maxBloom) this.bloom += dt * 1.2;
+        else this.bloom = this.maxBloom;
+        this.age += dt;
+        if (this.age > 4 && !this.dying) this.dying = true;
+        if (this.dying) { this.bloom -= dt * 0.5; if (this.bloom <= 0) this.alive = false; }
+      }
+      draw(t) {
+        const b = Math.max(0, Math.min(1, this.bloom / this.maxBloom));
+        const alpha = Math.sin(b * Math.PI);
+        if (alpha <= 0) return;
+        const wobbleX = Math.sin(this.wobble + t * 0.3) * 3;
+        const stemTopY = this.y - this.stemH * b;
+
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.bezierCurveTo(
+          this.x + Math.sin(t*0.5+this.wobble)*8, this.y - this.stemH*b*0.3,
+          this.x - Math.cos(t*0.4+this.wobble)*6, stemTopY + this.stemH*b*0.3,
+          this.x + wobbleX, stemTopY
+        );
+        ctx.strokeStyle = hsl(paletteHue.value + 90, 50, 40, alpha * 0.7);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        if (b > 0.1) {
+          const ps = this.size * b;
+          const rot = t * this.rotSpeed + this.wobble;
+          for (let i = 0; i < this.petals; i++) {
+            const angle = (i / this.petals) * Math.PI * 2 + rot;
+            const px = this.x + wobbleX + Math.cos(angle) * ps * 0.6;
+            const py = stemTopY + Math.sin(angle) * ps * 0.4;
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(angle + Math.PI / 2);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(ps*0.3,-ps*0.15, ps*0.4,ps*0.2, 0,ps*0.5);
+            ctx.bezierCurveTo(-ps*0.4,ps*0.2, -ps*0.3,-ps*0.15, 0,0);
+            const ph = paletteHue.value + this.hueOff + i * 8;
+            ctx.fillStyle = hsl(ph, 75, 60, alpha * 0.6);
+            ctx.fill();
+            const pg = ctx.createRadialGradient(0, ps*0.15, 0, 0, ps*0.15, ps*0.3);
+            pg.addColorStop(0, hsl(ph, 90, 80, alpha * 0.2));
+            pg.addColorStop(1, hsl(ph, 90, 80, 0));
+            ctx.fillStyle = pg;
+            ctx.fill();
+            ctx.restore();
+          }
+          const cg = ctx.createRadialGradient(this.x+wobbleX, stemTopY, 0, this.x+wobbleX, stemTopY, ps*0.2);
+          cg.addColorStop(0, hsl(paletteHue.value+this.hueOff, 80, 75, alpha*0.9));
+          cg.addColorStop(1, hsl(paletteHue.value+this.hueOff, 80, 50, 0));
+          ctx.beginPath();
+          ctx.arc(this.x+wobbleX, stemTopY, ps*0.2, 0, Math.PI*2);
+          ctx.fillStyle = cg;
+          ctx.fill();
+        }
+      }
+    }
+
+    class Firefly {
+      constructor() {
+        this.x = Math.random() * W; this.y = Math.random() * H;
+        this.vx = (Math.random()-0.5)*0.3; this.vy = (Math.random()-0.5)*0.3;
+        this.size = 1 + Math.random()*2; this.phase = Math.random()*Math.PI*2;
+        this.glowP = Math.random()*Math.PI*2;
+      }
+      update(dt) {
+        this.vx *= 0.995; this.vy *= 0.995;
+        this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
+        if (this.x < -20) this.x = W+20; if (this.x > W+20) this.x = -20;
+        if (this.y < -20) this.y = H+20; if (this.y > H+20) this.y = -20;
+      }
+      draw(t) {
+        const glow = (Math.sin(t*1.5+this.glowP)+1)/2;
+        const a = 0.3 + glow*0.7;
+        const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size*8);
+        g.addColorStop(0, `rgba(255,240,180,${a*0.4})`);
+        g.addColorStop(0.3, `rgba(255,200,100,${a*0.15})`);
+        g.addColorStop(1, 'rgba(255,180,60,0)');
+        ctx.beginPath(); ctx.arc(this.x,this.y,this.size*8,0,Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+        ctx.beginPath(); ctx.arc(this.x,this.y,this.size*glow*0.5+0.3,0,Math.PI*2);
+        ctx.fillStyle = `rgba(255,245,200,${a})`; ctx.fill();
+      }
+    }
+
+    const flowers = [];
+    const fireflies = Array.from({length: 30}, () => new Firefly());
+
+    // Spawn initial burst of flowers
+    for (let i = 0; i < 25; i++) {
+      const fx = W * 0.1 + Math.random() * W * 0.8;
+      const fy = H * 0.4 + Math.random() * H * 0.5;
+      flowers.push(new Flower(fx, fy));
+    }
+
+    let lastTime = performance.now();
+    let globalTime = 0;
+    let redirectTimer = null;
+
+    function animate(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      globalTime += dt;
+      paletteHue.value = (paletteHue.value + dt * 8) % 360;
+
+      // Background gradient
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      const h1 = (paletteHue.value + 240) % 360;
+      const h2 = (paletteHue.value + 280) % 360;
+      bg.addColorStop(0, `hsl(${h1},60%,${3+Math.sin(globalTime*0.05)*1}%)`);
+      bg.addColorStop(0.5, `hsl(${(h1+h2)/2},50%,${2+Math.sin(globalTime*0.07)*0.5}%)`);
+      bg.addColorStop(1, `hsl(${h2},40%,1%)`);
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Stars
+      for (let i = 0; i < 80; i++) {
+        const sx = ((i * 137.5) % W);
+        const sy = ((i * 97.3) % (H * 0.6));
+        const twinkle = (Math.sin(globalTime * (1 + i*0.1) + i) + 1) / 2;
+        const a = 0.2 + twinkle * 0.5;
+        ctx.beginPath(); ctx.arc(sx, sy, 0.5 + Math.random()*0.3, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,255,${240+Math.random()*15},${a})`;
+        ctx.fill();
+      }
+
+      // Ground line
+      const lineHue = (paletteHue.value + 120) % 360;
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 2) {
+        const y = H * 0.87 + Math.sin(x*0.005+globalTime*0.2)*5*DPR;
+        if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle = hsl(lineHue, 40, 25, 0.15 + Math.sin(globalTime*0.3)*0.05);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Spawn flowers periodically
+      if (Math.random() < dt * 3 && flowers.length < 80) {
+        const fx = W*0.05 + Math.random()*W*0.9;
+        const fy = H*0.4 + Math.random()*H*0.45;
+        flowers.push(new Flower(fx, fy));
+      }
+
+      for (let i = flowers.length-1; i >= 0; i--) {
+        if (!flowers[i].alive) flowers.splice(i, 1);
+        else flowers[i].update(dt);
+      }
+
+      fireflies.forEach(f => { f.update(dt); f.draw(globalTime); });
+      flowers.forEach(f => f.draw(globalTime));
+
+      // Vignette
+      const vig = ctx.createRadialGradient(W/2,H/2,W*0.3*DPR, W/2,H/2,W*0.75*DPR);
+      vig.addColorStop(0, 'rgba(0,0,0,0)');
+      vig.addColorStop(1, 'rgba(0,0,0,0.4)');
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, W, H);
+
+      if (redirectTimer === null) {
+        const aliveCount = flowers.filter(f => f.alive).length;
+        if (globalTime > 2 && aliveCount < 5) {
+          redirectTimer = globalTime + 1.5;
+        }
+      }
+
+      if (redirectTimer !== null && globalTime >= redirectTimer) {
+        canvas.style.transition = 'opacity 1.2s ease';
+        canvas.style.opacity = '0';
+        setTimeout(() => { window.location.href = '/sg'; }, 1400);
+        return;
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  }
