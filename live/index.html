@@ -129,6 +129,46 @@
     }
     #stream-video::-webkit-media-controls { display: none !important; }
 
+    /* ── Auth overlay (stream locked) ─────────────────────── */
+    #auth-overlay {
+      position: absolute; inset: 0; z-index: 20;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      background: rgba(8,10,16,0.95);
+    }
+    #auth-overlay.visible { display: flex; }
+    @keyframes authPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(138,36,66,0.2); }
+      50%      { box-shadow: 0 0 40px rgba(138,36,66,0.45); }
+    }
+    #auth-lock-icon {
+      font-size: 2rem; color: rgba(255,96,112,0.7);
+      animation: authPulse 3s ease-in-out infinite;
+    }
+    #auth-title {
+      font-size: 14px; font-weight: 800; letter-spacing: 3px;
+      text-transform: uppercase; color: rgba(255,96,112,0.85);
+    }
+    #auth-message {
+      font-size: 12px; color: rgba(242,242,242,0.55);
+      text-align: center; max-width: 300px; line-height: 1.6;
+    }
+    #auth-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .auth-btn {
+      font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 7px 16px; border-radius: 5px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .auth-btn.primary {
+      background: rgba(138,36,66,0.8); border: 1px solid rgba(138,36,66,0.9);
+      color: #fff;
+    }
+    .auth-btn.primary:hover { background: rgba(154,45,76,0.95); transform: translateY(-1px); }
+    .auth-btn.secondary {
+      background: none; border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.45);
+    }
+    .auth-btn.secondary:hover { color: #fff; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
+
     /* ── Offline overlay ──────────────────────────────────── */
     #offline-overlay {
       position: absolute; inset: 0; z-index: 10;
@@ -481,6 +521,14 @@
       <!-- Player -->
       <div id="player-col">
         <div id="player-wrap">
+          <!-- Auth overlay (replaces video when stream is locked) -->
+          <div id="auth-overlay" role="alert" aria-live="polite">
+            <div id="auth-lock-icon">&#x1F512;</div>
+            <div id="auth-title">Stream Locked</div>
+            <div id="auth-message"></div>
+            <div id="auth-actions"></div>
+          </div>
+
           <video
             id="stream-video"
             playsinline autoplay muted preload="none"
@@ -668,6 +716,7 @@
     const LIVE_EDGE_THRESHOLD = 20;
     const CLIP_VISIBLE_THRESHOLD = 2;
     const CLIP_API = 'https://chat.hitpoint.pro/api/clips';
+    const API = 'https://chat.hitpoint.pro/api';
     let hideTimer = null;
     let clipToastTimer = null;
     let clipToastFadeTimer = null;
@@ -992,8 +1041,47 @@
       });
     });
 
+    /* ── Stream Auth Gate ─────────────────────────────────── */
+    const authOverlay = document.getElementById('auth-overlay');
+    const authMessage = document.getElementById('auth-message');
+    const authActions = document.getElementById('auth-actions');
+
+    function showAuthLocked(type) {
+      if (type === 'not-logged-in') {
+        authMessage.textContent = 'This stream requires a chat account to watch. Log in or create an account to view.';
+        authActions.innerHTML = `
+          <a href="/chat/" class="auth-btn primary">Login</a>
+          <a href="/chat/" class="auth-btn secondary" target="_blank">Create Account</a>
+        `;
+      } else {
+        authMessage.textContent = 'Privileges not granted. Only admins and mods can view the stream.';
+        authActions.innerHTML = `<a href="/chat/" class="auth-btn primary">Log In with Chat Account</a>`;
+      }
+      authOverlay.classList.add('visible');
+    }
+
+    async function checkStreamAccess() {
+      try {
+        const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
+        if (!res.ok) { showAuthLocked('not-logged-in'); return false; }
+        const user = await res.json().catch(() => null);
+        if (!user || !['admin', 'mod'].includes(user.role)) { showAuthLocked('role-denied'); return false; }
+        const accessRes = await fetch(`${API}/stream/access`, { credentials: 'include' });
+        if (!accessRes.ok) { showAuthLocked('role-denied'); return false; }
+        return true;
+      } catch {
+        showAuthLocked('not-logged-in');
+        return false;
+      }
+    }
+
     /* ── Boot ─────────────────────────────────────────────── */
-    checkStream();
+    (async () => {
+      const allowed = await checkStreamAccess();
+      if (allowed) {
+        checkStream();
+      }
+    })();
   </script>
 </body>
 </html>
