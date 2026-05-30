@@ -3629,6 +3629,11 @@
   resetViewerData();
   fetchEmotes();
   checkAuth();
+
+  // Open modal from URL hash (e.g. /chat/#login, /chat/#register)
+  const hash = window.location.hash.slice(1);
+  if (hash === 'login') openModal('login-backdrop');
+  else if (hash === 'register') openModal('register-backdrop');
 </script>
 
 <!-- Emote picker panel -->

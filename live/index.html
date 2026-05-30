@@ -1050,12 +1050,12 @@
       if (type === 'not-logged-in') {
         authMessage.textContent = 'This stream requires a chat account to watch. Log in or create an account to view.';
         authActions.innerHTML = `
-          <a href="/chat/" class="auth-btn primary">Login</a>
-          <a href="/chat/" class="auth-btn secondary" target="_blank">Create Account</a>
+          <a href="/chat/#login" class="auth-btn primary">Login</a>
+          <a href="/chat/#register" class="auth-btn secondary" target="_blank">Create Account</a>
         `;
       } else {
         authMessage.textContent = 'Privileges not granted. Only admins and mods can view the stream.';
-        authActions.innerHTML = `<a href="/chat/" class="auth-btn primary">Log In with Chat Account</a>`;
+        authActions.innerHTML = `<a href="/chat/#login" class="auth-btn primary">Log In with Chat Account</a>`;
       }
       authOverlay.classList.add('visible');
     }
