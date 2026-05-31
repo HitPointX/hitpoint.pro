@@ -86,6 +86,11 @@
       border-color: rgba(0,200,120,0.4); box-shadow: 0 0 14px rgba(0,200,120,0.25);
       animation: livePulse 2.4s ease-in-out infinite;
     }
+    #status-badge.interrupted {
+      background: rgba(255,176,64,0.12); color: #ffb040;
+      border-color: rgba(255,176,64,0.35); box-shadow: 0 0 14px rgba(255,176,64,0.2);
+      animation: livePulse 2.4s ease-in-out infinite;
+    }
     #status-badge.offline {
       background: rgba(255,60,80,0.10); color: #ff6070;
       border-color: rgba(255,60,80,0.25);
@@ -199,6 +204,31 @@
     #offline-heart {
       font-size: 1.4rem; line-height: 1; color: rgba(255,255,255,0.18);
       transition: opacity 0.15s ease; user-select: none;
+    }
+
+    /* ── Interrupted overlay ──────────────────────────────── */
+    #interrupted-overlay {
+      position: absolute; inset: 0; z-index: 9;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      background: rgba(8,10,16,0.85);
+    }
+    .interrupted-pulse-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #ffb040; opacity: 0.7;
+      animation: interruptedPulse 2s ease-in-out infinite;
+    }
+    @keyframes interruptedPulse {
+      0%,100% { transform: scale(1);   opacity: 0.5; box-shadow: 0 0 8px rgba(255,176,64,0.2); }
+      50%       { transform: scale(1.6); opacity: 0.9; box-shadow: 0 0 20px rgba(255,176,64,0.45); }
+    }
+    #interrupted-title {
+      font-size: 13px; font-weight: 800; letter-spacing: 2.5px;
+      text-transform: uppercase; color: rgba(255,176,64,0.8);
+    }
+    #interrupted-countdown {
+      font-size: 11px; font-weight: 600; letter-spacing: 1px;
+      color: rgba(255,176,64,0.45);
     }
 
     /* ── Custom controls ──────────────────────────────────── */
@@ -542,6 +572,12 @@
             <div id="offline-heart">♡</div>
           </div>
 
+          <div id="interrupted-overlay" aria-live="polite" style="display:none">
+            <div class="interrupted-pulse-dot"></div>
+            <div id="interrupted-title">Reconnecting…</div>
+            <div id="interrupted-countdown"></div>
+          </div>
+
           <div id="seekbar-wrap">
             <input type="range" id="seekbar" min="0" max="120" value="120" step="1" aria-label="Seek">
           </div>
@@ -611,26 +647,24 @@
   <script>
     const _sk = [68,122,78,83,89,98,104,113,169,178,131,139,57,55,112,75,85,133,99,150,108,164,118,176,135,145,52,105,72,76,84,89];
     const STREAM_URL = `https://stream.hitpoint.pro/hls/${_sk.map((c,i)=>String.fromCharCode(c-((i*7+13)%97))).join('')}.m3u8`;
-    const POLL_OFFLINE = 10000;
-    const POLL_LIVE    = 30000;
-
-    const video   = document.getElementById('stream-video');
-    const badge   = document.getElementById('status-badge');
-    const overlay = document.getElementById('offline-overlay');
-
-    let hls = null, isLive = false, pollTimer = null;
-    let userSeeked = false;
-    let suppressSeekingFlag = false;
-    const LIVE_SYNC_DURATION = 3;
-    const LIVE_SYNC_RESTORE_THRESHOLD = 1.5;
+    const STATUS_URL = '/stream/status.json';
+    const POLL_INTERVAL = 3000;
 
     /* ── Stream badge ─────────────────────────────────────── */
     function setBadge(state) {
       badge.className  = state;
-      badge.textContent = state === 'live' ? 'LIVE' : 'OFFLINE';
+      if (state === 'live')       badge.textContent = 'LIVE';
+      else if (state === 'interrupted') badge.textContent = 'INTERRUPTED';
+      else                        badge.textContent = 'OFFLINE';
     }
-    function showOffline() { overlay.classList.add('visible');    video.pause(); }
-    function showLive()    { overlay.classList.remove('visible'); }
+    function showOffline() { overlay.classList.add('visible'); intOverlay.style.display = 'none'; video.pause(); }
+    function hideOffline() { overlay.classList.remove('visible'); }
+    function showInterrupted(age) {
+      intOverlay.style.display = 'flex';
+      const remaining = Math.max(0, 45 - age);
+      document.getElementById('interrupted-countdown').textContent = `offline in ${Math.ceil(remaining)}s`;
+    }
+    function hideInterrupted() { intOverlay.style.display = 'none'; }
 
     function destroyHls() {
       if (hls) { hls.destroy(); hls = null; }
@@ -658,36 +692,51 @@
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           userSeeked = false;
           setHlsLiveSyncEnabled(true);
-          isLive = true; setBadge('live'); showLive();
+          isLive = true; setBadge('live'); hideOffline(); hideInterrupted();
           video.play().catch(() => {});
         });
         hls.on(Hls.Events.ERROR, (_, data) => {
-          if (data.fatal) { isLive = false; setBadge('offline'); showOffline(); destroyHls(); schedulePoll(POLL_OFFLINE); }
+          if (data.fatal) { isLive = false; setBadge('offline'); showOffline(); destroyHls(); schedulePoll(POLL_INTERVAL * 3); }
         });
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = STREAM_URL;
-        video.addEventListener('loadedmetadata', () => { isLive = true; setBadge('live'); showLive(); video.play().catch(() => {}); }, { once: true });
-        video.addEventListener('error', () => { isLive = false; setBadge('offline'); showOffline(); video.src = ''; schedulePoll(POLL_OFFLINE); }, { once: true });
+        video.addEventListener('loadedmetadata', () => { isLive = true; setBadge('live'); hideOffline(); hideInterrupted(); video.play().catch(() => {}); }, { once: true });
+        video.addEventListener('error', () => { isLive = false; setBadge('offline'); showOffline(); video.src = ''; schedulePoll(POLL_INTERVAL * 3); }, { once: true });
       }
     }
 
-    async function checkStream() {
+    async function checkStatus() {
       clearTimeout(pollTimer);
       try {
-        const res = await fetch(STREAM_URL + '?_=' + Date.now(), { method:'HEAD', cache:'no-store', signal: AbortSignal.timeout(8000) });
-        if (res.ok || res.status === 304) {
-          if (!isLive) { attachHls(); schedulePoll(POLL_LIVE); }
-          else { setBadge('live'); schedulePoll(POLL_LIVE); }
-        } else handleOffline();
-      } catch { handleOffline(); }
+        const res = await fetch(STATUS_URL + '?_=' + Date.now(), { cache:'no-store', signal: AbortSignal.timeout(5000) });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        handleState(data.state, data.heartbeat_age_seconds);
+      } catch {
+        schedulePoll(POLL_INTERVAL * 3);
+      }
     }
-    function handleOffline() {
-      if (isLive) { isLive = false; destroyHls(); }
-      ctrlClip.style.display = 'none';
-      closeClipDialog();
-      setBadge('offline'); showOffline(); schedulePoll(POLL_OFFLINE);
+
+    function handleState(state, age) {
+      if (state === 'live') {
+        if (!isLive) { isLive = true; attachHls(); }
+        setBadge('live'); hideOffline(); hideInterrupted();
+        ctrlClip.style.display = '';
+        schedulePoll(POLL_INTERVAL);
+      } else if (state === 'interrupted') {
+        setBadge('interrupted'); showInterrupted(age);
+        ctrlClip.style.display = 'none';
+        schedulePoll(POLL_INTERVAL);
+      } else {
+        if (isLive) { isLive = false; destroyHls(); }
+        setBadge('offline'); showOffline(); hideInterrupted();
+        ctrlClip.style.display = 'none';
+        closeClipDialog();
+        schedulePoll(POLL_INTERVAL * 3);
+      }
     }
-    function schedulePoll(ms) { clearTimeout(pollTimer); pollTimer = setTimeout(checkStream, ms); }
+
+    function schedulePoll(ms) { clearTimeout(pollTimer); pollTimer = setTimeout(checkStatus, ms); }
 
     /* ── Custom controls ──────────────────────────────────── */
     const ctrlPlay    = document.getElementById('ctrl-play');
@@ -1079,7 +1128,7 @@
     (async () => {
       const allowed = await checkStreamAccess();
       if (allowed) {
-        checkStream();
+        checkStatus();
       }
     })();
   </script>
