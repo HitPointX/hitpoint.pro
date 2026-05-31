@@ -675,7 +675,7 @@
       clearTimeout(pollTimer);
       try {
         const res = await fetch(STREAM_URL + '?_=' + Date.now(), { method:'HEAD', cache:'no-store', signal: AbortSignal.timeout(8000) });
-        if (res.ok) {
+        if (res.ok || res.status === 304) {
           if (!isLive) { attachHls(); schedulePoll(POLL_LIVE); }
           else { setBadge('live'); schedulePoll(POLL_LIVE); }
         } else handleOffline();
