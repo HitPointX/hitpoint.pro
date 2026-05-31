@@ -140,6 +140,31 @@
       margin-top: 3px; letter-spacing: 0.2px;
     }
 
+    /* state badges */
+    .state-badge {
+      font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 2px 6px; border-radius: 3px;
+      display: inline-block; margin-left: 8px; vertical-align: middle;
+    }
+    .state-badge.live { background: rgba(0,175,255,0.2); color: #bff1ff; }
+    .state-badge.complete { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
+
+    /* expandable segment list */
+    .segment-list {
+      margin-top: 8px; padding: 8px 10px;
+      background: rgba(255,255,255,0.02); border-radius: 4px;
+      font-size: 10px; color: rgba(255,255,255,0.3);
+    }
+    .segment-list .segment-item { padding: 2px 0; }
+
+    /* double-click hint */
+    .vod-entry:hover::after {
+      content: 'double-click for segments';
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 9px; color: rgba(255,255,255,0.15); letter-spacing: 0.5px;
+    }
+    .vod-entry { position: relative; }
+
     /* skeletons */
     .skeleton {
       height: 52px; margin: 5px 14px; border-radius: 4px;
@@ -328,6 +353,43 @@
       return Math.round(bytes / 1e3) + ' KB';
     }
 
+    function parseVodDate(session) {
+      if (session.start_time) {
+        const d = new Date(session.start_time * 1000);
+        if (!isNaN(d)) return d;
+      }
+      // Fallback: try to parse from primary_segment filename
+      const m = (session.primary_segment || '').match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+      if (m) return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+      return null;
+    }
+
+    function formatVodDate(d) {
+      if (!d) return 'Unknown date';
+      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+        + ' \u00b7 ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    function formatSessionLabel(session) {
+      const d = parseVodDate(session);
+      if (!d) return session.session_id || 'Unknown';
+      const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      if (session.is_live && session.segment_count > 0) {
+        return dateStr + ' \u2014 LIVE (' + session.segment_count + ' segments)';
+      }
+      return dateStr + ' \u2014 ' + formatSize(session.total_size_bytes || 0);
+    }
+
+    function formatSessionDropdownLabel(session) {
+      const d = parseVodDate(session);
+      if (!d) return session.session_id || 'Unknown';
+      const timeStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      if (session.is_live && session.segment_count > 0) {
+        return timeStr + ' (LIVE - ' + session.segment_count + ' segments)';
+      }
+      return timeStr + ' (' + session.segment_count + ' segments)';
+    }
+
     function parseVodDate(vod) {
       if (vod.created_at) {
         const d = new Date(vod.created_at);
@@ -418,50 +480,97 @@
       if (!vods.length) { vodEmpty.style.display = 'block'; return; }
       vodEmpty.style.display = 'none';
 
-      // Sort newest first
-      vods.sort((a, b) => {
-        const da = parseVodDate(a), db = parseVodDate(b);
-        return (db ? db.getTime() : 0) - (da ? da.getTime() : 0);
-      });
+      // Sort newest first (API already returns sorted, but ensure consistency)
+      vods.sort((a, b) => (b.start_time || 0) - (a.start_time || 0));
 
-      vods.forEach(vod => {
-        const d       = parseVodDate(vod);
+      vods.forEach(session => {
+        const d       = parseVodDate(session);
         const dateStr = formatVodDate(d);
-        const sizeStr = formatSize(vod.size_bytes);
+        const sizeStr = formatSize(session.total_size_bytes);
+        const isLive  = session.is_live && session.segment_count > 0;
+        const stateLabel = isLive ? 'LIVE' : (session.state || 'complete');
 
+        // Create card element
         const el = document.createElement('div');
         el.className = 'vod-entry';
-        el.dataset.filename = vod.filename;
-        el.innerHTML = `<div class="vod-date">${dateStr}</div><div class="vod-meta">${sizeStr}</div>`;
-        el.addEventListener('click', () => selectVod(vod));
-        if (vod.filename === currentFilename) el.classList.add('active');
+        el.dataset.sessionId = session.session_id;
+        el.innerHTML = `
+          <div class="vod-date">
+            ${dateStr}
+            <span class="state-badge ${isLive ? 'live' : 'complete'}">${stateLabel}</span>
+          </div>
+          <div class="vod-meta">${session.segment_count || 0} segments \u00b7 ${sizeStr}</div>
+          <div class="segment-list" style="display:none"></div>`;
+
+        // Click to expand/collapse segment list
+        el.addEventListener('click', (e) => {
+          if (e.target.closest('.download-inline')) return;
+          selectVod(session);
+        });
+
+        // Double-click to toggle segment expansion
+        el.addEventListener('dblclick', () => {
+          const segList = el.querySelector('.segment-list');
+          if (!segList || !session.segments) return;
+          if (segList.style.display === 'none') {
+            renderSegments(segList, session);
+            el.classList.add('expanded');
+          } else {
+            segList.style.display = 'none';
+            el.classList.remove('expanded');
+          }
+        });
+
         vodListEl.appendChild(el);
 
+        // Mobile dropdown option
         const opt = document.createElement('option');
-        opt.value = vod.filename;
-        opt.textContent = dateStr + ' \u2014 ' + sizeStr;
-        if (vod.filename === currentFilename) opt.selected = true;
+        opt.value = session.session_id;
+        opt.textContent = formatSessionDropdownLabel(session);
+        if (session.session_id === currentFilename) opt.selected = true;
         vodSelect.appendChild(opt);
       });
     }
 
-    function selectVod(vod) {
-      currentFilename = vod.filename;
-      const url = VOD_BASE + vod.filename;
+    function renderSegments(container, session) {
+      container.innerHTML = '';
+      if (!session.segments || !Array.isArray(session.segments)) return;
+      const maxShow = 20;
+      const segments = session.segments.slice(0, maxShow);
+      segments.forEach((seg, i) => {
+        const item = document.createElement('div');
+        item.className = 'segment-item';
+        const sizeStr = seg.size ? formatSize(seg.size) : '\u2014';
+        const durStr  = seg.duration && seg.duration !== 'N/A' ? parseFloat(seg.duration).toFixed(1) + 's' : '\u2014';
+        item.textContent = `#${i + 1} ${sizeStr} ${durStr}`;
+        container.appendChild(item);
+      });
+      if (session.segments.length > maxShow) {
+        const more = document.createElement('div');
+        more.className = 'segment-item';
+        more.style.color = 'rgba(255,255,255,0.2)';
+        more.textContent = `+${session.segments.length - maxShow} more segments`;
+        container.appendChild(more);
+      }
+    }
+
+    function selectVod(session) {
+      currentFilename = session.session_id;
+      const url = VOD_BASE + session.primary_segment;
 
       document.querySelectorAll('.vod-entry').forEach(el => {
-        el.classList.toggle('active', el.dataset.filename === vod.filename);
+        el.classList.toggle('active', el.dataset.sessionId === session.session_id);
       });
-      vodSelect.value = vod.filename;
+      vodSelect.value = session.session_id;
 
-      vodTitle.textContent     = formatVodDate(parseVodDate(vod));
-      vodSizeLabel.textContent = formatSize(vod.size_bytes);
+      vodTitle.textContent     = formatVodDate(parseVodDate(session));
+      vodSizeLabel.textContent = (session.segment_count || 0) + ' segments \u00b7 ' + formatSize(session.total_size_bytes);
       downloadBtn.href         = url;
-      downloadBtn.download     = vod.filename;
+      downloadBtn.download     = session.primary_segment ? session.primary_segment.split('/').pop() : '';
 
       placeholder.style.display = 'none';
       playerSection.classList.add('visible');
-      loadVideo(url, vod.filename);
+      loadVideo(url, session.primary_segment || '');
     }
 
     function loadVideo(url, filename) {
@@ -486,8 +595,8 @@
     refreshBtn.addEventListener('click', loadVods);
     retryBtn.addEventListener('click', loadVods);
     vodSelect.addEventListener('change', () => {
-      const vod = vods.find(v => v.filename === vodSelect.value);
-      if (vod) selectVod(vod);
+      const session = vods.find(v => v.session_id === vodSelect.value);
+      if (session) selectVod(session);
     });
 
     // ── Boot ───────────────────────────────────────────────
