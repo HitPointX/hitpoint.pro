@@ -650,6 +650,17 @@
     const STATUS_URL = '/stream/status.json';
     const POLL_INTERVAL = 3000;
 
+    const video   = document.getElementById('stream-video');
+    const badge   = document.getElementById('status-badge');
+    const overlay = document.getElementById('offline-overlay');
+    const intOverlay = document.getElementById('interrupted-overlay');
+
+    let hls = null, isLive = false, pollTimer = null;
+    let userSeeked = false;
+    let suppressSeekingFlag = false;
+    const LIVE_SYNC_DURATION = 3;
+    const LIVE_SYNC_RESTORE_THRESHOLD = 1.5;
+
     /* ── Stream badge ─────────────────────────────────────── */
     function setBadge(state) {
       badge.className  = state;
