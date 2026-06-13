@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09090c">
+  <meta name="description" content="Play Termina Scape, a browser-based Runescape Classic private server.">
+  <title>Termina Scape | HitPoint</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09090c;
+      --panel: rgba(14, 15, 20, 0.9);
+      --panel-soft: rgba(18, 19, 25, 0.72);
+      --line: rgba(255, 255, 255, 0.09);
+      --muted: rgba(242, 242, 246, 0.58);
+      --crimson: #8b1d36;
+      --crimson-bright: #c0394b;
+      --text: #f2f2f4;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      background: var(--bg);
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(139, 29, 54, 0.24), transparent 34rem),
+        radial-gradient(circle at 88% 90%, rgba(92, 16, 36, 0.2), transparent 38rem),
+        linear-gradient(145deg, #0b0b0f 0%, #07070a 52%, #0d090d 100%);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      isolation: isolate;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.2;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 88%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 12px;
+      z-index: 10;
+      border: 1px solid rgba(192, 57, 75, 0.2);
+      border-radius: 18px;
+      box-shadow: inset 0 0 60px rgba(139, 29, 54, 0.05);
+      pointer-events: none;
+    }
+
+    #embers {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .page-shell {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 42px 0 54px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .back-link {
+      color: rgba(255, 255, 255, 0.48);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 160ms ease;
+    }
+
+    .back-link:hover,
+    .back-link:focus-visible {
+      color: #fff;
+    }
+
+    .server-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.54);
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .server-status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #c0394b;
+      box-shadow: 0 0 14px rgba(192, 57, 75, 0.8);
+      animation: status-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes status-pulse {
+      50% {
+        opacity: 0.42;
+        box-shadow: 0 0 5px rgba(192, 57, 75, 0.5);
+      }
+    }
+
+    .hero {
+      margin: 0 auto 30px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #c65a6a;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.7rem, 8vw, 5.6rem);
+      font-weight: 600;
+      letter-spacing: 0.035em;
+      line-height: 0.95;
+      text-shadow:
+        0 2px 0 #25070e,
+        0 0 28px rgba(192, 57, 75, 0.18);
+    }
+
+    .hero p {
+      max-width: 660px;
+      margin: 16px auto 0;
+      color: var(--muted);
+      font-size: clamp(0.9rem, 2vw, 1.03rem);
+      line-height: 1.65;
+    }
+
+    .game-panel {
+      padding: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(8, 8, 11, 0.88);
+      box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.62),
+        0 0 60px rgba(139, 29, 54, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .game-toolbar {
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 7px 9px 10px;
+    }
+
+    .game-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      color: rgba(255, 255, 255, 0.64);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .game-label::before {
+      content: "";
+      width: 18px;
+      height: 1px;
+      background: var(--crimson-bright);
+      box-shadow: 0 0 8px rgba(192, 57, 75, 0.7);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .escape-hint {
+      color: rgba(255, 255, 255, 0.34);
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .fullscreen-button {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 6px;
+      padding: 9px 13px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(54, 54, 64, 0.92), rgba(139, 29, 54, 0.88));
+      box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.035);
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: border-color 160ms ease, transform 160ms ease, filter 160ms ease;
+    }
+
+    .fullscreen-button:hover,
+    .fullscreen-button:focus-visible {
+      border-color: rgba(255, 255, 255, 0.3);
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+    }
+
+    .game-frame-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 512 / 346;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 9px;
+      background: #000;
+    }
+
+    #game-frame {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000;
+    }
+
+    #game-frame:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    .loading-cover {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgba(255, 255, 255, 0.44);
+      background: #050507;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      transition: opacity 400ms ease, visibility 400ms ease;
+      pointer-events: none;
+    }
+
+    .loading-cover.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .info-card {
+      min-height: 150px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-soft);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(9px);
+    }
+
+    .info-card h2 {
+      margin: 0 0 11px;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .info-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .step-number {
+      flex: 0 0 auto;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(192, 57, 75, 0.4);
+      border-radius: 50%;
+      color: #d66a79;
+      font-size: 0.65rem;
+      font-weight: 800;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 24px;
+      color: rgba(255, 255, 255, 0.28);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    .footer a {
+      color: rgba(255, 255, 255, 0.54);
+      text-decoration: none;
+    }
+
+    .footer a:hover,
+    .footer a:focus-visible {
+      color: #fff;
+    }
+
+    @media (max-width: 760px) {
+      .page-shell {
+        width: min(100% - 24px, 1180px);
+        padding: 28px 0 38px;
+      }
+
+      body::after {
+        inset: 6px;
+        border-radius: 12px;
+      }
+
+      .topbar {
+        margin-bottom: 24px;
+      }
+
+      .game-panel {
+        padding: 7px;
+        border-radius: 12px;
+      }
+
+      .game-toolbar {
+        align-items: flex-start;
+        padding: 6px 5px 11px;
+      }
+
+      .game-label {
+        display: none;
+      }
+
+      .toolbar-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .escape-hint {
+        font-size: 0.62rem;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .info-card {
+        min-height: auto;
+        padding: 20px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+
+      #embers {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="embers" aria-hidden="true"></canvas>
+
+  <main class="page-shell">
+    <nav class="topbar" aria-label="Page navigation">
+      <a class="back-link" href="/">← HitPoint</a>
+      <span class="server-status">World online</span>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">Runescape Classic</p>
+      <h1>Termina Scape</h1>
+      <p>A private classic world, preserved for the browser. No client download required.</p>
+    </header>
+
+    <section class="game-panel" aria-label="Termina Scape game client">
+      <div class="game-toolbar">
+        <span class="game-label">Browser client</span>
+        <div class="toolbar-actions">
+          <span class="escape-hint">Press ESC to exit fullscreen</span>
+          <button class="fullscreen-button" id="fullscreen-button" type="button">Fullscreen</button>
+        </div>
+      </div>
+
+      <div class="game-frame-wrap">
+        <iframe
+          id="game-frame"
+          src="/RSC/client/mudclient.html"
+          title="Termina Scape game client"
+          allow="fullscreen"
+          allowfullscreen
+        ></iframe>
+        <div class="loading-cover" id="loading-cover">Loading world</div>
+      </div>
+    </section>
+
+    <section class="info-grid" aria-label="Server information">
+      <article class="info-card">
+        <h2>About the world</h2>
+        <p>
+          Termina Scape is a browser-based Runescape Classic private server.
+          Step back into the original point-and-click world, create your character,
+          and play from any modern desktop browser.
+        </p>
+      </article>
+
+      <article class="info-card">
+        <h2>How to play</h2>
+        <div class="steps">
+          <div class="step"><span class="step-number">1</span><span>Click <strong>New User</strong> to register.</span></div>
+          <div class="step"><span class="step-number">2</span><span>Return to the login screen and enter your account.</span></div>
+          <div class="step"><span class="step-number">3</span><span>Use fullscreen for the best experience.</span></div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <a href="/">Return to hitpoint.pro</a>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const frame = document.getElementById("game-frame");
+      const fullscreenButton = document.getElementById("fullscreen-button");
+      const loadingCover = document.getElementById("loading-cover");
+
+      frame.addEventListener("load", () => {
+        loadingCover.classList.add("hidden");
+      });
+
+      fullscreenButton.addEventListener("click", async () => {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          } else {
+            await frame.requestFullscreen();
+          }
+        } catch {
+          fullscreenButton.textContent = "Fullscreen unavailable";
+          setTimeout(() => {
+            fullscreenButton.textContent = "Fullscreen";
+          }, 1800);
+        }
+      });
+
+      document.addEventListener("fullscreenchange", () => {
+        fullscreenButton.textContent = document.fullscreenElement ? "Exit fullscreen" : "Fullscreen";
+      });
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      const canvas = document.getElementById("embers");
+      const context = canvas.getContext("2d");
+      let particles = [];
+      let animationFrame = 0;
+
+      const resize = () => {
+        const scale = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(window.innerWidth * scale);
+        canvas.height = Math.floor(window.innerHeight * scale);
+        canvas.style.width = `${window.innerWidth}px`;
+        canvas.style.height = `${window.innerHeight}px`;
+        context.setTransform(scale, 0, 0, scale, 0, 0);
+
+        const count = Math.min(54, Math.max(24, Math.floor(window.innerWidth / 28)));
+        particles = Array.from({ length: count }, () => ({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          radius: 0.4 + Math.random() * 1.2,
+          speed: 0.08 + Math.random() * 0.24,
+          drift: -0.08 + Math.random() * 0.16,
+          alpha: 0.08 + Math.random() * 0.28
+        }));
+      };
+
+      const draw = () => {
+        context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+        for (const particle of particles) {
+          particle.y -= particle.speed;
+          particle.x += particle.drift;
+
+          if (particle.y < -5) {
+            particle.y = window.innerHeight + 5;
+            particle.x = Math.random() * window.innerWidth;
+          }
+
+          if (particle.x < -5) particle.x = window.innerWidth + 5;
+          if (particle.x > window.innerWidth + 5) particle.x = -5;
+
+          context.beginPath();
+          context.fillStyle = `rgba(192, 57, 75, ${particle.alpha})`;
+          context.shadowColor = "rgba(139, 29, 54, 0.55)";
+          context.shadowBlur = 8;
+          context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+          context.fill();
+        }
+
+        animationFrame = window.requestAnimationFrame(draw);
+      };
+
+      window.addEventListener("resize", resize, { passive: true });
+      window.addEventListener("pagehide", () => window.cancelAnimationFrame(animationFrame), { once: true });
+      resize();
+      draw();
+    })();
+  </script>
+</body>
+</html>

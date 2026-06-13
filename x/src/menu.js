@@ -288,6 +288,7 @@
       if (action === 'gch-save') document.dispatchEvent(new CustomEvent('gachitop:save'));
       if (action === 'gch-reset') document.dispatchEvent(new CustomEvent('gachitop:reset'));
       if (action === 'gch-quit') document.dispatchEvent(new CustomEvent('gachitop:quit'));
+      if (action === 'rsc-launch') window.location.href = '/RSC/';
     });
 
     if (serversList) renderServers(serversList);
