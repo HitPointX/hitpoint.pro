@@ -260,6 +260,19 @@
       background: #000;
     }
 
+    .fullscreen-stage {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .fullscreen-stage:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
     #game-frame {
       display: block;
       width: 100%;
@@ -268,10 +281,28 @@
       background: #000;
     }
 
-    #game-frame:fullscreen {
-      width: 100vw;
-      height: 100vh;
+    .fullscreen-fade {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      color: rgba(255, 255, 255, 0.52);
       background: #000;
+      font-size: 0.67rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 240ms ease, visibility 0s linear 240ms;
+    }
+
+    .fullscreen-stage.is-transitioning .fullscreen-fade {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 160ms ease;
     }
 
     .loading-cover {
@@ -463,13 +494,16 @@
       </div>
 
       <div class="game-frame-wrap">
-        <iframe
-          id="game-frame"
-          src="/RSC/client/mudclient.html"
-          title="Termina Scape game client"
-          allow="fullscreen"
-          allowfullscreen
-        ></iframe>
+        <div class="fullscreen-stage" id="fullscreen-stage">
+          <iframe
+            id="game-frame"
+            src="/RSC/client/mudclient.html"
+            title="Termina Scape game client"
+            allow="fullscreen"
+            allowfullscreen
+          ></iframe>
+          <div class="fullscreen-fade" aria-hidden="true">Adjusting display</div>
+        </div>
         <div class="loading-cover" id="loading-cover">Loading world</div>
       </div>
     </section>
@@ -502,21 +536,39 @@
   <script>
     (() => {
       const frame = document.getElementById("game-frame");
+      const fullscreenStage = document.getElementById("fullscreen-stage");
       const fullscreenButton = document.getElementById("fullscreen-button");
       const loadingCover = document.getElementById("loading-cover");
+      let fullscreenTransitionTimer = 0;
+      let fullscreenRequestPending = false;
 
       frame.addEventListener("load", () => {
         loadingCover.classList.add("hidden");
       });
 
+      const finishFullscreenTransition = (delay = 180) => {
+        window.clearTimeout(fullscreenTransitionTimer);
+        fullscreenTransitionTimer = window.setTimeout(() => {
+          fullscreenStage.classList.remove("is-transitioning");
+          fullscreenRequestPending = false;
+        }, delay);
+      };
+
       fullscreenButton.addEventListener("click", async () => {
+        if (fullscreenRequestPending) return;
+
+        fullscreenRequestPending = true;
+        fullscreenStage.classList.add("is-transitioning");
+
         try {
           if (document.fullscreenElement) {
             await document.exitFullscreen();
           } else {
-            await frame.requestFullscreen();
+            await fullscreenStage.requestFullscreen();
           }
         } catch {
+          fullscreenStage.classList.remove("is-transitioning");
+          fullscreenRequestPending = false;
           fullscreenButton.textContent = "Fullscreen unavailable";
           setTimeout(() => {
             fullscreenButton.textContent = "Fullscreen";
@@ -525,7 +577,14 @@
       });
 
       document.addEventListener("fullscreenchange", () => {
-        fullscreenButton.textContent = document.fullscreenElement ? "Exit fullscreen" : "Fullscreen";
+        const isGameFullscreen = document.fullscreenElement === fullscreenStage;
+
+        if (!fullscreenRequestPending) {
+          fullscreenStage.classList.add("is-transitioning");
+        }
+
+        fullscreenButton.textContent = isGameFullscreen ? "Exit fullscreen" : "Fullscreen";
+        finishFullscreenTransition(isGameFullscreen ? 220 : 140);
       });
 
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
