@@ -23,17 +23,17 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-
+ 
     html, body {
       margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden;
     }
-
+ 
     body {
       background-color: #0c0c10;
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
       color: #f2f2f2;
     }
-
+ 
     /* ── Overlays ─────────────────────────────────────────── */
     #vignette {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
@@ -51,14 +51,14 @@
       from { background-position: 0% 0%; }
       to   { background-position: 100% 100%; }
     }
-
+ 
     /* ── Page shell ───────────────────────────────────────── */
     #page {
       position: relative; z-index: 2;
       height: 100vh;
       display: flex; flex-direction: column;
     }
-
+ 
     /* ── Top bar ──────────────────────────────────────────── */
     #top-bar {
       display: flex; align-items: center; justify-content: space-between;
@@ -74,9 +74,9 @@
       transition: color 0.2s ease; white-space: nowrap;
     }
     #nav-back:hover { color: #00afff; }
-
+ 
     #header-meta { display: flex; align-items: center; gap: 6px; }
-
+ 
     #status-badge {
       font-size: 9px; font-weight: 800; padding: 3px 8px;
       border-radius: 999px; letter-spacing: 1.3px; border: 1px solid transparent;
@@ -106,12 +106,12 @@
       0%,100% { box-shadow: 0 0 10px rgba(0,200,120,0.2); }
       50%      { box-shadow: 0 0 22px rgba(0,200,120,0.5); }
     }
-
+ 
     /* ── Content area ─────────────────────────────────────── */
     #content-area {
       flex: 1; display: flex; min-height: 0; overflow: hidden;
     }
-
+ 
     /* ── Player column ────────────────────────────────────── */
     #player-col {
       flex: 1; min-width: 0;
@@ -119,7 +119,7 @@
       align-items: center; justify-content: center;
       background: #000;
     }
-
+ 
     #player-wrap {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -130,13 +130,13 @@
       overflow: hidden;
       flex-shrink: 0;
     }
-
+ 
     #stream-video {
       display: block; width: 100%; height: 100%;
       object-fit: contain; background: #000; outline: none;
     }
     #stream-video::-webkit-media-controls { display: none !important; }
-
+ 
     /* ── Auth overlay (stream locked) ─────────────────────── */
     #auth-overlay {
       position: absolute; inset: 0; z-index: 20;
@@ -176,7 +176,7 @@
       color: rgba(255,255,255,0.45);
     }
     .auth-btn.secondary:hover { color: #fff; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
-
+ 
     /* ── Offline overlay ──────────────────────────────────── */
     #offline-overlay {
       position: absolute; inset: 0; z-index: 10;
@@ -208,7 +208,7 @@
       font-size: 1.4rem; line-height: 1; color: rgba(255,255,255,0.18);
       transition: opacity 0.15s ease; user-select: none;
     }
-
+ 
     /* ── Interrupted overlay ──────────────────────────────── */
     #interrupted-overlay {
       position: absolute; inset: 0; z-index: 9;
@@ -233,7 +233,7 @@
       font-size: 11px; font-weight: 600; letter-spacing: 1px;
       color: rgba(255,176,64,0.45);
     }
-
+ 
     /* ── Custom controls ──────────────────────────────────── */
     #controls {
       position: absolute; bottom: 0; left: 0; right: 0;
@@ -316,7 +316,7 @@
       color: rgba(255,255,255,0.5); letter-spacing: 0.3px;
       font-variant-numeric: tabular-nums;
     }
-
+ 
     /* ── Seek bar ─────────────────────────────────────────── */
     #seekbar-wrap {
       position: absolute; bottom: 54px; left: 14px; right: 14px;
@@ -338,7 +338,7 @@
       width: 13px; height: 13px; border-radius: 50%; border: none;
       background: #fff; cursor: pointer;
     }
-
+ 
     /* ── Clip dialog + toast ─────────────────────────────── */
     #clip-dialog {
       position: absolute;
@@ -436,7 +436,7 @@
       color: rgba(255,120,110,0.92);
       line-height: 1.35;
     }
-
+ 
     #clip-toast {
       position: absolute;
       left: 50%;
@@ -459,7 +459,7 @@
     }
     #clip-toast.visible { display: block; opacity: 1; }
     #clip-toast.fade { opacity: 0; }
-
+ 
     /* ── Mobile tabs (hidden on desktop) ─────────────────── */
     #mobile-tabs {
       display: none; flex-shrink: 0;
@@ -473,7 +473,7 @@
       cursor: pointer; transition: color 0.15s, border-color 0.15s;
     }
     .tab-btn.active { color: #fff; border-bottom-color: rgba(200,20,20,0.8); }
-
+ 
     /* ── Chat column ──────────────────────────────────────── */
     #chat-col {
       width: 320px; flex-shrink: 0;
@@ -489,7 +489,7 @@
       transition: background 0.15s;
     }
     #chat-resize-handle:hover { background: rgba(255,255,255,0.07); }
-
+ 
     #chat-area { flex: 1; position: relative; min-height: 0; }
     #chat-frame {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -513,7 +513,7 @@
       padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
     }
     #show-chat-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
-
+ 
     /* ── Mobile responsive ────────────────────────────────── */
     @media (max-width: 860px) {
       body { overflow-y: auto; }
@@ -538,7 +538,7 @@
 <body>
   <div id="vignette" aria-hidden="true"></div>
   <div id="fog-overlay" aria-hidden="true"></div>
-
+ 
   <div id="page">
     <!-- Top bar -->
     <div id="top-bar">
@@ -547,10 +547,10 @@
         <div id="status-badge" class="checking">CHECKING</div>
       </div>
     </div>
-
+ 
     <!-- Content -->
     <div id="content-area">
-
+ 
       <!-- Player -->
       <div id="player-col">
         <div id="player-wrap">
@@ -561,30 +561,30 @@
             <div id="auth-message"></div>
             <div id="auth-actions"></div>
           </div>
-
+ 
           <video
             id="stream-video"
             playsinline autoplay muted preload="none"
             aria-label="Live stream"
           ></video>
-
+ 
           <div id="offline-overlay" class="visible" aria-live="polite">
             <div id="offline-icon">&#x25A0;</div>
             <div id="offline-title">Stream Offline</div>
             <div id="offline-sub">Check back soon</div>
             <div id="offline-heart">♡</div>
           </div>
-
+ 
           <div id="interrupted-overlay" aria-live="polite" style="display:none">
             <div class="interrupted-pulse-dot"></div>
             <div id="interrupted-title">Reconnecting…</div>
             <div id="interrupted-countdown"></div>
           </div>
-
+ 
           <div id="seekbar-wrap">
             <input type="range" id="seekbar" min="0" max="120" value="120" step="1" aria-label="Seek">
           </div>
-
+ 
           <div id="controls">
             <div id="ctrl-left">
               <button class="ctrl-btn" id="ctrl-play" aria-label="Play / Pause">
@@ -606,7 +606,7 @@
               </button>
             </div>
           </div>
-
+ 
           <div id="clip-dialog" aria-hidden="true">
             <div id="clip-dialog-title">Name your clip</div>
             <input id="clip-title-input" type="text" maxlength="80" placeholder="e.g. Insane clutch moment">
@@ -622,14 +622,14 @@
           </div>
           <div id="clip-toast" role="status" aria-live="polite">✓ Clip created and posted to chat</div>
         </div>
-
+ 
         <!-- Mobile tabs -->
         <div id="mobile-tabs">
           <button class="tab-btn active" data-tab="watch">WATCH</button>
           <button class="tab-btn"        data-tab="chat">CHAT</button>
         </div>
       </div>
-
+ 
       <!-- Chat sidebar -->
       <div id="chat-col">
         <div id="chat-resize-handle"></div>
@@ -641,29 +641,29 @@
           </div>
         </div>
       </div>
-
+ 
     </div><!-- /content-area -->
   </div><!-- /page -->
-
+ 
   <!-- HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
   <script>
     const STATUS_URL = 'https://stream.hitpoint.pro/stream/status.json';
     const POLL_INTERVAL = 3000;
     const TOKEN_REFRESH_INTERVAL = 45000;
-
+ 
     const video   = document.getElementById('stream-video');
     const badge   = document.getElementById('status-badge');
     const overlay = document.getElementById('offline-overlay');
     const intOverlay = document.getElementById('interrupted-overlay');
-
+ 
     let hls = null, isLive = false, pollTimer = null;
     let userSeeked = false;
     let suppressSeekingFlag = false;
     let hlsToken = null, hlsExpires = null, tokenRefreshTimer = null;
     const LIVE_SYNC_DURATION = 3;
     const LIVE_SYNC_RESTORE_THRESHOLD = 1.5;
-
+ 
     /* ── Signed stream URL (token auth) ──────────────────────
        /api/stream-url is admin/mod-gated server-side; the token
        is re-fetched periodically so long-running viewers keep a
@@ -678,7 +678,7 @@
         return null;
       }
     }
-
+ 
     function scheduleTokenRefresh() {
       clearTimeout(tokenRefreshTimer);
       tokenRefreshTimer = setTimeout(async () => {
@@ -687,17 +687,26 @@
         if (isLive) scheduleTokenRefresh();
       }, TOKEN_REFRESH_INTERVAL);
     }
-
+ 
     class TokenLoader extends Hls.DefaultConfig.loader {
       load(context, config, callbacks) {
         if (hlsToken && hlsExpires) {
-          const sep = context.url.includes('?') ? '&' : '?';
-          context.url += `${sep}token=${hlsToken}&expires=${hlsExpires}`;
+          try {
+            const url = new URL(context.url, location.href);
+            url.searchParams.delete('token');
+            url.searchParams.delete('expires');
+            url.searchParams.set('token', hlsToken);
+            url.searchParams.set('expires', hlsExpires);
+            context.url = url.toString();
+          } catch {
+            const base = context.url.split('?')[0];
+            context.url = `${base}?token=${hlsToken}&expires=${hlsExpires}`;
+          }
         }
         super.load(context, config, callbacks);
       }
     }
-
+ 
     /* ── Stream badge ─────────────────────────────────────── */
     function setBadge(state) {
       badge.className  = state;
@@ -713,7 +722,7 @@
       document.getElementById('interrupted-countdown').textContent = `offline in ${Math.ceil(remaining)}s`;
     }
     function hideInterrupted() { intOverlay.style.display = 'none'; }
-
+ 
     function destroyHls() {
       if (hls) { hls.destroy(); hls = null; }
       video.src = '';
@@ -723,12 +732,12 @@
       hlsToken = null;
       hlsExpires = null;
     }
-
+ 
     function setHlsLiveSyncEnabled(enabled) {
       if (!hls || !hls.config) return;
       hls.config.liveSyncDuration = enabled ? LIVE_SYNC_DURATION : Infinity;
     }
-
+ 
     async function attachHls() {
       destroyHls();
       const data = await fetchStreamUrl();
@@ -760,7 +769,7 @@
         video.addEventListener('error', () => { isLive = false; setBadge('offline'); showOffline(); video.src = ''; schedulePoll(POLL_INTERVAL * 3); }, { once: true });
       }
     }
-
+ 
     async function checkStatus() {
       clearTimeout(pollTimer);
       try {
@@ -772,7 +781,7 @@
         schedulePoll(POLL_INTERVAL * 3);
       }
     }
-
+ 
     function handleState(state, age) {
       if (state === 'live') {
         if (!isLive) { isLive = true; attachHls(); }
@@ -791,9 +800,9 @@
         schedulePoll(POLL_INTERVAL * 3);
       }
     }
-
+ 
     function schedulePoll(ms) { clearTimeout(pollTimer); pollTimer = setTimeout(checkStatus, ms); }
-
+ 
     /* ── Custom controls ──────────────────────────────────── */
     const ctrlPlay    = document.getElementById('ctrl-play');
     const ctrlLive    = document.getElementById('ctrl-live-btn');
@@ -817,7 +826,7 @@
     const clipToast = document.getElementById('clip-toast');
     const pauseIcon   = `<svg width="11" height="14" viewBox="0 0 10 12" fill="currentColor"><rect x="0" y="0" width="3.5" height="12"/><rect x="6.5" y="0" width="3.5" height="12"/></svg>`;
     const playIcon    = `<svg width="12" height="14" viewBox="0 0 10 12" fill="currentColor"><polygon points="0,0 10,6 0,12"/></svg>`;
-
+ 
     const LIVE_EDGE_THRESHOLD = 20;
     const CLIP_VISIBLE_THRESHOLD = 2;
     const CLIP_API = 'https://chat.hitpoint.pro/api/clips';
@@ -825,7 +834,7 @@
     let hideTimer = null;
     let clipToastTimer = null;
     let clipToastFadeTimer = null;
-
+ 
     function getClipDistanceFromLive() {
       if (!Number.isFinite(video.currentTime)) return null;
       if (Number.isFinite(video.duration)) {
@@ -843,20 +852,20 @@
       if (!Number.isFinite(liveTarget)) return null;
       return Math.max(0, liveTarget - video.currentTime);
     }
-
+ 
     function updateClipButtonVisibility() {
       const dist = getClipDistanceFromLive();
       const visible = isLive && dist != null && dist > CLIP_VISIBLE_THRESHOLD;
       ctrlClip.style.display = visible ? 'inline-flex' : 'none';
       if (!visible && clipDialog.classList.contains('visible')) closeClipDialog();
     }
-
+ 
     function getClipStartOffset() {
       const dist = getClipDistanceFromLive();
       if (dist == null) return null;
       return Math.min(120, Math.max(1, Math.round(dist)));
     }
-
+ 
     function updateClipDialogInfo() {
       if (!clipDialogInfo) return;
       const startOffset = getClipStartOffset();
@@ -867,11 +876,11 @@
       const capped = startOffset >= 120;
       clipDialogInfo.textContent = `Rewound ${startOffset}s from live. Estimated clip length: ${startOffset}s${capped ? ' (max 120s).' : '.'}`;
     }
-
+ 
     function showClipError(message) {
       clipDialogError.textContent = message || '';
     }
-
+ 
     function openClipDialog() {
       showClipError('');
       updateClipDialogInfo();
@@ -883,13 +892,13 @@
       clipGenerateLabel.textContent = 'Generate';
       setTimeout(() => clipTitleInput.focus(), 0);
     }
-
+ 
     function closeClipDialog() {
       clipDialog.classList.remove('visible');
       clipDialog.setAttribute('aria-hidden', 'true');
       showClipError('');
     }
-
+ 
     function showClipToast() {
       clearTimeout(clipToastTimer);
       clearTimeout(clipToastFadeTimer);
@@ -901,7 +910,7 @@
         clipToast.classList.remove('fade');
       }, 3000);
     }
-
+ 
     async function submitClip() {
       const title = clipTitleInput.value.trim();
       if (!title) {
@@ -940,7 +949,7 @@
         clipGenerateLabel.textContent = 'Generate';
       }
     }
-
+ 
     function showControls() {
       controls.classList.remove('hidden'); clearTimeout(hideTimer);
       if (!video.paused) hideTimer = setTimeout(() => controls.classList.add('hidden'), 3000);
@@ -949,28 +958,28 @@
     playerWrap.addEventListener('mouseenter', showControls);
     playerWrap.addEventListener('mouseleave', () => { clearTimeout(hideTimer); if (!video.paused) controls.classList.add('hidden'); });
     playerWrap.addEventListener('touchstart', showControls, { passive: true });
-
+ 
     ctrlPlay.addEventListener('click', () => { if (video.paused) video.play().catch(()=>{}); else video.pause(); });
     video.addEventListener('play',  () => { ctrlPlay.innerHTML = pauseIcon; showControls(); updateLiveEdge(); });
     video.addEventListener('pause', () => { ctrlPlay.innerHTML = playIcon;  showControls(); updateLiveEdge(); });
-
+ 
     function updateMute() {
       iconMute.style.display   = video.muted ? 'block' : 'none';
       iconUnmute.style.display = video.muted ? 'none'  : 'block';
     }
     ctrlMute.addEventListener('click', () => { video.muted = !video.muted; updateMute(); });
     updateMute();
-
+ 
     ctrlFs.addEventListener('click', () => {
       if (!document.fullscreenElement) playerWrap.requestFullscreen().catch(()=>{});
       else document.exitFullscreen();
     });
-
+ 
     function updateSeekbarFill() {
       const pct = (seekbar.value / seekbar.max) * 100;
       seekbar.style.background = `linear-gradient(to right, rgba(200,20,20,0.9) ${pct}%, rgba(255,255,255,0.2) ${pct}%)`;
     }
-
+ 
     function updateLiveEdge() {
       if (!isLive) return;
       const dist = video.duration - video.currentTime;
@@ -1010,14 +1019,14 @@
       setHlsLiveSyncEnabled(false);
       updateLiveEdge();
     });
-
+ 
     seekbar.addEventListener('input', () => {
       const dist = 120 - Number(seekbar.value);
       if (isFinite(video.duration)) video.currentTime = Math.max(0, video.duration - dist);
       updateSeekbarFill(); updateLiveEdge();
     });
     updateSeekbarFill();
-
+ 
     ctrlLive.addEventListener('click', () => {
       if (!ctrlLive.classList.contains('behind')) return;
       userSeeked = false;
@@ -1047,7 +1056,7 @@
         closeClipDialog();
       }
     });
-
+ 
     /* ── Offline heart blink ──────────────────────────────── */
     const offlineHeart = document.getElementById('offline-heart');
     const hearts = [
@@ -1067,18 +1076,18 @@
       setTimeout(nextHeart, 500 + Math.random() * 2000);
     }
     setTimeout(nextHeart, 800 + Math.random() * 1200);
-
+ 
     /* ── Chat popout ──────────────────────────────────────── */
     const chatFrame  = document.getElementById('chat-frame');
     const poppedNote = document.getElementById('chat-popped-notice');
     let chatWindow   = null;
-
+ 
     function popoutChatFromLive() {
       try { chatWindow = window.open('', 'hp-chat'); } catch { chatWindow = null; }
       chatFrame.style.display = 'none';
       poppedNote.classList.add('visible');
     }
-
+ 
     window.addEventListener('message', (e) => {
       if (e.origin !== window.location.origin) return;
       if (e.data?.type === 'hp-chat-popout') {
@@ -1091,20 +1100,20 @@
         try { window.open(url, '_blank', 'noopener,noreferrer'); } catch {}
       }
     });
-
+ 
     document.getElementById('show-chat-btn').addEventListener('click', () => {
       if (chatWindow && !chatWindow.closed) chatWindow.close();
       chatFrame.style.display = '';
       poppedNote.classList.remove('visible');
     });
-
+ 
     /* ── Chat resize ──────────────────────────────────────── */
     const chatCol       = document.getElementById('chat-col');
     const CHAT_MIN      = 320;
     const chatMax       = () => Math.floor(window.innerWidth * 0.5);
     const SNAP_THRESH   = 28;
     let chatResizing    = false;
-
+ 
     document.getElementById('chat-resize-handle').addEventListener('mousedown', e => {
       if (window.innerWidth <= 860) return;
       chatResizing = true;
@@ -1135,7 +1144,7 @@
     window.addEventListener('resize', () => {
       if (window.innerWidth <= 860) { chatResizing = false; chatCol.style.width = ''; }
     });
-
+ 
     /* ── Mobile tabs ──────────────────────────────────────── */
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1145,12 +1154,12 @@
         else chatCol.classList.remove('tab-active');
       });
     });
-
+ 
     /* ── Stream Auth Gate ─────────────────────────────────── */
     const authOverlay = document.getElementById('auth-overlay');
     const authMessage = document.getElementById('auth-message');
     const authActions = document.getElementById('auth-actions');
-
+ 
     function showAuthLocked(type) {
       if (type === 'not-logged-in') {
         authMessage.textContent = 'This stream requires a chat account to watch. Log in or create an account to view.';
@@ -1164,7 +1173,7 @@
       }
       authOverlay.classList.add('visible');
     }
-
+ 
     async function checkStreamAccess() {
       try {
         const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
@@ -1179,7 +1188,7 @@
         return false;
       }
     }
-
+ 
     /* ── Boot ─────────────────────────────────────────────── */
     (async () => {
       const allowed = await checkStreamAccess();
