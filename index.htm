@@ -10,7 +10,7 @@
   gtag('config', 'AW-18004893946');
 </script>
   <meta charset="UTF-8" />
-  <title>HitPoint - LIVE</title>
+  <title>HitPoint</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
@@ -180,7 +180,7 @@
       }
     }
 
-    .redirect-card {
+    .landing-card {
       width: min(100%, 520px);
       background: rgba(10, 12, 18, 0.82);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -191,11 +191,9 @@
       text-align: center;
       position: relative;
       z-index: 3;
-      opacity: 0;
-      transition: opacity 0.4s ease;
     }
 
-    .redirect-card h1 {
+    .landing-card h1 {
       margin: 0 0 10px;
       font-size: clamp(1.15rem, 2.5vw, 1.5rem);
       letter-spacing: 0.8px;
@@ -208,14 +206,14 @@
       min-height: 1.3em;
     }
 
-    #redirect-title {
+    #landing-title {
       font-variant-caps: all-small-caps;
       font-feature-settings: "smcp" 1, "c2sc" 1;
       letter-spacing: 1.35px;
       font-weight: 700;
     }
 
-    #redirect-title .glitch-char {
+    #landing-title .glitch-char {
       display: inline-block;
       position: relative;
       z-index: 1;
@@ -225,8 +223,8 @@
       will-change: transform, filter, color;
     }
 
-    #redirect-title .glitch-char::before,
-    #redirect-title .glitch-char::after {
+    #landing-title .glitch-char::before,
+    #landing-title .glitch-char::after {
       content: attr(data-char);
       position: absolute;
       inset: 0;
@@ -238,29 +236,29 @@
       background-clip: text;
     }
 
-    #redirect-title .glitch-char::before {
+    #landing-title .glitch-char::before {
       background: linear-gradient(132deg, rgba(158, 28, 48, 0.86) 8%, rgba(94, 12, 29, 0.9) 60%, rgba(172, 44, 40, 0.58) 100%);
       transform: translate(0.24px, -0.22px);
       opacity: 0.62;
       filter: saturate(1.04);
     }
 
-    #redirect-title .glitch-char::after {
+    #landing-title .glitch-char::after {
       background: linear-gradient(305deg, rgba(182, 40, 56, 0.52) 0%, rgba(82, 10, 24, 0.82) 62%, rgba(138, 26, 34, 0.42) 100%);
       transform: translate(-0.2px, 0.18px);
       opacity: 0.46;
     }
 
-    #redirect-title .glitch-char.space {
+    #landing-title .glitch-char.space {
       width: 0.38em;
     }
 
-    #redirect-title .glitch-char.space::before,
-    #redirect-title .glitch-char.space::after {
+    #landing-title .glitch-char.space::before,
+    #landing-title .glitch-char.space::after {
       content: none;
     }
 
-    #redirect-title .glitch-char.is-glitching {
+    #landing-title .glitch-char.is-glitching {
       animation: title-glitch 200ms steps(1, end) 1;
     }
 
@@ -290,7 +288,7 @@
       }
     }
 
-    .redirect-card p {
+    .landing-card p {
       margin: 0 0 18px;
       color: rgba(255, 255, 255, 0.74);
       font-size: 0.95rem;
@@ -334,33 +332,69 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.28; }
     }
+
+    #live-banner {
+      display: none;
+      width: fit-content;
+      margin: 0 auto 16px;
+    }
+
+    body.is-live #live-banner {
+      display: flex;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .menu a {
+      display: block;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.86);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 12px 10px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .menu a:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.24);
+      background: rgba(154, 45, 76, 0.14);
+    }
   </style>
   <script>
-    // Stream status check — show live banner only if stream is up.
-    (async () => {
-      const _sk = [68,122,78,83,89,98,104,113,169,178,131,139,57,55,112,75,85,133,99,150,108,164,118,176,135,145,52,105,72,76,84,89];
-      const streamUrl = `https://stream.hitpoint.pro/hls/${_sk.map((c,i)=>String.fromCharCode(c-((i*7+13)%97))).join('')}.m3u8`;
+    // Stream status check — reveal the LIVE banner only while the stream is up.
+    const STATUS_URL = 'https://stream.hitpoint.pro/stream/status.json';
+
+    async function checkLive() {
       let live = false;
       try {
-        const r = await fetch(streamUrl + '?_=' + Date.now(), {
-          method: 'HEAD', cache: 'no-store',
-          signal: AbortSignal.timeout(2000)
+        const r = await fetch(STATUS_URL + '?_=' + Date.now(), {
+          cache: 'no-store',
+          signal: AbortSignal.timeout(4000)
         });
-        live = r.ok;
+        if (r.ok) live = (await r.json()).state === 'live';
       } catch {}
+      document.body.classList.toggle('is-live', live);
+    }
 
-      const card = document.querySelector('.redirect-card');
-      if (live) {
-        card.style.opacity = '1';
-        setTimeout(() => { window.location.href = 'https://hitpoint.pro/live'; }, 3000);
-      } else {
-        setTimeout(() => { window.location.href = 'https://hitpoint.pro/live'; }, 2000);
-      }
-    })();
+    document.addEventListener('DOMContentLoaded', () => {
+      checkLive();
+      setInterval(checkLive, 30000);
+    });
 
-    // Toned-down per-letter glitch for redirect title.
+    // Toned-down per-letter glitch for landing title.
     document.addEventListener("DOMContentLoaded", () => {
-      const titleEl = document.getElementById("redirect-title");
+      const titleEl = document.getElementById("landing-title");
       if (!titleEl) return;
 
       const titleText = titleEl.textContent;
@@ -414,10 +448,15 @@
   <div id="fan-layer" aria-hidden="true">
     <img src="/heart_fan_loop.gif" alt="">
   </div>
-  <main class="redirect-card" aria-live="polite">
-    <h1 id="redirect-title">HitPoint ✖ LIVE</h1>
-    <p>Redirecting you to the stream now.</p>
-    <a class="live-link" href="https://hitpoint.pro/live"><span class="dot"></span>Go to Live</a>
+  <main class="landing-card" aria-live="polite">
+    <h1 id="landing-title">HitPoint ✖</h1>
+    <a class="live-link" id="live-banner" href="/live"><span class="dot"></span>Live Now — Watch</a>
+    <nav class="menu">
+      <a href="/live">Live</a>
+      <a href="/vods">VODs</a>
+      <a href="/clips">Clips</a>
+      <a href="/chat">Chat</a>
+    </nav>
   </main>
 </body>
 </html>
