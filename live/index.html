@@ -648,10 +648,9 @@
   <!-- HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
   <script>
-    const _sk = [68,122,78,83,89,98,104,113,169,178,131,139,57,55,112,75,85,133,99,150,108,164,118,176,135,145,52,105,72,76,84,89];
-    const STREAM_URL = `https://stream.hitpoint.pro/hls/${_sk.map((c,i)=>String.fromCharCode(c-((i*7+13)%97))).join('')}.m3u8`;
     const STATUS_URL = 'https://stream.hitpoint.pro/stream/status.json';
     const POLL_INTERVAL = 3000;
+    const TOKEN_REFRESH_INTERVAL = 45000;
 
     const video   = document.getElementById('stream-video');
     const badge   = document.getElementById('status-badge');
@@ -661,8 +660,43 @@
     let hls = null, isLive = false, pollTimer = null;
     let userSeeked = false;
     let suppressSeekingFlag = false;
+    let hlsToken = null, hlsExpires = null, tokenRefreshTimer = null;
     const LIVE_SYNC_DURATION = 3;
     const LIVE_SYNC_RESTORE_THRESHOLD = 1.5;
+
+    /* ── Signed stream URL (token auth) ──────────────────────
+       /api/stream-url is admin/mod-gated server-side; the token
+       is re-fetched periodically so long-running viewers keep a
+       valid token past its short TTL. */
+    async function fetchStreamUrl() {
+      try {
+        const res = await fetch(`${API}/stream-url`, { credentials: 'include' });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        console.error('Failed to fetch stream URL', err);
+        return null;
+      }
+    }
+
+    function scheduleTokenRefresh() {
+      clearTimeout(tokenRefreshTimer);
+      tokenRefreshTimer = setTimeout(async () => {
+        const data = await fetchStreamUrl();
+        if (data) { hlsToken = data.token; hlsExpires = data.expires; }
+        if (isLive) scheduleTokenRefresh();
+      }, TOKEN_REFRESH_INTERVAL);
+    }
+
+    class TokenLoader extends Hls.DefaultConfig.loader {
+      load(context, config, callbacks) {
+        if (hlsToken && hlsExpires) {
+          const sep = context.url.includes('?') ? '&' : '?';
+          context.url += `${sep}token=${hlsToken}&expires=${hlsExpires}`;
+        }
+        super.load(context, config, callbacks);
+      }
+    }
 
     /* ── Stream badge ─────────────────────────────────────── */
     function setBadge(state) {
@@ -685,6 +719,9 @@
       video.src = '';
       userSeeked = false;
       suppressSeekingFlag = false;
+      clearTimeout(tokenRefreshTimer);
+      hlsToken = null;
+      hlsExpires = null;
     }
 
     function setHlsLiveSyncEnabled(enabled) {
@@ -692,16 +729,21 @@
       hls.config.liveSyncDuration = enabled ? LIVE_SYNC_DURATION : Infinity;
     }
 
-    function attachHls() {
+    async function attachHls() {
       destroyHls();
+      const data = await fetchStreamUrl();
+      if (!data) { isLive = false; setBadge('offline'); showOffline(); schedulePoll(POLL_INTERVAL * 3); return; }
+      hlsToken = data.token; hlsExpires = data.expires;
+      scheduleTokenRefresh();
       if (Hls.isSupported()) {
         hls = new Hls({
           liveSyncDuration: LIVE_SYNC_DURATION,
           liveMaxLatencyDuration: 10,
           maxFragLookUpTolerance: 0.2,
           liveBackBufferLength: 120,
+          loader: TokenLoader,
         });
-        hls.loadSource(STREAM_URL);
+        hls.loadSource(data.url);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           userSeeked = false;
@@ -713,7 +755,7 @@
           if (data.fatal) { isLive = false; setBadge('offline'); showOffline(); destroyHls(); schedulePoll(POLL_INTERVAL * 3); }
         });
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = STREAM_URL;
+        video.src = data.url;
         video.addEventListener('loadedmetadata', () => { isLive = true; setBadge('live'); hideOffline(); hideInterrupted(); video.play().catch(() => {}); }, { once: true });
         video.addEventListener('error', () => { isLive = false; setBadge('offline'); showOffline(); video.src = ''; schedulePoll(POLL_INTERVAL * 3); }, { once: true });
       }
